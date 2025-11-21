@@ -67,17 +67,12 @@ include __DIR__ . '/../../includes/header.php';
                     🏪 <?= htmlspecialchars($shop['name']) ?> - <?= htmlspecialchars($shop['city']) ?>
                 </p>
             </div>
-            <a href="online-orders.php" class="btn btn-outline btn-lg border-4 border-lime-accent text-deep-green hover:bg-lime-accent w-full py-6 flex flex-col items-center justify-center gap-2 transform hover:scale-105 transition-all shadow-lg">
-    <span class="text-4xl">🌐</span>
-    <span class="font-bold text-xl">View Online Orders</span>
-    <span class="text-sm">Check delivery address & items</span>
-</a>
             <a href="<?= SITE_URL ?>/views/salesman/pos.php" class="btn btn-primary btn-lg neon-border">
                 🧾 Open POS System
             </a>
             
         </div>
-
+        
         <!-- Stats Cards -->
         <div class="grid md:grid-cols-3 gap-6 mb-12">
             <!-- Today's Orders -->
@@ -90,7 +85,7 @@ include __DIR__ . '/../../includes/header.php';
                     <div class="text-6xl">📦</div>
                 </div>
             </div>
-
+            
             <!-- Today's Sales -->
             <div class="card bg-white border-4 border-deep-green" data-aos="fade-up" data-aos-delay="100">
                 <div class="flex items-center justify-between">
@@ -101,7 +96,7 @@ include __DIR__ . '/../../includes/header.php';
                     <div class="text-6xl">💰</div>
                 </div>
             </div>
-
+            
             <!-- Delivered -->
             <div class="card bg-white border-4 border-lime-accent" data-aos="fade-up" data-aos-delay="200">
                 <div class="flex items-center justify-between">
@@ -112,6 +107,15 @@ include __DIR__ . '/../../includes/header.php';
                     <div class="text-6xl">✅</div>
                 </div>
             </div>
+        </div>
+        
+        <div>
+
+            <a href="online-orders.php" class="btn btn-outline btn-lg border-4 border-lime-accent text-deep-green hover:bg-lime-accent w-full py-6 flex flex-col items-center justify-center gap-2 transform hover:scale-105 transition-all shadow-lg">
+    <span class="text-4xl">🌐</span>
+    <span class="font-bold text-xl">View Online Orders</span>
+    <span class="text-sm">Check delivery address & items</span>
+    </a>
         </div>
 
         <!-- Recent Orders -->

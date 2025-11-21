@@ -410,4 +410,34 @@ setTimeout(() => {
         setTimeout(() => alert.remove(), 500);
     });
 }, 5000);
+
+// Global Toast Notification Function
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+});
+
+// Check for PHP Session Messages
+<?php if (isset($_SESSION['success'])): ?>
+    Toast.fire({
+        icon: 'success',
+        title: '<?= $_SESSION['success'] ?>'
+    });
+    <?php unset($_SESSION['success']); ?>
+<?php endif; ?>
+
+<?php if (isset($_SESSION['error'])): ?>
+    Toast.fire({
+        icon: 'error',
+        title: '<?= $_SESSION['error'] ?>'
+    });
+    <?php unset($_SESSION['error']); ?>
+<?php endif; ?>
 </script>
