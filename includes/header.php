@@ -87,6 +87,15 @@ if (isLoggedIn() && $currentUser && isset($currentUser['role_name']) && $current
         .mobile-nav-item {
             transition: all 0.3s ease;
         }
+        
+        /* Fade In Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
     </style>
 </head>
 <body class="retro-texture">
@@ -116,7 +125,7 @@ if (isLoggedIn() && $currentUser && isset($currentUser['role_name']) && $current
             <div class="flex items-center gap-4">
                 <span class="animate-pulse">📞 Hotline: 09678-100100</span>
                 <span>📧 support@quickmed.com</span>
-                <span>🚚 Free Delivery on Orders Above 500৳</span>
+                <span>🚚 Free Delivery on Orders Above 1000৳</span>
             </div>
             <div class="flex items-center gap-3">
                 <a href="?lang=<?= getOppositeLang() ?>" class="hover:text-lime-accent transition-colors duration-300 transform hover:scale-110">
@@ -200,85 +209,112 @@ if (isLoggedIn() && $currentUser && isset($currentUser['role_name']) && $current
         </div>
     </nav>
 
-    <div class="mobile-bottom-nav fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 flex justify-around items-center h-16 pb-safe">
-        <?php if (isLoggedIn() && $currentUser): ?>
+    <div class="mobile-bottom-nav fixed bottom-0 left-0 right-0 bg-white border-t shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-50 flex justify-around items-center h-16 pb-safe md:hidden">
+        <?php if (isLoggedIn()): ?>
             
-            <a href="<?= SITE_URL ?>/views/<?= $currentUser['role_name'] ?>/dashboard.php" 
-               class="flex flex-col items-center justify-center w-full h-full space-y-1 <?= basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'text-deep-green' : 'text-gray-400' ?>">
-                <span class="text-2xl">📊</span>
-                <span class="text-[10px] font-bold uppercase">Dashboard</span>
-            </a>
-            
-            <a href="<?= SITE_URL ?>/shop.php" 
-               class="flex flex-col items-center justify-center w-full h-full space-y-1 <?= basename($_SERVER['PHP_SELF']) == 'shop.php' ? 'text-deep-green' : 'text-gray-400' ?>">
-                <span class="text-2xl">🛍️</span>
-                <span class="text-[10px] font-bold uppercase">Shop</span>
-            </a>
-            
+            <?php if (in_array($currentUser['role_name'], ['admin', 'shop_manager', 'salesman', 'doctor'])): ?>
+                <a href="<?= SITE_URL ?>/views/<?= $currentUser['role_name'] ?>/dashboard.php" class="flex flex-col items-center text-gray-600 hover:text-deep-green <?= basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'text-deep-green' : '' ?>">
+                    <span class="text-xl">📊</span>
+                    <span class="text-[10px] font-bold uppercase">Dash</span>
+                </a>
+            <?php else: ?>
+                <a href="<?= SITE_URL ?>/index.php" class="flex flex-col items-center text-gray-600 hover:text-deep-green <?= basename($_SERVER['PHP_SELF']) == 'index.php' ? 'text-deep-green' : '' ?>">
+                    <span class="text-xl">🏠</span>
+                    <span class="text-[10px] font-bold uppercase">Home</span>
+                </a>
+            <?php endif; ?>
+
+            <?php if ($currentUser['role_name'] === 'salesman'): ?>
+                <a href="<?= SITE_URL ?>/views/salesman/pos.php" class="flex flex-col items-center text-gray-600 hover:text-deep-green <?= basename($_SERVER['PHP_SELF']) == 'pos.php' ? 'text-deep-green' : '' ?>">
+                    <span class="text-xl">🧾</span>
+                    <span class="text-[10px] font-bold uppercase">POS</span>
+                </a>
+            <?php elseif ($currentUser['role_name'] === 'shop_manager'): ?>
+                <a href="<?= SITE_URL ?>/views/shop_manager/inventory.php" class="flex flex-col items-center text-gray-600 hover:text-deep-green <?= basename($_SERVER['PHP_SELF']) == 'inventory.php' ? 'text-deep-green' : '' ?>">
+                    <span class="text-xl">📦</span>
+                    <span class="text-[10px] font-bold uppercase">Stock</span>
+                </a>
+            <?php elseif ($currentUser['role_name'] === 'doctor'): ?>
+                <a href="<?= SITE_URL ?>/views/doctor/prescriptions.php" class="flex flex-col items-center text-gray-600 hover:text-deep-green <?= basename($_SERVER['PHP_SELF']) == 'prescriptions.php' ? 'text-deep-green' : '' ?>">
+                    <span class="text-xl">📋</span>
+                    <span class="text-[10px] font-bold uppercase">Rx</span>
+                </a>
+            <?php else: ?>
+                <a href="<?= SITE_URL ?>/shop.php" class="flex flex-col items-center text-gray-600 hover:text-deep-green <?= basename($_SERVER['PHP_SELF']) == 'shop.php' ? 'text-deep-green' : '' ?>">
+                    <span class="text-xl">🛍️</span>
+                    <span class="text-[10px] font-bold uppercase">Shop</span>
+                </a>
+            <?php endif; ?>
+
             <?php if ($currentUser['role_name'] === 'customer'): ?>
-                <a href="<?= SITE_URL ?>/cart.php" 
-                   class="flex flex-col items-center justify-center w-full h-full space-y-1 relative <?= basename($_SERVER['PHP_SELF']) == 'cart.php' ? 'text-deep-green' : 'text-gray-400' ?>">
-                    
-                    <div class="absolute -top-6 bg-deep-green p-3 rounded-full border-4 border-white shadow-lg transform transition-transform active:scale-95">
-                        <span class="text-2xl text-white">🛒</span>
+                <a href="<?= SITE_URL ?>/cart.php" class="flex flex-col items-center relative text-gray-600 hover:text-deep-green">
+                    <div class="absolute -top-5 bg-deep-green p-2.5 rounded-full border-4 border-white shadow-lg transform active:scale-95 transition">
+                        <span class="text-white text-lg">🛒</span>
                     </div>
                     <span class="mt-6 text-[10px] font-bold uppercase">Cart</span>
-                    
                     <?php if ($cartCount > 0): ?>
-                        <span class="absolute top-[-20px] right-[calc(50%-20px)] bg-lime-accent text-deep-green text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
+                        <span class="absolute top-[-15px] right-[-5px] bg-lime-accent text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full border border-white">
                             <?= $cartCount ?>
                         </span>
                     <?php endif; ?>
                 </a>
+            <?php else: ?>
+                <a href="<?= SITE_URL ?>/profile.php" class="flex flex-col items-center text-gray-600 hover:text-deep-green <?= basename($_SERVER['PHP_SELF']) == 'profile.php' ? 'text-deep-green' : '' ?>">
+                    <span class="text-xl">👤</span>
+                    <span class="text-[10px] font-bold uppercase">Profile</span>
+                </a>
             <?php endif; ?>
-            
-            <button onclick="toggleMobileMenu()" class="flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-400 hover:text-deep-green">
-                <span class="text-2xl">☰</span>
+
+            <button onclick="toggleMobileMenu()" class="flex flex-col items-center text-gray-600 hover:text-deep-green">
+                <span class="text-xl">☰</span>
                 <span class="text-[10px] font-bold uppercase">Menu</span>
             </button>
-                
+
         <?php else: ?>
-            <a href="<?= SITE_URL ?>/index.php" class="flex flex-col items-center justify-center w-full h-full space-y-1 <?= basename($_SERVER['PHP_SELF']) == 'index.php' ? 'text-deep-green' : 'text-gray-400' ?>">
-                <span class="text-2xl">🏠</span>
-                <span class="text-[10px] font-bold uppercase">Home</span>
-            </a>
-            
-            <a href="<?= SITE_URL ?>/shop.php" class="flex flex-col items-center justify-center w-full h-full space-y-1 <?= basename($_SERVER['PHP_SELF']) == 'shop.php' ? 'text-deep-green' : 'text-gray-400' ?>">
-                <span class="text-2xl">🛍️</span>
-                <span class="text-[10px] font-bold uppercase">Shop</span>
-            </a>
-            
-            <a href="<?= SITE_URL ?>/login.php" class="flex flex-col items-center justify-center w-full h-full space-y-1 <?= basename($_SERVER['PHP_SELF']) == 'login.php' ? 'text-deep-green' : 'text-gray-400' ?>">
-                <span class="text-2xl">🔐</span>
-                <span class="text-[10px] font-bold uppercase">Login</span>
-            </a>
+            <a href="<?= SITE_URL ?>/index.php" class="flex flex-col items-center"><span class="text-xl">🏠</span><span class="text-[10px]">Home</span></a>
+            <a href="<?= SITE_URL ?>/shop.php" class="flex flex-col items-center"><span class="text-xl">🛍️</span><span class="text-[10px]">Shop</span></a>
+            <a href="<?= SITE_URL ?>/login.php" class="flex flex-col items-center"><span class="text-xl">🔐</span><span class="text-[10px]">Login</span></a>
+            <a href="<?= SITE_URL ?>/signup.php" class="flex flex-col items-center"><span class="text-xl">✍️</span><span class="text-[10px]">Join</span></a>
         <?php endif; ?>
     </div>
 
-    <div id="mobileMenuOverlay" class="fixed inset-0 bg-deep-green bg-opacity-95 z-[60] hidden transition-opacity duration-300">
-        <div class="flex flex-col items-center justify-center h-full space-y-6 text-white">
-            <button onclick="toggleMobileMenu()" class="absolute top-6 right-6 text-4xl text-lime-accent">&times;</button>
-            
-            <?php if (isLoggedIn()): ?>
-                <div class="text-center mb-4">
-                    <div class="w-20 h-20 bg-lime-accent rounded-full flex items-center justify-center text-3xl font-bold text-deep-green mx-auto mb-2">
-                        <?= strtoupper(substr($currentUser['full_name'], 0, 1)) ?>
-                    </div>
-                    <p class="text-xl font-bold"><?= htmlspecialchars($currentUser['full_name']) ?></p>
-                    <p class="text-sm text-lime-accent"><?= htmlspecialchars($currentUser['member_id'] ?? '') ?></p>
+    <div id="mobileMenuOverlay" class="fixed inset-0 bg-deep-green bg-opacity-95 z-[60] hidden flex flex-col items-center justify-center text-white space-y-6 transition-opacity duration-300 backdrop-blur-sm">
+        <button onclick="toggleMobileMenu()" class="absolute top-6 right-6 text-4xl text-lime-accent hover:rotate-90 transition-transform">&times;</button>
+        
+        <?php if (isLoggedIn()): ?>
+            <div class="text-center animate-fade-in">
+                <div class="w-20 h-20 bg-lime-accent rounded-full flex items-center justify-center text-3xl font-bold text-deep-green mx-auto mb-3 border-4 border-white">
+                    <?= strtoupper(substr($currentUser['full_name'], 0, 1)) ?>
                 </div>
+                <h3 class="text-xl font-bold"><?= htmlspecialchars($currentUser['full_name']) ?></h3>
+                <p class="text-sm text-lime-200 uppercase tracking-widest"><?= $currentUser['role_name'] ?></p>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-6 w-full max-w-xs px-4">
+                <a href="<?= SITE_URL ?>/profile.php" class="bg-white/10 p-4 rounded-xl text-center hover:bg-white/20 transition">
+                    <span class="text-2xl block mb-1">👤</span> Profile
+                </a>
                 
-                <a href="<?= SITE_URL ?>/profile.php" class="text-2xl font-bold hover:text-lime-accent">👤 My Profile</a>
                 <?php if ($currentUser['role_name'] === 'customer'): ?>
-                    <a href="<?= SITE_URL ?>/my-orders.php" class="text-2xl font-bold hover:text-lime-accent">📦 My Orders</a>
-                    <a href="<?= SITE_URL ?>/prescription-upload.php" class="text-2xl font-bold hover:text-lime-accent">📋 Upload Prescription</a>
+                    <a href="<?= SITE_URL ?>/my-orders.php" class="bg-white/10 p-4 rounded-xl text-center hover:bg-white/20 transition">
+                        <span class="text-2xl block mb-1">📦</span> Orders
+                    </a>
+                    <a href="<?= SITE_URL ?>/prescription-upload.php" class="bg-white/10 p-4 rounded-xl text-center hover:bg-white/20 transition">
+                        <span class="text-2xl block mb-1">📋</span> Rx Upload
+                    </a>
                 <?php endif; ?>
-                <a href="<?= SITE_URL ?>/logout.php" class="text-2xl font-bold text-red-400 hover:text-red-300">🚪 Logout</a>
-            <?php else: ?>
-                <a href="<?= SITE_URL ?>/login.php" class="text-2xl font-bold hover:text-lime-accent">Login</a>
-                <a href="<?= SITE_URL ?>/signup.php" class="text-2xl font-bold hover:text-lime-accent">Register</a>
-            <?php endif; ?>
-        </div>
+
+                <?php if ($currentUser['role_name'] === 'admin'): ?>
+                    <a href="<?= SITE_URL ?>/views/admin/reports.php" class="bg-white/10 p-4 rounded-xl text-center hover:bg-white/20 transition">
+                        <span class="text-2xl block mb-1">📊</span> Reports
+                    </a>
+                <?php endif; ?>
+                
+                <a href="<?= SITE_URL ?>/logout.php" class="bg-red-500/80 p-4 rounded-xl text-center hover:bg-red-600 transition col-span-2">
+                    <span class="text-xl block mb-1">🚪</span> Logout
+                </a>
+            </div>
+        <?php endif; ?>
     </div>
 
     <div id="mobileSearchModal" class="hidden fixed inset-0 bg-black bg-opacity-90 z-[99999]">
