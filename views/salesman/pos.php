@@ -152,7 +152,6 @@ include __DIR__ . '/../../includes/header.php';
         <div class="p-4 bg-gray-50 border-b space-y-3">
             
             <input type="hidden" id="prescriptionId" value="<?= $prescData ? $prescData['id'] : '' ?>">
-            <input type="hidden" id="customerAddress" value="<?= $prescData ? htmlspecialchars($prescData['customer_address']) : '' ?>">
 
             <div class="flex gap-2 items-center">
                 <div class="relative flex-1">
@@ -194,7 +193,6 @@ include __DIR__ . '/../../includes/header.php';
                         <input type="number" id="pointsToRedeem" class="w-full p-1 text-sm border rounded focus:outline-none focus:border-deep-green" placeholder="Points to use" oninput="renderCart()">
                         <span class="text-xs text-gray-500 whitespace-nowrap">Max: <span id="maxPoints">0</span></span>
                     </div>
-                    <p class="text-[10px] text-gray-500 mt-1 hidden" id="redeemInfo">100 Points = 10 BDT Discount</p>
                 </div>
             </div>
             
@@ -203,12 +201,15 @@ include __DIR__ . '/../../includes/header.php';
                    placeholder="Customer Name"
                    value="<?= $prescData ? htmlspecialchars($prescData['customer_name']) : '' ?>">
             
+            <div>
+                <label class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Delivery Address / Note (Printed on Invoice)</label>
+                <textarea id="orderNote" rows="2" class="w-full p-2 border rounded text-sm focus:border-green-500 outline-none resize-none" placeholder="Enter delivery address or special note..."><?= $prescData ? htmlspecialchars($prescData['customer_address']) : '' ?></textarea>
+            </div>
+
             <?php if ($prescData): ?>
                 <div class="bg-yellow-50 p-3 border border-yellow-200 rounded text-sm text-yellow-800 mb-2 shadow-sm">
-                    📝 <strong>Prescription Notes:</strong><br>
+                    📝 <strong>Rx Notes:</strong><br>
                     <span class="italic text-gray-700"><?= nl2br(htmlspecialchars($prescData['notes'])) ?></span>
-                    <hr class="my-2 border-yellow-200">
-                    📍 <strong>Address:</strong> <?= htmlspecialchars($prescData['customer_address']) ?>
                 </div>
             <?php endif; ?>
         </div>
@@ -255,9 +256,6 @@ include __DIR__ . '/../../includes/header.php';
 
             <form method="POST" id="posForm">
                 <input type="hidden" name="complete_sale" value="1">
-                <input type="hidden" name="cart_items" id="formCart">
-                <input type="hidden" name="member_id" id="formMemberId">
-                <input type="hidden" name="customer_name" id="formCustomerName">
                 
                 <button type="button" onclick="submitSale()" class="w-full bg-deep-green text-white py-3.5 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all flex items-center justify-center gap-2 active:scale-95">
                     <span>⚡ Complete Sale</span>
@@ -426,16 +424,13 @@ function toggleCart() {
 function toggleRedeem() {
     const isChecked = document.getElementById('usePointsCheck').checked;
     const container = document.getElementById('redeemInputContainer');
-    const info = document.getElementById('redeemInfo');
     const input = document.getElementById('pointsToRedeem');
 
     if (isChecked) {
         container.classList.remove('hidden');
-        info.classList.remove('hidden');
         input.focus();
     } else {
         container.classList.add('hidden');
-        info.classList.add('hidden');
         input.value = '';
         renderCart();
     }
@@ -477,8 +472,7 @@ async function checkMember() {
     }
 }
 
-// Submit Sale
-// Updated Submit Sale Function (Auto Print Popup)
+// Submit Sale (UPDATED)
 async function submitSale() {
     if (cart.length === 0) return showToast('Cart Empty', 'warning');
 
@@ -491,6 +485,8 @@ async function submitSale() {
         cart: cart,
         member_id: document.getElementById('memberId').value,
         customer_name: document.getElementById('customerName').value,
+        // ✅ Added Address/Note
+        customer_address: document.getElementById('orderNote').value, 
         prescription_id: document.getElementById('prescriptionId') ? document.getElementById('prescriptionId').value : null,
         vat_percent: document.getElementById('vatCheck').checked ? parseFloat(document.getElementById('vatRate').value) : 0,
         points_used: document.getElementById('usePointsCheck') && document.getElementById('usePointsCheck').checked ? (parseInt(document.getElementById('pointsToRedeem').value) || 0) : 0

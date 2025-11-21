@@ -1,6 +1,6 @@
 <?php
 /**
- * Professional POS Invoice - Fixed Address Logic
+ * Professional POS Invoice - Fixed Address/Note Logic
  */
 
 require_once __DIR__ . '/../../config.php';
@@ -14,7 +14,7 @@ if (!$orderId) {
     die("Invalid Order ID");
 }
 
-// Get Order Details (Updated Query to fetch User Address)
+// Get Order Details
 $orderQuery = "SELECT o.*, 
                u.member_id, u.points as current_points, u.address as member_address, u.phone as member_phone,
                s.name as shop_name, s.location, s.phone as shop_phone
@@ -35,30 +35,12 @@ if (!$order) {
 // Get Items
 $items = $conn->query("SELECT * FROM order_items WHERE order_id = $orderId");
 
-// VAT & Totals
-$vatRate = 0.05; // Default fallback
-// Calculate based on saved totals to be accurate
+// VAT & Totals Calculations
 $subtotal = $order['subtotal'];
 $discount = $order['points_discount'];
 $grandTotal = $order['total_amount'];
 $vatAmount = $grandTotal - ($subtotal - $discount); // Back-calculate VAT
 
-// --- ADDRESS LOGIC ---
-$finalAddress = '';
-$finalPhone = $order['customer_phone'];
-
-// 1. Try Order Address first (if not generic 'POS Sale')
-if (!empty($order['customer_address']) && $order['customer_address'] !== 'POS Sale') {
-    $finalAddress = $order['customer_address'];
-} 
-// 2. If empty or 'POS Sale', try Member Address
-elseif (!empty($order['member_address'])) {
-    $finalAddress = $order['member_address'];
-    // If order phone is empty, use member phone
-    if (empty($finalPhone)) {
-        $finalPhone = $order['member_phone'];
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -94,7 +76,7 @@ elseif (!empty($order['member_address'])) {
             padding: 5px;
             border: 1px solid #000;
             font-size: 11px;
-            font-weight: bold;
+            font-weight: normal; /* Normal weight for reading long notes */
             background: #eee; /* Visible on screen, usually ignored by thermal printers */
         }
         
@@ -136,18 +118,17 @@ elseif (!empty($order['member_address'])) {
         <?php endif; ?>
     </div>
 
-    <!-- ADDRESS SECTION -->
-    <?php if (!empty($finalAddress)): ?>
+    <?php if (!empty($order['customer_address']) && $order['customer_address'] !== 'POS Sale'): ?>
     <div class="address-box">
-        ADDRESS:<br>
-        <?= nl2br(htmlspecialchars($finalAddress)) ?>
-        <?php if (!empty($finalPhone)): ?>
-        <br>Phone: <?= htmlspecialchars($finalPhone) ?>
+        <strong>Delivery Note / Address:</strong><br>
+        <?= nl2br(htmlspecialchars($order['customer_address'])) ?>
+        
+        <?php if (!empty($order['customer_phone'])): ?>
+        <br>Phone: <?= htmlspecialchars($order['customer_phone']) ?>
         <?php endif; ?>
     </div>
-    <?php endif; ?>
-
     <div class="divider"></div>
+    <?php endif; ?>
 
     <table>
         <thead>

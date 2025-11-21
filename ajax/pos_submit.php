@@ -9,6 +9,13 @@ ini_set('display_errors', 0);
 
 require_once __DIR__ . '/../config.php';
 
+// Fallback for clean function if not in config
+if (!function_exists('clean')) {
+    function clean($data) {
+        return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
+    }
+}
+
 header('Content-Type: application/json');
 
 try {
@@ -43,9 +50,19 @@ try {
     // Default Shop for Admin (Optional)
     if (!$shopId) $shopId = 1;
 
-    $customerName = $input['customer_name'] ?: 'Walk-in Customer';
-    $customerAddress = $input['customer_address'] ?? 'POS Sale';
-    $memberId = $input['member_id'] ?? '';
+    // --- DATA SANITIZATION & PREPARATION (UPDATED) ---
+    
+    // Customer Name
+    $customerName = isset($input['customer_name']) && !empty($input['customer_name']) 
+                    ? clean($input['customer_name']) 
+                    : 'Walk-in Customer';
+
+    // Customer Address (UPDATED LOGIC)
+    $customerAddress = isset($input['customer_address']) && !empty($input['customer_address'])
+                    ? clean($input['customer_address'])
+                    : 'POS Sale';
+
+    $memberId = isset($input['member_id']) ? clean($input['member_id']) : '';
     $prescriptionId = intval($input['prescription_id'] ?? 0);
     $vatPercent = floatval($input['vat_percent'] ?? 0);
     $pointsUsed = intval($input['points_used'] ?? 0);
@@ -104,13 +121,14 @@ try {
     $uid = $userId ?: $user['id'];
     $orderNum = generateOrderNumber();
 
-    // 6. Create Order
+    // 6. Create Order (UPDATED BINDING)
     $orderQuery = "INSERT INTO orders (user_id, order_number, customer_name, customer_address, delivery_type, subtotal, points_used, points_discount, total_amount, points_earned, payment_status) 
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'paid')";
     
     $stmt = $conn->prepare($orderQuery);
     if (!$stmt) throw new Exception("Order Prepare Failed: " . $conn->error);
     
+    // Params: i(uid), s(num), s(name), s(address), s(del_type), d(sub), d(pts_used), d(pts_disc), d(total), d(pts_earned)
     $stmt->bind_param("issssddddi", $uid, $orderNum, $customerName, $customerAddress, $deliveryType, $subtotal, $pointsUsed, $pointsDiscount, $totalAmount, $pointsEarned);
     
     if (!$stmt->execute()) throw new Exception("Order Execute Failed: " . $stmt->error);
