@@ -1,6 +1,6 @@
 <?php
 /**
- * Checkout Page - Complete Fixed Version
+ * Checkout Page - Fixed Calculation Logic
  */
 
 require_once 'config.php';
@@ -105,14 +105,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception('Minimum order amount is ৳' . MIN_ORDER_AMOUNT);
             }
             
-            // Calculate points earned (100 points per 1000 BDT)
-            $pointsEarned = floor($totalAmount / 1000) * POINTS_PER_1000_BDT;
+            // ============================================================
+            // NEW LOGIC: Calculate Proportional Points Earned
+            // Formula: (Total / 1000) * POINTS_PER_1000_BDT
+            // ============================================================
+            $pointsEarned = floor(($totalAmount / 1000) * POINTS_PER_1000_BDT);
             
             // Create order
             $orderNumber = generateOrderNumber();
             $orderQuery = "INSERT INTO orders (user_id, order_number, customer_name, customer_phone, customer_address, 
-                          delivery_type, delivery_charge, subtotal, points_used, points_discount, total_amount, points_earned)
-                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                           delivery_type, delivery_charge, subtotal, points_used, points_discount, total_amount, points_earned)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $orderStmt = $conn->prepare($orderQuery);
             
             if ($orderStmt === false) {
@@ -161,7 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 // Add parcel status log
                 $logQuery = "INSERT INTO parcel_status_logs (parcel_id, status, remarks, updated_by)
-                            VALUES (?, 'processing', 'Order placed', ?)";
+                             VALUES (?, 'processing', 'Order placed', ?)";
                 $logStmt = $conn->prepare($logQuery);
                 
                 if ($logStmt) {
@@ -174,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $itemTotal = $item['price'] * $item['quantity'];
                     
                     $itemQuery = "INSERT INTO order_items (order_id, parcel_id, medicine_id, shop_id, medicine_name, quantity, price, subtotal)
-                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                     $itemStmt = $conn->prepare($itemQuery);
                     
                     if ($itemStmt === false) {
@@ -189,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     // Reduce stock
                     $stockQuery = "UPDATE shop_medicines SET stock_quantity = stock_quantity - ? 
-                                  WHERE medicine_id = ? AND shop_id = ?";
+                                   WHERE medicine_id = ? AND shop_id = ?";
                     $stockStmt = $conn->prepare($stockQuery);
                     
                     if ($stockStmt) {
@@ -212,7 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Log points transactions
             if ($usePoints > 0) {
                 $pointsLogQuery = "INSERT INTO points_log (user_id, order_id, points, type, description)
-                                  VALUES (?, ?, ?, 'redeem', 'Points redeemed for order')";
+                                   VALUES (?, ?, ?, 'redeem', 'Points redeemed for order')";
                 $pointsLogStmt = $conn->prepare($pointsLogQuery);
                 
                 if ($pointsLogStmt) {
@@ -224,7 +227,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             if ($pointsEarned > 0) {
                 $pointsLogQuery = "INSERT INTO points_log (user_id, order_id, points, type, description)
-                                  VALUES (?, ?, ?, 'order', 'Points earned from order')";
+                                   VALUES (?, ?, ?, 'order', 'Points earned from order')";
                 $pointsLogStmt = $conn->prepare($pointsLogQuery);
                 
                 if ($pointsLogStmt) {
@@ -264,7 +267,6 @@ include 'includes/header.php';
 
 <section class="container mx-auto px-4 py-16 min-h-screen">
     <div class="max-w-6xl mx-auto">
-        <!-- Header -->
         <div class="text-center mb-12" data-aos="fade-down">
             <h1 class="text-5xl font-bold text-deep-green mb-4 font-mono uppercase">
                 💳 <?= __('checkout') ?>
@@ -277,9 +279,7 @@ include 'includes/header.php';
         <form method="POST" action="" class="grid lg:grid-cols-3 gap-8">
             <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
             
-            <!-- Delivery Information -->
             <div class="lg:col-span-2 space-y-6">
-                <!-- Customer Details -->
                 <div class="card bg-white border-4 border-deep-green" data-aos="fade-right">
                     <h3 class="text-2xl font-bold text-deep-green mb-6 uppercase border-b-4 border-deep-green pb-3">
                         📋 <?= __('delivery_info') ?>
@@ -321,7 +321,6 @@ include 'includes/header.php';
                     </div>
                 </div>
 
-                <!-- Delivery Type -->
                 <div class="card bg-white border-4 border-deep-green" data-aos="fade-right" data-aos-delay="100">
                     <h3 class="text-2xl font-bold text-deep-green mb-6 uppercase border-b-4 border-deep-green pb-3">
                         🚚 <?= __('delivery_type') ?>
@@ -350,7 +349,6 @@ include 'includes/header.php';
                     </div>
                 </div>
 
-                <!-- Use Points -->
                 <?php if ($user['points'] >= 100): ?>
                 <div class="card bg-lime-accent border-4 border-deep-green" data-aos="fade-right" data-aos-delay="200">
                     <h3 class="text-2xl font-bold text-deep-green mb-4 uppercase">
@@ -368,6 +366,7 @@ include 'includes/header.php';
                             class="input border-4 border-deep-green flex-1 text-lg"
                             placeholder="Enter points (multiples of 100)"
                             onchange="calculateDiscount()"
+                            onkeyup="calculateDiscount()"
                         >
                         <span id="pointsDiscount" class="text-xl font-bold text-deep-green"></span>
                     </div>
@@ -375,7 +374,6 @@ include 'includes/header.php';
                 </div>
                 <?php endif; ?>
 
-                <!-- Prescription Warning -->
                 <?php if ($requiresPrescription): ?>
                 <div class="card bg-yellow-100 border-4 border-yellow-500" data-aos="fade-right" data-aos-delay="300">
                     <h3 class="text-xl font-bold text-yellow-800 mb-3">
@@ -391,14 +389,12 @@ include 'includes/header.php';
                 <?php endif; ?>
             </div>
 
-            <!-- Order Summary -->
             <div class="lg:col-span-1">
                 <div class="card bg-white border-4 border-deep-green sticky top-24" data-aos="fade-left">
                     <h3 class="text-2xl font-bold text-deep-green mb-6 uppercase border-b-4 border-deep-green pb-3">
                         📦 Order Summary
                     </h3>
                     
-                    <!-- Items -->
                     <div class="space-y-3 mb-6 max-h-64 overflow-y-auto">
                         <?php foreach ($cartData as $item): ?>
                             <div class="flex gap-3 p-3 bg-gray-50 border-2 border-gray-200 hover:border-lime-accent transition-all">
@@ -411,7 +407,6 @@ include 'includes/header.php';
                         <?php endforeach; ?>
                     </div>
                     
-                    <!-- Calculations -->
                     <div class="space-y-3 mb-6 border-t-4 border-deep-green pt-4">
                         <div class="flex justify-between text-lg">
                             <span>Subtotal:</span>
@@ -434,15 +429,13 @@ include 'includes/header.php';
                         </div>
                     </div>
                     
-                    <!-- Points to Earn -->
                     <div class="bg-lime-accent border-4 border-deep-green p-4 mb-6">
                         <p class="text-sm font-bold text-deep-green mb-2">🎁 Points You'll Earn</p>
                         <p class="text-3xl font-bold text-deep-green" id="pointsEarn">
-                            ⭐ <?= floor($subtotal / 1000) * POINTS_PER_1000_BDT ?>
+                            ⭐ <?= floor(($subtotal + HOME_DELIVERY_CHARGE) / 1000) * POINTS_PER_1000_BDT ?>
                         </p>
                     </div>
                     
-                    <!-- Submit -->
                     <button type="submit" class="btn btn-primary w-full text-xl py-4 neon-border transform hover:scale-105 transition-all">
                         ✅ PLACE ORDER
                     </button>
@@ -496,15 +489,26 @@ function calculateTotal() {
     const deliveryType = document.querySelector('input[name="delivery_type"]:checked').value;
     const deliveryCharge = deliveryType === 'home' ? homeDeliveryCharge : 0;
     const usePoints = parseInt(document.getElementById('usePoints')?.value || 0);
+    
+    // Calculate Discount
     const validPoints = Math.floor(usePoints / 100) * 100;
     const pointsDiscount = (validPoints / 100) * 10;
     
+    // Calculate Total
     const total = subtotal + deliveryCharge - pointsDiscount;
     document.getElementById('grandTotal').textContent = '৳' + total.toFixed(2);
     
-    const pointsEarn = Math.floor(total / 1000) * <?= POINTS_PER_1000_BDT ?>;
+    // ==========================================================
+    // UPDATED LOGIC: Calculate Proportional Points
+    // Formula: (Total / 1000) * 100 (assuming 100 points per 1000)
+    // ==========================================================
+    const pointsEarn = Math.floor((total / 1000) * <?= POINTS_PER_1000_BDT ?>);
+    
     document.getElementById('pointsEarn').textContent = '⭐ ' + pointsEarn;
 }
+
+// Initialize on load
+calculateTotal();
 </script>
 
 <?php include 'includes/footer.php'; ?>

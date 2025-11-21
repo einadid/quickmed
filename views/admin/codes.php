@@ -14,23 +14,25 @@ $user = getCurrentUser();
 // Handle code generation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate'])) {
     $roleId = intval($_POST['role_id']);
-    $shopId = $_POST['shop_id'] ? intval($_POST['shop_id']) : null;
+    $shopId = !empty($_POST['shop_id']) ? intval($_POST['shop_id']) : null;
     $expiryDays = intval($_POST['expiry_days']);
     
-    $code = generateVerificationCode(10);
+    $code = generateVerificationCode(10); // Ensure function exists in config.php
     $expiresAt = date('Y-m-d H:i:s', strtotime("+$expiryDays days"));
+    $createdBy = $_SESSION['user_id'];
     
     $query = "INSERT INTO signup_codes (code, role_id, shop_id, expires_at, created_by) VALUES (?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("siisi", $code, $roleId, $shopId, $expiresAt, $user['id']);
+    $stmt->bind_param("siisi", $code, $roleId, $shopId, $expiresAt, $createdBy);
     
     if ($stmt->execute()) {
         $_SESSION['success'] = "Code generated: <strong>$code</strong>";
     } else {
-        $_SESSION['error'] = 'Failed to generate code';
+        $_SESSION['error'] = 'Failed to generate code: ' . $stmt->error;
     }
     
-    redirect('codes.php');
+    header("Location: codes.php");
+    exit();
 }
 
 // Get all codes

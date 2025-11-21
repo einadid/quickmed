@@ -17,7 +17,7 @@ if (!$shopId) {
     redirect('dashboard.php');
 }
 
-// Get shop medicines
+// 1. Get shop medicines
 $medicinesQuery = "SELECT m.*, sm.price, sm.stock_quantity
                    FROM medicines m
                    JOIN shop_medicines sm ON m.id = sm.medicine_id
@@ -28,8 +28,24 @@ $stmt->bind_param("i", $shopId);
 $stmt->execute();
 $medicines = $stmt->get_result();
 
-// Handle POS sale
-// Handle POS sale
+// 2. Auto-fill customer from prescription (If ID provided)
+$pData = [];
+if (isset($_GET['prescription_id'])) {
+    $pid = intval($_GET['prescription_id']);
+    $pQuery = "SELECT u.full_name, u.phone, u.member_id 
+               FROM prescriptions p 
+               JOIN users u ON p.user_id = u.id 
+               WHERE p.id = ?";
+    $pStmt = $conn->prepare($pQuery);
+    $pStmt->bind_param("i", $pid);
+    $pStmt->execute();
+    $result = $pStmt->get_result();
+    if ($result->num_rows > 0) {
+        $pData = $result->fetch_assoc();
+    }
+}
+
+// 3. Handle POS sale (Form Submission)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_sale'])) {
     $cartItems = json_decode($_POST['cart_items'], true);
     $customerName = clean($_POST['customer_name'] ?? 'Walk-in Customer');
@@ -63,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_sale'])) {
                 }
             }
             
-            // Use salesman's user_id if no member
+            // Use salesman's user_id if no member (for record keeping), but 0 points
             if (!$userId) {
                 $userId = $user['id'];
                 $pointsEarned = 0; // No points for non-members
@@ -72,8 +88,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_sale'])) {
             // Create order
             $orderNumber = generateOrderNumber();
             $orderQuery = "INSERT INTO orders (user_id, order_number, customer_name, customer_phone, customer_address, 
-                          delivery_type, delivery_charge, subtotal, total_amount, payment_method, payment_status, points_earned)
-                          VALUES (?, ?, ?, ?, 'POS Sale', 'pickup', 0, ?, ?, 'cod', 'paid', ?)";
+                           delivery_type, delivery_charge, subtotal, total_amount, payment_method, payment_status, points_earned)
+                           VALUES (?, ?, ?, ?, 'POS Sale', 'pickup', 0, ?, ?, 'cod', 'paid', ?)";
             $orderStmt = $conn->prepare($orderQuery);
             $orderStmt->bind_param("isssddi", $userId, $orderNumber, $customerName, $customerPhone, $subtotal, $subtotal, $pointsEarned);
             $orderStmt->execute();
@@ -82,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_sale'])) {
             // Create parcel
             $parcelNumber = generateParcelNumber($orderId, $shopId);
             $parcelQuery = "INSERT INTO parcels (order_id, shop_id, parcel_number, items_count, subtotal, status, updated_by)
-                           VALUES (?, ?, ?, ?, ?, 'delivered', ?)";
+                            VALUES (?, ?, ?, ?, ?, 'delivered', ?)";
             $parcelStmt = $conn->prepare($parcelQuery);
             $itemsCount = count($cartItems);
             $parcelStmt->bind_param("iisidi", $orderId, $shopId, $parcelNumber, $itemsCount, $subtotal, $user['id']);
@@ -91,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_sale'])) {
             
             // Add status log
             $logQuery = "INSERT INTO parcel_status_logs (parcel_id, status, remarks, updated_by)
-                        VALUES (?, 'delivered', 'POS Sale - Instant Delivery', ?)";
+                         VALUES (?, 'delivered', 'POS Sale - Instant Delivery', ?)";
             $logStmt = $conn->prepare($logQuery);
             $logStmt->bind_param("ii", $parcelId, $user['id']);
             $logStmt->execute();
@@ -101,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_sale'])) {
                 $itemTotal = $item['price'] * $item['quantity'];
                 
                 $itemQuery = "INSERT INTO order_items (order_id, parcel_id, medicine_id, shop_id, medicine_name, quantity, price, subtotal)
-                             VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                              VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                 $itemStmt = $conn->prepare($itemQuery);
                 $itemStmt->bind_param("iiiisidd", $orderId, $parcelId, $item['id'], $shopId, $item['name'], 
                                      $item['quantity'], $item['price'], $itemTotal);
@@ -109,14 +125,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_sale'])) {
                 
                 // Reduce stock
                 $stockQuery = "UPDATE shop_medicines SET stock_quantity = stock_quantity - ? 
-                              WHERE medicine_id = ? AND shop_id = ?";
+                               WHERE medicine_id = ? AND shop_id = ?";
                 $stockStmt = $conn->prepare($stockQuery);
                 $stockStmt->bind_param("iii", $item['quantity'], $item['id'], $shopId);
                 $stockStmt->execute();
             }
             
             // Award points to member
-            if ($userId && $pointsEarned > 0) {
+            if ($userId && $pointsEarned > 0 && $userId != $user['id']) {
                 // Update user points
                 $updatePointsQuery = "UPDATE users SET points = points + ? WHERE id = ?";
                 $updatePointsStmt = $conn->prepare($updatePointsQuery);
@@ -125,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_sale'])) {
                 
                 // Log points
                 $pointsLogQuery = "INSERT INTO points_log (user_id, order_id, points, type, description)
-                                  VALUES (?, ?, ?, 'order', 'POS Purchase')";
+                                   VALUES (?, ?, ?, 'order', 'POS Purchase')";
                 $pointsLogStmt = $conn->prepare($pointsLogQuery);
                 $pointsLogStmt->bind_param("iii", $userId, $orderId, $pointsEarned);
                 $pointsLogStmt->execute();
@@ -157,27 +173,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_sale'])) {
 include __DIR__ . '/../../includes/header.php';
 ?>
 
-<!-- Print CSS -->
 <style>
 @media print {
-    body * {
-        visibility: hidden;
-    }
-    #printArea, #printArea * {
-        visibility: visible;
-    }
-    #printArea {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-    }
+    body * { visibility: hidden; }
+    #printArea, #printArea * { visibility: visible; }
+    #printArea { position: absolute; left: 0; top: 0; width: 100%; }
 }
 </style>
 
 <section class="container mx-auto px-4 py-16 min-h-screen">
     <div class="max-w-7xl mx-auto">
-        <!-- Header -->
         <div class="flex justify-between items-center mb-8" data-aos="fade-down">
             <h1 class="text-5xl font-bold text-deep-green font-mono uppercase">
                 🧾 POS System
@@ -188,14 +193,12 @@ include __DIR__ . '/../../includes/header.php';
         </div>
 
         <div class="grid lg:grid-cols-3 gap-8">
-            <!-- Product Search & List -->
             <div class="lg:col-span-2">
                 <div class="card bg-white border-4 border-deep-green" data-aos="fade-right">
                     <h2 class="text-2xl font-bold text-deep-green mb-6 uppercase border-b-4 border-deep-green pb-3">
                         🔍 Search Medicine
                     </h2>
 
-                    <!-- Search -->
                     <input 
                         type="text" 
                         id="posSearch" 
@@ -204,7 +207,6 @@ include __DIR__ . '/../../includes/header.php';
                         autocomplete="off"
                     >
 
-                    <!-- Products Grid -->
                     <div id="productsGrid" class="grid md:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto">
                         <?php $medicines->data_seek(0); while ($med = $medicines->fetch_assoc()): ?>
                             <div class="product-item border-4 border-gray-200 p-4 hover:border-lime-accent transition-all cursor-pointer"
@@ -233,20 +235,19 @@ include __DIR__ . '/../../includes/header.php';
                 </div>
             </div>
 
-            <!-- POS Cart -->
             <div class="lg:col-span-1">
                 <div class="card bg-lime-accent border-4 border-deep-green sticky top-24" data-aos="fade-left">
                     <h2 class="text-2xl font-bold text-deep-green mb-6 uppercase border-b-4 border-deep-green pb-3">
                         🛒 Current Sale
                     </h2>
 
-                    <!-- Customer Info -->
                     <div class="mb-6 space-y-3">
                         <input 
                             type="text" 
                             id="memberIdInput" 
                             class="input border-4 border-deep-green" 
                             placeholder="Member ID (for points)"
+                            value="<?= htmlspecialchars($pData['member_id'] ?? '') ?>"
                             onblur="checkMemberId(this.value)"
                         >
                         <div id="memberInfo" class="hidden bg-lime-accent p-3 border-2 border-deep-green">
@@ -259,23 +260,23 @@ include __DIR__ . '/../../includes/header.php';
                             id="customerName" 
                             class="input border-4 border-deep-green" 
                             placeholder="Customer Name"
+                            value="<?= htmlspecialchars($pData['full_name'] ?? '') ?>"
                         >
                         <input 
                             type="tel" 
                             id="customerPhone" 
                             class="input border-4 border-deep-green" 
                             placeholder="Phone (Optional)"
+                            value="<?= htmlspecialchars($pData['phone'] ?? '') ?>"
                         >
                     </div>
 
-                    <!-- Cart Items -->
                     <div id="posCartItems" class="mb-6 max-h-64 overflow-y-auto space-y-2">
                         <div class="text-center text-gray-600 py-8">
                             Cart is empty
                         </div>
                     </div>
 
-                    <!-- Total -->
                     <div class="bg-white border-4 border-deep-green p-4 mb-6">
                         <div class="flex justify-between items-center mb-3">
                             <span class="text-lg">Subtotal:</span>
@@ -287,7 +288,6 @@ include __DIR__ . '/../../includes/header.php';
                         </div>
                     </div>
 
-                    <!-- Actions -->
                     <button 
                         onclick="completeSale()" 
                         id="completeSaleBtn"
@@ -308,6 +308,7 @@ include __DIR__ . '/../../includes/header.php';
         </div>
     </div>
 </section>
+
 <script>
 // Check Member ID
 let currentMemberId = null;
@@ -344,12 +345,15 @@ async function checkMemberId(memberId) {
             document.getElementById('memberInfo').classList.add('hidden');
             currentMemberId = null;
             memberData = null;
-            Swal.fire({
-                icon: 'warning',
-                title: 'Member Not Found',
-                text: 'No member found with this ID',
-                confirmButtonColor: '#065f46'
-            });
+            // Only show alert if triggered manually by blur, not page load
+            if(document.activeElement === document.getElementById('memberIdInput')) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Member Not Found',
+                    text: 'No member found with this ID',
+                    confirmButtonColor: '#065f46'
+                });
+            }
         }
     } catch (error) {
         console.error('Error:', error);
@@ -413,6 +417,14 @@ async function completeSale() {
         form.submit();
     }
 }
+
+// Check member ID automatically if page loaded with pre-filled data
+window.onload = function() {
+    const prefilledMemberId = "<?= htmlspecialchars($pData['member_id'] ?? '') ?>";
+    if(prefilledMemberId) {
+        checkMemberId(prefilledMemberId);
+    }
+};
 </script>
 
 <script src="<?= SITE_URL ?>/assets/js/pos.js"></script>

@@ -57,12 +57,12 @@ if (isset($_GET['delete'])) {
     redirect('shops.php');
 }
 
-// Get all shops with stats
+// Get all shops with stats (FIXED LEFT JOIN LOGIC)
 $shopsQuery = "SELECT s.*,
     (SELECT COUNT(*) FROM shop_medicines WHERE shop_id = s.id) as products_count,
     (SELECT COUNT(*) FROM users WHERE shop_id = s.id AND is_active = 1) as staff_count,
     (SELECT COUNT(*) FROM parcels WHERE shop_id = s.id) as total_orders,
-    (SELECT SUM(subtotal) FROM parcels WHERE shop_id = s.id) as total_revenue
+    (SELECT COALESCE(SUM(subtotal), 0) FROM parcels WHERE shop_id = s.id) as total_revenue
     FROM shops s
     ORDER BY s.created_at DESC";
 $shops = $conn->query($shopsQuery);

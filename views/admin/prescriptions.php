@@ -13,7 +13,7 @@ $pageTitle = 'Manage Prescriptions - Admin';
 // Handle Review
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['review_prescription'])) {
     $prescId = intval($_POST['prescription_id']);
-    $status = clean($_POST['status']);
+    $status = clean($_POST['status']); // 'approved' or 'rejected'
     $notes = clean($_POST['review_notes']);
     $reviewerId = $_SESSION['user_id'];
     
@@ -22,11 +22,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['review_prescription']
     $stmt->bind_param("sisi", $status, $reviewerId, $notes, $prescId);
     
     if ($stmt->execute()) {
-        $_SESSION['success'] = 'Prescription reviewed successfully';
-        logAudit('PRESCRIPTION_REVIEW', 'prescriptions', $prescId, null, ['status' => $status]);
+        $_SESSION['success'] = 'Prescription updated successfully';
+    } else {
+        $_SESSION['error'] = 'Update failed: ' . $stmt->error;
     }
     
-    redirect('prescriptions.php');
+    header("Location: prescriptions.php");
+    exit();
 }
 
 // Get all prescriptions
