@@ -10,74 +10,86 @@ requireLogin();
 $pageTitle = 'My Profile - QuickMed';
 $user = getCurrentUser();
 
-// Enable Error Reporting for Debugging (Remove in production)
-// error_reporting(E_ALL);
-// ini_set('display_errors', 1);
-
 // Handle Profile Update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
-    $fullName = clean($_POST['full_name']);
-    $phone = clean($_POST['phone']);
-    $address = clean($_POST['address'] ?? '');
-    $currentPassword = $_POST['current_password'] ?? '';
-    $newPassword = $_POST['new_password'] ?? '';
-    
-    $errors = [];
-    
-    // Validate
-    if (empty($fullName)) $errors[] = 'Full name is required';
-    if (empty($phone)) $errors[] = 'Phone is required';
-    
-    // Handle Profile Image
-    $profileImage = $user['profile_image']; // Keep existing image by default
-    if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = __DIR__ . '/uploads/profiles/';
+    // CSRF Check
+    if (isset($_POST['csrf_token']) && !verifyCSRFToken($_POST['csrf_token'])) {
+        $errors[] = 'Security token mismatch. Please refresh.';
+    } else {
+        $fullName = clean($_POST['full_name']);
+        $phone = clean($_POST['phone']);
+        $address = clean($_POST['address'] ?? '');
+        $currentPassword = $_POST['current_password'] ?? '';
+        $newPassword = $_POST['new_password'] ?? '';
         
-        // Create directory if not exists
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
+        $errors = [];
         
-        $uploadResult = uploadFile($_FILES['profile_image'], $uploadDir, ['jpg', 'jpeg', 'png']);
-        if ($uploadResult['success']) {
-            $profileImage = $uploadResult['filename'];
-        } else {
-            $errors[] = $uploadResult['message'];
-        }
-    }
-    
-    // Handle Password Change
-    $passwordHash = $user['password_hash']; // Keep existing password by default
-    if (!empty($newPassword)) {
-        if (empty($currentPassword)) {
-            $errors[] = 'Current password required to set new password';
-        } else {
-            if (!password_verify($currentPassword, $user['password_hash'])) {
-                $errors[] = 'Current password is incorrect';
-            } elseif (strlen($newPassword) < MIN_PASSWORD_LENGTH) {
-                $errors[] = 'New password must be at least ' . MIN_PASSWORD_LENGTH . ' characters';
+        // Validate
+        if (empty($fullName)) $errors[] = 'Full name is required';
+        if (empty($phone)) $errors[] = 'Phone is required';
+        
+        // Handle Profile Image
+        $profileImage = $user['profile_image']; // Keep existing image by default
+        if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = __DIR__ . '/uploads/profiles/';
+            
+            // Create directory if not exists
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            
+            // Check file type manually if uploadFile helper acts up, otherwise use helper
+            $allowedTypes = ['jpg', 'jpeg', 'png'];
+            $fileInfo = pathinfo($_FILES['profile_image']['name']);
+            $ext = strtolower($fileInfo['extension']);
+            
+            if (in_array($ext, $allowedTypes)) {
+                $newFileName = uniqid() . '.' . $ext;
+                if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $uploadDir . $newFileName)) {
+                    $profileImage = $newFileName;
+                } else {
+                    $errors[] = "Failed to upload image.";
+                }
             } else {
-                $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+                $errors[] = "Invalid image format. Only JPG/PNG allowed.";
             }
         }
-    }
-    
-    if (empty($errors)) {
-        // Update Query
-        $updateQuery = "UPDATE users SET full_name = ?, phone = ?, address = ?, profile_image = ?, password_hash = ? WHERE id = ?";
-        $stmt = $conn->prepare($updateQuery);
-        $stmt->bind_param("sssssi", $fullName, $phone, $address, $profileImage, $passwordHash, $user['id']);
         
-        if ($stmt->execute()) {
-            // Log Activity
-            logAudit('PROFILE_UPDATE', 'users', $user['id']);
-            $_SESSION['success'] = 'Profile updated successfully!';
+        // Handle Password Change
+        $passwordHash = $user['password_hash']; // Keep existing password by default
+        if (!empty($newPassword)) {
+            if (empty($currentPassword)) {
+                $errors[] = 'Current password required to set new password';
+            } else {
+                if (!password_verify($currentPassword, $user['password_hash'])) {
+                    $errors[] = 'Current password is incorrect';
+                } elseif (strlen($newPassword) < MIN_PASSWORD_LENGTH) {
+                    $errors[] = 'New password must be at least ' . MIN_PASSWORD_LENGTH . ' characters';
+                } else {
+                    $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+                }
+            }
+        }
+        
+        if (empty($errors)) {
+            // Update Query
+            $updateQuery = "UPDATE users SET full_name = ?, phone = ?, address = ?, profile_image = ?, password_hash = ? WHERE id = ?";
+            $stmt = $conn->prepare($updateQuery);
+            $stmt->bind_param("sssssi", $fullName, $phone, $address, $profileImage, $passwordHash, $user['id']);
             
-            // Refresh page to show updates
-            echo "<script>window.location.href = 'profile.php';</script>";
-            exit();
-        } else {
-            $errors[] = 'Failed to update profile: ' . $conn->error;
+            if ($stmt->execute()) {
+                // Log Activity
+                if (function_exists('logAudit')) {
+                    logAudit('PROFILE_UPDATE', 'users', $user['id']);
+                }
+                $_SESSION['success'] = 'Profile updated successfully!';
+                
+                // Refresh page to show updates
+                echo "<script>window.location.href = 'profile.php';</script>";
+                exit();
+            } else {
+                $errors[] = 'Failed to update profile: ' . $conn->error;
+            }
         }
     }
     
@@ -89,34 +101,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
 // Refresh user data after update attempt
 $user = getCurrentUser();
 
+// Helper for role display (FIXES THE ERROR)
+$roleDisplay = isset($user['role_name']) ? ucfirst($user['role_name']) : 'Member';
+
 include 'includes/header.php';
 ?>
 
 <section class="container mx-auto px-4 py-16 min-h-screen">
     <div class="max-w-4xl mx-auto">
-        <!-- Header -->
         <div class="text-center mb-12" data-aos="fade-down">
             <h1 class="text-5xl font-bold text-deep-green mb-4 font-mono uppercase">
                 👤 My Profile
             </h1>
             <div class="bg-lime-accent inline-block px-6 py-3 border-4 border-deep-green">
                 <p class="text-deep-green font-bold text-xl">
-                    <?= htmlspecialchars($user['role_display']) ?>
+                    <?= htmlspecialchars($roleDisplay) ?>
                 </p>
             </div>
         </div>
 
         <div class="grid md:grid-cols-3 gap-8">
-            <!-- Profile Sidebar -->
             <div class="md:col-span-1">
                 <div class="card bg-white border-4 border-deep-green relative overflow-hidden" data-aos="fade-right">
                     
-                    <!-- Role Badge -->
                     <div class="absolute top-4 right-0 bg-lime-accent text-deep-green px-4 py-1 font-bold text-sm border-l-2 border-deep-green shadow-md">
-                        <?= strtoupper($user['role_name']) ?>
+                        <?= strtoupper($user['role_name'] ?? 'USER') ?>
                     </div>
 
-                    <!-- Profile Image -->
                     <div class="text-center mb-6 mt-4">
                         <div class="relative inline-block">
                             <?php if (!empty($user['profile_image'])): ?>
@@ -141,7 +152,6 @@ include 'includes/header.php';
                         Joined: <?= date('M Y', strtotime($user['created_at'])) ?>
                     </p>
 
-                    <!-- Member ID -->
                     <div class="bg-deep-green p-4 mb-6 text-white text-center">
                         <p class="text-xs text-lime-accent uppercase font-bold mb-1 tracking-widest">MEMBER ID</p>
                         <p class="text-2xl font-mono font-bold tracking-wider">
@@ -149,21 +159,19 @@ include 'includes/header.php';
                         </p>
                     </div>
 
-                    <!-- Points -->
-                    <?php if ($user['role_name'] === 'customer'): ?>
+                    <?php if (isset($user['role_name']) && $user['role_name'] === 'customer'): ?>
                         <div class="bg-white border-4 border-lime-accent p-4 mb-6 text-center">
                             <p class="text-sm font-bold text-gray-600 mb-1">LOYALTY POINTS</p>
                             <div class="flex items-center justify-center gap-2">
                                 <span class="text-4xl font-bold text-deep-green">⭐</span>
-                                <span class="text-4xl font-bold text-deep-green"><?= number_format($user['points']) ?></span>
+                                <span class="text-4xl font-bold text-deep-green"><?= number_format($user['points'] ?? 0) ?></span>
                             </div>
                             <p class="text-xs text-green-600 mt-2 font-bold bg-green-50 py-1 px-2 inline-block rounded">
-                                Value: ৳<?= floor($user['points'] / 100) * 10 ?>
+                                Value: ৳<?= floor(($user['points'] ?? 0) / 100) * 10 ?>
                             </p>
                         </div>
                     <?php endif; ?>
 
-                    <!-- Contact Info -->
                     <div class="space-y-3 text-sm border-t-2 border-gray-100 pt-4">
                         <div class="flex items-center gap-3">
                             <span class="text-lg">📧</span>
@@ -173,7 +181,7 @@ include 'includes/header.php';
                             <span class="text-lg">📱</span>
                             <span class="text-gray-600"><?= htmlspecialchars($user['phone']) ?></span>
                         </div>
-                        <?php if ($user['address']): ?>
+                        <?php if (!empty($user['address'])): ?>
                         <div class="flex items-center gap-3">
                             <span class="text-lg">📍</span>
                             <span class="text-gray-600 truncate"><?= htmlspecialchars($user['address']) ?></span>
@@ -183,7 +191,6 @@ include 'includes/header.php';
                 </div>
             </div>
 
-            <!-- Edit Profile Form -->
             <div class="md:col-span-2">
                 <div class="card bg-white border-4 border-deep-green" data-aos="fade-left">
                     <h2 class="text-2xl font-bold text-deep-green mb-6 uppercase border-b-4 border-deep-green pb-3">
@@ -191,9 +198,10 @@ include 'includes/header.php';
                     </h2>
 
                     <form method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
+                        <?php if(function_exists('generateCSRFToken')): ?>
+                            <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
+                        <?php endif; ?>
 
-                        <!-- Profile Image -->
                         <div class="mb-6">
                             <label class="block font-bold mb-2 text-deep-green text-lg">Change Picture</label>
                             <input 
@@ -205,7 +213,6 @@ include 'includes/header.php';
                             <p class="text-sm text-gray-600 mt-1">Upload JPG, JPEG, or PNG (Max 5MB)</p>
                         </div>
 
-                        <!-- Full Name -->
                         <div class="mb-6">
                             <label class="block font-bold mb-2 text-deep-green text-lg">Full Name *</label>
                             <input 
@@ -217,7 +224,6 @@ include 'includes/header.php';
                             >
                         </div>
 
-                        <!-- Phone -->
                         <div class="mb-6">
                             <label class="block font-bold mb-2 text-deep-green text-lg">Phone Number *</label>
                             <input 
@@ -229,7 +235,6 @@ include 'includes/header.php';
                             >
                         </div>
 
-                        <!-- Address -->
                         <div class="mb-6">
                             <label class="block font-bold mb-2 text-deep-green text-lg">Address</label>
                             <textarea 
@@ -240,7 +245,6 @@ include 'includes/header.php';
                             ><?= htmlspecialchars($user['address'] ?? '') ?></textarea>
                         </div>
 
-                        <!-- Change Password -->
                         <div class="bg-yellow-50 border-4 border-yellow-500 p-6 mb-6">
                             <h3 class="text-xl font-bold text-yellow-800 mb-4 uppercase">🔐 Change Password</h3>
                             
@@ -267,15 +271,13 @@ include 'includes/header.php';
                             <p class="text-sm text-yellow-700">Leave blank if you don't want to change password.</p>
                         </div>
 
-                        <!-- Submit Button -->
                         <button type="submit" name="update_profile" class="btn btn-primary w-full text-xl py-4 neon-border">
                             💾 Update Profile
                         </button>
                     </form>
                 </div>
 
-                <!-- Additional Info -->
-                <?php if ($user['role_name'] === 'customer'): ?>
+                <?php if (isset($user['role_name']) && $user['role_name'] === 'customer'): ?>
                     <div class="card bg-lime-accent border-4 border-deep-green mt-8" data-aos="fade-up">
                         <h3 class="text-xl font-bold text-deep-green mb-4 uppercase">📊 Your Statistics</h3>
                         <?php

@@ -168,6 +168,9 @@ include __DIR__ . '/../../includes/header.php';
 <a href="<?= SITE_URL ?>/views/admin/messages.php" class="btn btn-outline text-center py-6 border-lime-accent text-deep-green hover:bg-lime-accent">
     💬 Messages
 </a>
+<a href="<?= SITE_URL ?>/views/admin/reviews.php" class="btn btn-outline text-center py-6 border-yellow-500 text-yellow-700 hover:bg-yellow-500 hover:text-white">
+    ⭐ Reviews
+</a>
         </div>
 
         <div class="grid lg:grid-cols-2 gap-8">

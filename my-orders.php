@@ -32,7 +32,6 @@ include 'includes/header.php';
 
 <section class="container mx-auto px-4 py-16 min-h-screen">
     <div class="max-w-6xl mx-auto">
-        <!-- Header -->
         <div class="text-center mb-12" data-aos="fade-down">
             <h1 class="text-5xl font-bold text-deep-green mb-4 font-mono uppercase">
                 📦 My Orders
@@ -43,7 +42,6 @@ include 'includes/header.php';
         </div>
 
         <?php if ($orders->num_rows === 0): ?>
-            <!-- No Orders -->
             <div class="card bg-white text-center py-20" data-aos="zoom-in">
                 <div class="text-9xl mb-6">📦</div>
                 <h2 class="text-3xl font-bold text-gray-600 mb-6">No Orders Yet</h2>
@@ -53,12 +51,10 @@ include 'includes/header.php';
                 </a>
             </div>
         <?php else: ?>
-            <!-- Orders List -->
             <div class="space-y-6">
                 <?php while ($order = $orders->fetch_assoc()): ?>
                     <div class="card bg-white border-4 border-deep-green" data-aos="fade-up">
-                        <!-- Order Header -->
-                        <div class="flex flex-wrap justify-between items-center mb-6 pb-6 border-b-4 border-deep-green">
+                        <div class="flex flex-wrap justify-between items-start mb-6 pb-6 border-b-4 border-deep-green">
                             <div>
                                 <h3 class="text-2xl font-bold text-deep-green mb-2">
                                     Order #<?= htmlspecialchars($order['order_number']) ?>
@@ -67,13 +63,31 @@ include 'includes/header.php';
                                     📅 <?= date('M d, Y h:i A', strtotime($order['created_at'])) ?>
                                 </p>
                             </div>
-                            <div class="text-right">
+                            <div class="text-right flex flex-col items-end">
                                 <p class="text-3xl font-bold text-deep-green">৳<?= number_format($order['total_amount'], 2) ?></p>
-                                <p class="text-sm text-gray-600"><?= $order['item_count'] ?> items | <?= $order['parcel_count'] ?> parcels</p>
-                            </div>
+                                <p class="text-sm text-gray-600 mb-2"><?= $order['item_count'] ?> items | <?= $order['parcel_count'] ?> parcels</p>
+                                
+                                <?php 
+                                // Check if review already exists for this order
+                                $reviewCheck = $conn->query("SELECT id FROM reviews WHERE order_id = " . $order['id']);
+                                $hasReviewed = $reviewCheck->num_rows > 0;
+
+                                // Check delivery status (If any parcel is delivered)
+                                $isDelivered = strpos($order['parcel_statuses'], 'delivered') !== false;
+
+                                if ($isDelivered && !$hasReviewed): 
+                                ?>
+                                    <button onclick="openReviewModal(<?= $order['id'] ?>)" class="bg-yellow-400 text-black px-4 py-2 rounded font-bold border-2 border-black hover:bg-yellow-500 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-1 active:translate-y-1">
+                                        ⭐ Write Review
+                                    </button>
+                                <?php elseif ($hasReviewed): ?>
+                                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded border border-green-300 font-bold text-sm flex items-center gap-1">
+                                        ✅ Reviewed
+                                    </span>
+                                <?php endif; ?>
+                                </div>
                         </div>
 
-                        <!-- Order Details -->
                         <div class="grid md:grid-cols-2 gap-6 mb-6">
                             <div>
                                 <h4 class="font-bold text-deep-green mb-3 text-lg">📋 Delivery Details</h4>
@@ -112,7 +126,7 @@ include 'includes/header.php';
                                         <span class="font-bold text-deep-green">৳<?= number_format($order['total_amount'], 2) ?></span>
                                     </div>
                                     <?php if ($order['points_earned'] > 0): ?>
-                                    <div class="bg-lime-accent p-2 border-2 border-deep-green text-center">
+                                    <div class="bg-lime-accent p-2 border-2 border-deep-green text-center mt-2">
                                         <span class="font-bold">⭐ Earned <?= $order['points_earned'] ?> Points</span>
                                     </div>
                                     <?php endif; ?>
@@ -120,7 +134,6 @@ include 'includes/header.php';
                             </div>
                         </div>
 
-                        <!-- Parcels -->
                         <?php
                         $parcelsQuery = "SELECT p.*, s.name as shop_name, s.city,
                                         COUNT(oi.id) as items_count
@@ -174,7 +187,6 @@ include 'includes/header.php';
                                         </div>
                                     </div>
 
-                                    <!-- Status Timeline -->
                                     <div class="flex items-center justify-between mt-4 bg-gray-50 p-3 border-2 border-gray-200">
                                         <?php
                                         $statuses = ['processing', 'packed', 'ready', 'out_for_delivery', 'delivered'];
@@ -195,7 +207,6 @@ include 'includes/header.php';
                                         <?php endforeach; ?>
                                     </div>
 
-                                    <!-- View Items -->
                                     <button 
                                         onclick="toggleItems('items-<?= $parcel['id'] ?>')"
                                         class="btn btn-outline btn-sm mt-3 w-full"
@@ -203,7 +214,6 @@ include 'includes/header.php';
                                         👁️ View <?= $parcel['items_count'] ?> Items
                                     </button>
 
-                                    <!-- Items List (Hidden by default) -->
                                     <div id="items-<?= $parcel['id'] ?>" class="hidden mt-3 space-y-2">
                                         <?php
                                         $itemsQuery = "SELECT oi.*, m.image 
@@ -240,11 +250,81 @@ include 'includes/header.php';
     </div>
 </section>
 
+<div id="reviewModal" class="hidden fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center backdrop-blur-sm">
+    <div class="bg-white p-8 rounded-none border-4 border-deep-green max-w-md w-full relative shadow-[8px_8px_0px_0px_rgba(6,95,70,1)]">
+        <button onclick="closeReviewModal()" class="absolute top-4 right-4 text-2xl text-gray-500 hover:text-red-500 font-bold">&times;</button>
+        
+        <h2 class="text-2xl font-bold text-deep-green mb-4 text-center font-mono uppercase border-b-4 border-lime-accent pb-2">
+            ⭐ Write a Review
+        </h2>
+        
+        <form method="POST" action="submit_review.php">
+            <input type="hidden" name="order_id" id="reviewOrderId">
+            
+            <div class="mb-6 text-center">
+                <label class="block text-gray-700 mb-2 font-bold uppercase text-sm">Rate your experience</label>
+                <div class="flex justify-center gap-2 text-4xl cursor-pointer">
+                    <span onclick="setRating(1)" class="star text-gray-300 hover:text-yellow-400 transition-colors">★</span>
+                    <span onclick="setRating(2)" class="star text-gray-300 hover:text-yellow-400 transition-colors">★</span>
+                    <span onclick="setRating(3)" class="star text-gray-300 hover:text-yellow-400 transition-colors">★</span>
+                    <span onclick="setRating(4)" class="star text-gray-300 hover:text-yellow-400 transition-colors">★</span>
+                    <span onclick="setRating(5)" class="star text-gray-300 hover:text-yellow-400 transition-colors">★</span>
+                </div>
+                <input type="hidden" name="rating" id="ratingValue" required>
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-gray-700 mb-2 font-bold uppercase text-sm">Your Feedback</label>
+                <textarea name="review_text" rows="4" class="w-full border-4 border-gray-200 p-3 focus:outline-none focus:border-deep-green transition-colors font-mono text-sm" placeholder="Tell us about the product and delivery..." required></textarea>
+            </div>
+            
+            <button type="submit" class="w-full bg-deep-green text-white py-3 font-bold hover:bg-lime-accent hover:text-deep-green transition-all border-2 border-deep-green uppercase tracking-wider">
+                🚀 Submit Review
+            </button>
+        </form>
+    </div>
+</div>
+
 <script>
+// Existing Toggle Script
 function toggleItems(id) {
     const element = document.getElementById(id);
     element.classList.toggle('hidden');
 }
+
+// [STEP 1] Review Modal Scripts
+function openReviewModal(orderId) {
+    document.getElementById('reviewModal').classList.remove('hidden');
+    document.getElementById('reviewOrderId').value = orderId;
+    // Reset form
+    setRating(0); 
+    document.querySelector('textarea[name="review_text"]').value = '';
+}
+
+function closeReviewModal() {
+    document.getElementById('reviewModal').classList.add('hidden');
+}
+
+function setRating(value) {
+    document.getElementById('ratingValue').value = value;
+    const stars = document.querySelectorAll('.star');
+    stars.forEach((star, index) => {
+        if (index < value) {
+            star.classList.add('text-yellow-400');
+            star.classList.remove('text-gray-300');
+        } else {
+            star.classList.remove('text-yellow-400');
+            star.classList.add('text-gray-300');
+        }
+    });
+}
+
+// Close modal on outside click
+document.getElementById('reviewModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeReviewModal();
+    }
+});
 </script>
 
 <?php include 'includes/footer.php'; ?>
