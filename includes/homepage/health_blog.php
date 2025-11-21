@@ -1,90 +1,60 @@
 <?php
 /**
- * Health Tips & Blog Posts
+ * Homepage - Health Blog Section (Dynamic)
  */
-
-$blogQuery = "SELECT * FROM health_posts 
-              WHERE is_published = 1 
-              ORDER BY published_at DESC 
-              LIMIT 4";
-$blogResult = $conn->query($blogQuery);
-
-if ($blogResult->num_rows > 0):
+$blogs = $conn->query("SELECT hp.*, u.full_name, u.profile_image 
+                       FROM health_posts hp 
+                       JOIN users u ON hp.author_id = u.id 
+                       WHERE hp.is_published = 1 
+                       ORDER BY hp.created_at DESC 
+                       LIMIT 3");
 ?>
 
-<section class="container mx-auto px-4 py-16">
-    <div class="text-center mb-12" data-aos="fade-up">
-        <h2 class="text-4xl font-bold text-green mb-4 uppercase">
-            📚 <?= __('health_tips') ?> 📚
-        </h2>
-        <div class="bg-lime-accent inline-block px-6 py-2 border-4 border-green">
-            <p class="text-green font-bold">Expert Health Advice & Wellness Tips</p>
+<section class="py-20 bg-gray-50 relative overflow-hidden">
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="text-center mb-12" data-aos="fade-up">
+            <h2 class="text-4xl font-bold text-deep-green mb-2 font-mono uppercase">📚 Health Insights</h2>
+            <p class="text-gray-600">Expert advice from our certified doctors</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            <?php while ($blog = $blogs->fetch_assoc()): ?>
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:-translate-y-2 transition-all duration-300 border border-gray-200" data-aos="fade-up">
+                    
+                    <!-- Image -->
+                    <div class="h-56 overflow-hidden relative group">
+                        <img src="<?= SITE_URL ?>/uploads/news/<?= $blog['image'] ?>" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
+                        <div class="absolute top-4 left-4 bg-deep-green text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                            <?= $blog['category'] ?>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3 hover:text-deep-green transition">
+                            <a href="blog-details.php?id=<?= $blog['id'] ?>"><?= htmlspecialchars($blog['title']) ?></a>
+                        </h3>
+                        <p class="text-gray-500 text-sm line-clamp-3 mb-4">
+    <?= substr(strip_tags(str_replace(["\r", "\n"], ' ', $blog['content'])), 0, 120) ?>...
+</p>
+
+                        <!-- Author Info -->
+                        <div class="flex items-center gap-3 border-t pt-4">
+                            <img src="<?= $blog['profile_image'] ? SITE_URL.'/uploads/profiles/'.$blog['profile_image'] : 'https://ui-avatars.com/api/?name='.urlencode($blog['full_name']) ?>" class="w-10 h-10 rounded-full border-2 border-lime-accent">
+                            <div>
+                                <p class="text-sm font-bold text-deep-green">Dr. <?= htmlspecialchars($blog['full_name']) ?></p>
+                                <p class="text-xs text-gray-400"><?= date('M d, Y', strtotime($blog['created_at'])) ?></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php endwhile; ?>
+        </div>
+        
+        <div class="text-center mt-12">
+            <a href="blog.php" class="btn btn-outline border-deep-green text-deep-green hover:bg-deep-green hover:text-white px-8 py-3 rounded-full font-bold transition">
+                View All Articles
+            </a>
         </div>
     </div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <?php 
-        $delay = 0;
-        while ($post = $blogResult->fetch_assoc()): 
-        ?>
-            <div 
-                class="card bg-white hover:transform hover:scale-105 transition-all"
-                data-aos="fade-right"
-                data-aos-delay="<?= $delay ?>"
-            >
-                <!-- Post Image -->
-                <?php if ($post['image']): ?>
-                    <div class="bg-gray-100 mb-4 border-2 border-green overflow-hidden">
-                        <img 
-                            src="<?= SITE_URL ?>/uploads/news/<?= $post['image'] ?>" 
-                            alt="<?= htmlspecialchars($post['title']) ?>"
-                            class="w-full h-48 object-cover"
-                            loading="lazy"
-                        >
-                    </div>
-                <?php endif; ?>
-                
-                <!-- Category Badge -->
-                <?php if ($post['category']): ?>
-                    <span class="badge badge-info mb-3">
-                        <?= htmlspecialchars($post['category']) ?>
-                    </span>
-                <?php endif; ?>
-                
-                <!-- Post Title -->
-                <h3 class="text-2xl font-bold text-green mb-3 uppercase">
-                    <?= htmlspecialchars($post['title']) ?>
-                </h3>
-                
-                <!-- Post Excerpt -->
-                <p class="text-gray-700 mb-4 leading-relaxed">
-                    <?= substr(strip_tags($post['content']), 0, 150) ?>...
-                </p>
-                
-                <!-- Meta Info -->
-                <div class="flex justify-between items-center border-t-2 border-green pt-4">
-                    <span class="text-sm text-gray-500">
-                        👁️ <?= number_format($post['views']) ?> views
-                    </span>
-                    <a 
-                        href="<?= SITE_URL ?>/blog.php?id=<?= $post['id'] ?>" 
-                        class="btn btn-outline btn-sm"
-                    >
-                        Read More →
-                    </a>
-                </div>
-            </div>
-        <?php 
-            $delay += 100;
-        endwhile; 
-        ?>
-    </div>
-    
-    <div class="text-center mt-8" data-aos="fade-up">
-        <a href="<?= SITE_URL ?>/blog.php" class="btn btn-primary btn-lg">
-            View All Articles →
-        </a>
-    </div>
 </section>
-
-<?php endif; ?>

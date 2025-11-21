@@ -169,30 +169,41 @@ include __DIR__ . '/../../includes/header.php';
             </div>
         </div>
 
-        <div class="flex flex-wrap gap-4 mt-8 p-4 bg-gray-100 border-2 border-gray-300 rounded-lg">
-            <button onclick="window.print()" class="btn bg-gray-600 hover:bg-gray-700 text-white flex-1 py-3 font-bold flex items-center justify-center gap-2">
-                🖨️ Print Invoice
+        <div class="flex flex-wrap gap-4 mt-8 p-4 bg-gray-50 border-t-4 border-deep-green rounded-b-lg shadow-inner">
+            
+            <button onclick="openPrintInvoice(<?= $parcelId ?>)" class="btn btn-primary flex-1 shadow-lg transform hover:scale-105 transition-all flex items-center justify-center gap-2 py-3 text-lg font-bold">
+                <span class="text-2xl">🖨️</span> Print Invoice
             </button>
             
             <?php if ($parcel['status'] == 'processing'): ?>
-                <button onclick="updateParcelStatus(<?= $parcel['id'] ?>, 'packed')" class="btn bg-yellow-500 hover:bg-yellow-600 text-black flex-1 py-3 font-bold border-2 border-yellow-700">
-                    📦 Mark as Packed
-                </button>
+                <button onclick="updateStatus(<?= $parcel['id'] ?>, 'packed')" class="btn btn-warning flex-1 font-bold shadow-md">📦 Mark Packed</button>
             <?php elseif ($parcel['status'] == 'packed'): ?>
-                <button onclick="updateParcelStatus(<?= $parcel['id'] ?>, 'out_for_delivery')" class="btn bg-blue-500 hover:bg-blue-600 text-white flex-1 py-3 font-bold border-2 border-blue-700">
-                    🚚 Out for Delivery
-                </button>
+                <button onclick="updateStatus(<?= $parcel['id'] ?>, 'out_for_delivery')" class="btn btn-info flex-1 font-bold text-white shadow-md">🚚 Out for Delivery</button>
             <?php elseif ($parcel['status'] == 'out_for_delivery'): ?>
-                <button onclick="updateParcelStatus(<?= $parcel['id'] ?>, 'delivered')" class="btn bg-green-600 hover:bg-green-700 text-white flex-1 py-3 font-bold border-2 border-green-800">
-                    ✅ Mark Delivered
-                </button>
+                <button onclick="updateStatus(<?= $parcel['id'] ?>, 'delivered')" class="btn btn-success flex-1 font-bold text-white shadow-md">✅ Mark Delivered</button>
+            <?php elseif ($parcel['status'] == 'delivered'): ?>
+                <button onclick="alert('Return feature is available on the Salesman Dashboard.')" class="btn btn-outline border-red-600 text-red-600 flex-1 font-bold hover:bg-red-50">↩ Process Return</button>
             <?php endif; ?>
         </div>
+
     </div>
 </section>
 
 <script>
-function updateParcelStatus(parcelId, status) {
+// Open Print Invoice in Popup Window
+function openPrintInvoice(parcelId) {
+    // We use the Order ID for printing
+    const orderId = <?= $parcel['order_id'] ?>;
+    
+    const url = `print-invoice.php?id=${orderId}`;
+    const windowName = 'InvoicePrint';
+    const windowFeatures = 'width=400,height=600,scrollbars=no,resizable=no';
+    
+    window.open(url, windowName, windowFeatures);
+}
+
+// Updated Status Function
+function updateStatus(parcelId, status) {
     if(!confirm('Are you sure you want to change status to ' + status.replace(/_/g, ' ').toUpperCase() + '?')) {
         return;
     }
@@ -201,7 +212,7 @@ function updateParcelStatus(parcelId, status) {
     formData.append('parcel_id', parcelId);
     formData.append('status', status);
 
-    // Using the AJAX endpoint we fixed earlier
+    // Using the AJAX endpoint
     fetch('../../ajax/update_parcel_status.php', {
         method: 'POST',
         body: formData
@@ -209,8 +220,12 @@ function updateParcelStatus(parcelId, status) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('✅ Success: ' + data.message);
-            location.reload(); // Refresh to see changes
+            if(typeof Swal !== 'undefined') {
+                Swal.fire('Success', data.message, 'success').then(() => location.reload());
+            } else {
+                alert('✅ ' + data.message);
+                location.reload();
+            }
         } else {
             alert('❌ Error: ' + data.message);
         }

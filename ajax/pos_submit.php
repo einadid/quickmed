@@ -190,11 +190,12 @@ try {
         }
     }
 
-    // 10. Update Prescription Status
+    // 10. Update Prescription Status & Link Order (UPDATED)
     if ($prescriptionId > 0) {
-        $prescUpdate = "UPDATE prescriptions SET status = 'approved', reviewed_by = ?, reviewed_at = NOW() WHERE id = ?";
+        $prescUpdate = "UPDATE prescriptions SET status = 'approved', order_id = ?, reviewed_by = ?, reviewed_at = NOW() WHERE id = ?";
         $stmt = $conn->prepare($prescUpdate);
-        $stmt->bind_param("ii", $user['id'], $prescriptionId);
+        // Params: order_id (int), user_id (int), prescription_id (int)
+        $stmt->bind_param("iii", $orderId, $user['id'], $prescriptionId);
         $stmt->execute();
     }
 
