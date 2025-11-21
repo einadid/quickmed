@@ -128,11 +128,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send_message'])) {
 
         <!-- Bottom Bar -->
         <div class="border-t border-white/10 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-400 font-mono">
-            <p>&copy; <?= date('Y') ?> QuickMed. Built with <a href="https://github.com/einadid">einadid</a></p>
-            <div class="mt-4 md:mt-0">
-                <span class="text-[#84cc16]">System Version 1.0</span>
-            </div>
-        </div>
+    <p>
+        &copy; <?= date('Y') ?> QuickMed. Built with 
+        <a href="https://github.com/einadid" target="_blank" class="font-bold text-[#84cc16] hover:text-white transition-colors">
+            einadid
+        </a>
+    </p>
+    <div class="mt-4 md:mt-0">
+        <span class="text-[#84cc16]">System Version 1.0</span>
+    </div>
+</div>
     </div>
 </footer>
 

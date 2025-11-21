@@ -1,7 +1,8 @@
 <?php
 /**
  * QuickMed - Configuration File
- * Contains all database and application settings
+ * Contains all database, environment settings, and helper functions.
+ * Auto-detects Localhost vs Live Server.
  */
 
 // Start session if not already started
@@ -9,60 +10,96 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Error Reporting (Set to 0 in production)
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 // Timezone
 date_default_timezone_set('Asia/Dhaka');
 
 // =============================================
-// DATABASE CONFIGURATION
+// 1. ENVIRONMENT DETECTION & DB CONFIGURATION
 // =============================================
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'quickmed');
 
-// Create database connection
+// Check if running on Localhost (XAMPP)
+$whitelist = ['127.0.0.1', '::1', 'localhost'];
+$isLocal = in_array($_SERVER['SERVER_NAME'], $whitelist);
+
+if ($isLocal) {
+    // --- LOCALHOST SETTINGS (XAMPP) ---
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1); // Show errors while developing
+
+    define('DB_HOST', 'localhost');
+    define('DB_USER', 'root');
+    define('DB_PASS', '');
+    define('DB_NAME', 'quickmed');
+    
+    define('SITE_URL', 'http://localhost/quickmed');
+    define('UPLOAD_ROOT', __DIR__ . '/uploads/'); // Simple path for XAMPP
+} else {
+    // --- LIVE SERVER SETTINGS (INFINITYFREE) ---
+    error_reporting(0);
+    ini_set('display_errors', 0); // Hide errors from public
+
+    define('DB_HOST', 'sql112.infinityfree.com');
+    define('DB_USER', 'if0_40419807');
+    define('DB_PASS', '0123Nadid'); // Your Live Password
+    define('DB_NAME', 'if0_40419807_quickmed_db');
+    
+    define('SITE_URL', 'https://quickmed.free.nf'); // Your Live URL
+    
+    // InfinityFree sometimes requires strict path definitions
+    define('UPLOAD_ROOT', $_SERVER['DOCUMENT_ROOT'] . '/uploads/'); 
+}
+
+// =============================================
+// 2. DATABASE CONNECTION
+// =============================================
 try {
     $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
     
     if ($conn->connect_error) {
-        die("Database Connection Failed: " . $conn->connect_error);
+        // Don't show full error details on live site for security
+        if ($isLocal) {
+            die("Database Connection Failed: " . $conn->connect_error);
+        } else {
+            die("System is currently under maintenance. Please try again later.");
+        }
     }
     
-    // Set charset to utf8mb4 for emoji and multilingual support
+    // Set charset to utf8mb4 for emoji and multilingual (Bangla) support
     $conn->set_charset("utf8mb4");
     
 } catch (Exception $e) {
-    die("Database Error: " . $e->getMessage());
+    if ($isLocal) {
+        die("Database Error: " . $e->getMessage());
+    } else {
+        die("System Error.");
+    }
 }
 
 // =============================================
-// APPLICATION SETTINGS
+// 3. APPLICATION SETTINGS
 // =============================================
 define('SITE_NAME', 'QuickMed');
 define('SITE_TAGLINE', 'Your Trusted Online Pharmacy | আপনার বিশ্বস্ত অনলাইন ফার্মেসি');
-define('SITE_URL', 'http://localhost/quickmed');
 define('ADMIN_EMAIL', 'admin@quickmed.com');
 
-// Upload directories
-define('UPLOAD_DIR', __DIR__ . '/uploads/');
+// Upload directories (Based on UPLOAD_ROOT defined above)
+define('UPLOAD_DIR', UPLOAD_ROOT);
 define('PRESCRIPTION_DIR', UPLOAD_DIR . 'prescriptions/');
 define('MEDICINE_DIR', UPLOAD_DIR . 'medicines/');
 define('NEWS_DIR', UPLOAD_DIR . 'news/');
 
-// Create upload directories if not exist
-$dirs = [UPLOAD_DIR, PRESCRIPTION_DIR, MEDICINE_DIR, NEWS_DIR];
-foreach ($dirs as $dir) {
-    if (!is_dir($dir)) {
-        mkdir($dir, 0755, true);
+// Create upload directories if they don't exist (Only works if permissions allow)
+if ($isLocal) {
+    $dirs = [UPLOAD_DIR, PRESCRIPTION_DIR, MEDICINE_DIR, NEWS_DIR];
+    foreach ($dirs as $dir) {
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0755, true);
+        }
     }
 }
 
 // =============================================
-// BUSINESS RULES
+// 4. BUSINESS RULES
 // =============================================
 define('HOME_DELIVERY_CHARGE', 100); // BDT
 define('POINTS_PER_1000_BDT', 100); // 100 points for every 1000 BDT spent
@@ -71,22 +108,20 @@ define('SIGNUP_BONUS_POINTS', 100);
 define('MIN_ORDER_AMOUNT', 50); // Minimum order 50 BDT
 
 // =============================================
-// SECURITY SETTINGS
+// 5. SECURITY SETTINGS
 // =============================================
 define('CSRF_TOKEN_NAME', 'csrf_token');
 define('SESSION_LIFETIME', 7200); // 2 hours
 define('REMEMBER_ME_DAYS', 30);
-
-// Password requirements
 define('MIN_PASSWORD_LENGTH', 8);
 
 // =============================================
-// PAGINATION
+// 6. PAGINATION
 // =============================================
 define('ITEMS_PER_PAGE', 20);
 
 // =============================================
-// HELPER FUNCTIONS
+// 7. HELPER FUNCTIONS
 // =============================================
 
 /**
@@ -121,7 +156,12 @@ function clean($data) {
  * Redirect helper - Safe Version
  */
 function redirect($url) {
-    $target = SITE_URL . "/" . $url;
+    // Ensure URL doesn't already start with SITE_URL to avoid double prefixes
+    if (strpos($url, 'http') === 0) {
+        $target = $url;
+    } else {
+        $target = SITE_URL . "/" . ltrim($url, '/');
+    }
     
     if (!headers_sent()) {
         header("Location: " . $target);
@@ -232,7 +272,7 @@ function logAudit($action, $tableName = null, $recordId = null, $oldValues = nul
 /**
  * Upload file helper
  */
-function uploadFile($file, $directory, $allowedTypes = ['jpg', 'jpeg', 'png', 'gif']) {
+function uploadFile($file, $directory, $allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp']) {
     if (!isset($file) || $file['error'] !== UPLOAD_ERR_OK) {
         return ['success' => false, 'message' => 'File upload error'];
     }
@@ -248,6 +288,11 @@ function uploadFile($file, $directory, $allowedTypes = ['jpg', 'jpeg', 'png', 'g
     
     if ($fileSize > 5242880) { // 5MB
         return ['success' => false, 'message' => 'File too large (max 5MB)'];
+    }
+    
+    // Ensure directory exists
+    if (!is_dir($directory)) {
+        mkdir($directory, 0755, true);
     }
     
     $newFileName = uniqid() . '_' . time() . '.' . $fileExt;
@@ -288,7 +333,7 @@ function generateVerificationCode($length = 8) {
 }
 
 // =============================================
-// AUTO-LOAD LANGUAGE FILE
+// 8. AUTO-LOAD LANGUAGE FILE
 // =============================================
 $lang = $_SESSION['lang'] ?? 'en';
 if (file_exists(__DIR__ . '/includes/lang.php')) {
