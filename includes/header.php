@@ -120,7 +120,7 @@ if (isLoggedIn() && $currentUser && isset($currentUser['role_name']) && $current
         <div class="flex justify-between items-center py-3">
             <a href="<?= SITE_URL ?>/index.php" class="flex items-center gap-3 hover:opacity-90 transition-opacity">
                 <div class="bg-lime-accent text-deep-green px-4 py-2 border-2 border-white font-bold text-2xl md:text-3xl">
-                    QM
+                    QM💊
                 </div>
                 <span class="hidden md:inline text-white font-bold text-xl">QuickMed</span>
             </a>

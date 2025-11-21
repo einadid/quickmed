@@ -1,6 +1,6 @@
 <?php
 /**
- * Shop - Products Listing Page
+ * Shop - Products Listing Page (FIXED)
  */
 
 require_once 'config.php';
@@ -71,8 +71,7 @@ $totalPages = ceil($totalProducts / $perPage);
 
 // Get products
 $productsQuery = "SELECT m.*, sm.price, sm.stock_quantity, sm.shop_id,
-                  s.name as shop_name, s.city,
-                  MIN(sm.price) as min_price
+                  s.name as shop_name, s.city
                   FROM medicines m
                   JOIN shop_medicines sm ON m.id = sm.medicine_id
                   JOIN shops s ON sm.shop_id = s.id
@@ -90,204 +89,163 @@ if (!empty($allTypes)) {
 $productsStmt->execute();
 $products = $productsStmt->get_result();
 
-// Get categories
-$categoriesQuery = "SELECT DISTINCT category FROM medicines WHERE category IS NOT NULL ORDER BY category";
-$categories = $conn->query($categoriesQuery);
-
-// Get shops
-$shopsQuery = "SELECT * FROM shops WHERE is_active = 1 ORDER BY name";
-$shops = $conn->query($shopsQuery);
+// Get categories & shops
+$categories = $conn->query("SELECT DISTINCT category FROM medicines WHERE category IS NOT NULL ORDER BY category");
+$shops = $conn->query("SELECT * FROM shops WHERE is_active = 1 ORDER BY name");
 
 include 'includes/header.php';
 ?>
 
-<section class="container mx-auto px-4 py-16">
+<section class="container mx-auto px-4 py-16 min-h-screen">
     <!-- Header -->
-    <div class="text-center mb-12" data-aos="fade-down">
-        <h1 class="text-5xl font-bold text-deep-green mb-4 font-mono uppercase">
-            🛍️ Shop Medicines
-        </h1>
+    <div class="text-center mb-12">
+        <h1 class="text-5xl font-bold text-deep-green mb-4 font-mono uppercase">🛍️ Shop Medicines</h1>
         <div class="bg-lime-accent inline-block px-6 py-3 border-4 border-deep-green">
-            <p class="text-deep-green font-bold text-xl">
-                <?= $totalProducts ?> Products Available
-            </p>
+            <p class="text-deep-green font-bold text-xl"><?= $totalProducts ?> Products Available</p>
         </div>
     </div>
 
     <div class="grid lg:grid-cols-4 gap-8">
-        <!-- Filters Sidebar -->
+        <!-- Sidebar Filters -->
         <aside class="lg:col-span-1">
-            <div class="card bg-white border-4 border-deep-green sticky top-24" data-aos="fade-right">
-                <h3 class="text-2xl font-bold text-deep-green mb-6 uppercase border-b-4 border-deep-green pb-3">
-                    🔍 Filters
-                </h3>
-
-                <form method="GET" action="" id="filterForm">
-                    <!-- Search -->
-                    <div class="mb-6">
-                        <label class="block font-bold mb-2 text-deep-green">Search</label>
-                        <input 
-                            type="text" 
-                            name="search" 
-                            class="input border-4 border-deep-green" 
-                            placeholder="Search medicine..."
-                            value="<?= htmlspecialchars($searchQuery) ?>"
-                        >
+            <div class="bg-white border-4 border-deep-green p-6 sticky top-24 shadow-lg">
+                <h3 class="text-2xl font-bold text-deep-green mb-6 border-b-4 border-deep-green pb-2">🔍 Filters</h3>
+                <form method="GET">
+                    <div class="mb-4">
+                        <label class="block font-bold mb-2">Search</label>
+                        <input type="text" name="search" class="w-full p-3 border-2 border-deep-green" placeholder="Medicine name..." value="<?= htmlspecialchars($searchQuery) ?>">
                     </div>
-
-                    <!-- Category -->
-                    <div class="mb-6">
-                        <label class="block font-bold mb-2 text-deep-green">Category</label>
-                        <select name="category" class="input border-4 border-deep-green" onchange="this.form.submit()">
+                    <div class="mb-4">
+                        <label class="block font-bold mb-2">Category</label>
+                        <select name="category" class="w-full p-3 border-2 border-deep-green" onchange="this.form.submit()">
                             <option value="">All Categories</option>
                             <?php while ($cat = $categories->fetch_assoc()): ?>
-                                <option value="<?= htmlspecialchars($cat['category']) ?>" <?= $category === $cat['category'] ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($cat['category']) ?>
-                                </option>
+                                <option value="<?= htmlspecialchars($cat['category']) ?>" <?= $category === $cat['category'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['category']) ?></option>
                             <?php endwhile; ?>
                         </select>
                     </div>
-
-                    <!-- Shop -->
-                    <div class="mb-6">
-                        <label class="block font-bold mb-2 text-deep-green">Shop Location</label>
-                        <select name="shop" class="input border-4 border-deep-green" onchange="this.form.submit()">
+                    <div class="mb-4">
+                        <label class="block font-bold mb-2">Shop</label>
+                        <select name="shop" class="w-full p-3 border-2 border-deep-green" onchange="this.form.submit()">
                             <option value="">All Shops</option>
                             <?php while ($shop = $shops->fetch_assoc()): ?>
-                                <option value="<?= $shop['id'] ?>" <?= $shopId === $shop['id'] ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($shop['city']) ?>
-                                </option>
+                                <option value="<?= $shop['id'] ?>" <?= $shopId === $shop['id'] ? 'selected' : '' ?>><?= htmlspecialchars($shop['city']) ?></option>
                             <?php endwhile; ?>
                         </select>
                     </div>
-
-                    <!-- Sort -->
-                    <div class="mb-6">
-                        <label class="block font-bold mb-2 text-deep-green">Sort By</label>
-                        <select name="sort" class="input border-4 border-deep-green" onchange="this.form.submit()">
+                    <div class="mb-4">
+                        <label class="block font-bold mb-2">Sort By</label>
+                        <select name="sort" class="w-full p-3 border-2 border-deep-green" onchange="this.form.submit()">
                             <option value="name_asc" <?= $sort === 'name_asc' ? 'selected' : '' ?>>Name (A-Z)</option>
-                            <option value="name_desc" <?= $sort === 'name_desc' ? 'selected' : '' ?>>Name (Z-A)</option>
                             <option value="price_asc" <?= $sort === 'price_asc' ? 'selected' : '' ?>>Price (Low to High)</option>
-                            <option value="price_desc" <?= $sort === 'price_desc' ? 'selected' : '' ?>>Price (High to Low)</option>
                         </select>
                     </div>
-
-                    <button type="submit" class="btn btn-primary w-full">
-                        Apply Filters
-                    </button>
-
-                    <a href="<?= SITE_URL ?>/shop.php" class="btn btn-outline w-full mt-3">
-                        Clear All
-                    </a>
+                    <button type="submit" class="w-full bg-deep-green text-white py-3 font-bold hover:bg-lime-accent hover:text-deep-green border-2 border-transparent hover:border-deep-green transition">Apply Filters</button>
                 </form>
             </div>
         </aside>
 
         <!-- Products Grid -->
-<!-- Products Grid - 2 columns on mobile -->
-<main class="lg:col-span-3">
-    <?php if ($products->num_rows === 0): ?>
-        <div class="card bg-white text-center py-20" data-aos="zoom-in">
-            <div class="text-9xl mb-6">😔</div>
-            <h2 class="text-3xl font-bold text-gray-600 mb-4">No Products Found</h2>
-            <p class="text-lg text-gray-500 mb-8">Try adjusting your filters</p>
-            <a href="<?= SITE_URL ?>/shop.php" class="btn btn-primary">
-                View All Products
-            </a>
-        </div>
-    <?php else: ?>
-        <!-- Changed from md:grid-cols-3 to grid-cols-2 md:grid-cols-3 -->
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-            <?php while ($product = $products->fetch_assoc()): ?>
-                <div class="card bg-white hover:shadow-retro-lg transition-all" data-aos="zoom-in">
-                    <!-- Image -->
-                    <div class="bg-off-white p-2 md:p-4 mb-2 md:mb-4 border-2 border-deep-green">
-                        <img 
-                            src="<?= SITE_URL ?>/uploads/medicines/<?= $product['image'] ?? 'placeholder.png' ?>" 
-                            alt="<?= htmlspecialchars($product['name']) ?>"
-                            class="w-full h-32 md:h-40 object-contain"
-                            loading="lazy"
-                        >
-                    </div>
-
-                    <!-- Info -->
-                    <h3 class="text-sm md:text-lg font-bold text-deep-green mb-2 uppercase leading-tight">
-                        <?= htmlspecialchars($product['name']) ?>
-                    </h3>
-
-                    <p class="text-xs md:text-sm text-gray-600 mb-2 hidden md:block">
-                        <strong>Generic:</strong> <?= htmlspecialchars($product['generic_name']) ?>
-                    </p>
-
-                    <p class="text-xs md:text-sm text-gray-600 mb-2">
-                        <strong>Power:</strong> <?= htmlspecialchars($product['power']) ?>
-                    </p>
-
-                    <p class="text-xs md:text-sm text-gray-600 mb-2 md:mb-3">
-                        📍 <?= htmlspecialchars($product['city']) ?>
-                    </p>
-
-                    <!-- Stock -->
-                    <?php if ($product['stock_quantity'] > 50): ?>
-                        <span class="badge badge-success mb-2 md:mb-3 text-xs">✅ In Stock</span>
-                    <?php elseif ($product['stock_quantity'] > 0): ?>
-                        <span class="badge badge-warning mb-2 md:mb-3 text-xs">⚠️ Low Stock</span>
-                    <?php else: ?>
-                        <span class="badge badge-danger mb-2 md:mb-3 text-xs">❌ Out of Stock</span>
-                    <?php endif; ?>
-
-                    <!-- Price -->
-                    <div class="mb-2 md:mb-4">
-                        <span class="text-xl md:text-3xl font-bold text-deep-green">৳<?= number_format($product['price'], 2) ?></span>
-                    </div>
-
-                    <!-- Prescription Badge -->
-                    <?php if ($product['requires_prescription']): ?>
-                        <div class="bg-yellow-100 border-2 border-yellow-500 text-yellow-800 text-xs px-2 py-1 mb-2 md:mb-3 text-center font-bold">
-                            ⚠️ Rx Required
-                        </div>
-                    <?php endif; ?>
-
-                    <!-- Actions -->
-                    <button 
-                        onclick="addToCart(<?= $product['id'] ?>, <?= $product['shop_id'] ?>, 1)"
-                        class="btn btn-primary w-full text-xs md:text-base py-2 md:py-3"
-                        <?= $product['stock_quantity'] <= 0 ? 'disabled' : '' ?>
-                    >
-                        🛒 Add
-                    </button>
+        <main class="lg:col-span-3">
+            <?php if ($products->num_rows === 0): ?>
+                <div class="text-center py-20">
+                    <div class="text-8xl mb-4">😔</div>
+                    <h2 class="text-3xl font-bold text-gray-500">No Products Found</h2>
                 </div>
-            <?php endwhile; ?>
-        </div>
+            <?php else: ?>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                    <?php while ($prod = $products->fetch_assoc()): ?>
+                        <div class="bg-white border-4 border-deep-green p-4 hover:shadow-xl transition-all transform hover:-translate-y-1 group">
+                            <div class="bg-gray-50 p-4 mb-4 border-2 border-gray-200 group-hover:border-lime-accent transition-colors">
+                                <img src="<?= SITE_URL ?>/uploads/medicines/<?= $prod['image'] ?? 'placeholder.png' ?>" alt="<?= htmlspecialchars($prod['name']) ?>" class="w-full h-32 object-contain mix-blend-multiply">
+                            </div>
+                            <h3 class="text-lg font-bold text-deep-green truncate"><?= htmlspecialchars($prod['name']) ?></h3>
+                            <p class="text-sm text-gray-500 mb-2"><?= htmlspecialchars($prod['power']) ?> | <?= htmlspecialchars($prod['city']) ?></p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-2xl font-bold text-deep-green">৳<?= (int)$prod['price'] ?></span>
+                                <span class="text-xs bg-lime-accent px-2 py-1 rounded font-bold text-deep-green">In Stock</span>
+                            </div>
+                            <button onclick="addToCart(<?= $prod['id'] ?>, <?= $prod['shop_id'] ?>, 1)" class="w-full bg-deep-green text-white py-2 font-bold hover:bg-lime-accent hover:text-deep-green border-2 border-transparent hover:border-deep-green transition-all">
+                                🛒 Add to Cart
+                            </button>
+                        </div>
+                    <?php endwhile; ?>
+                </div>
 
-        <!-- Pagination -->
-        <?php if ($totalPages > 1): ?>
-            <div class="pagination mt-8 md:mt-12 flex justify-center gap-2 flex-wrap" data-aos="fade-up">
-                <?php if ($page > 1): ?>
-                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $page - 1])) ?>" class="px-3 md:px-4 py-2 border-4 border-deep-green hover:bg-lime-accent transition-all text-sm md:text-base">
-                        ← Prev
-                    </a>
+                <!-- Pagination -->
+                <?php if ($totalPages > 1): ?>
+                    <div class="flex justify-center gap-2 mt-12">
+                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                            <a href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>" class="px-4 py-2 border-2 border-deep-green font-bold <?= $i === $page ? 'bg-deep-green text-white' : 'hover:bg-lime-accent' ?>">
+                                <?= $i ?>
+                            </a>
+                        <?php endfor; ?>
+                    </div>
                 <?php endif; ?>
-
-                <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
-                    <a 
-                        href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>" 
-                        class="px-3 md:px-4 py-2 border-4 border-deep-green <?= $i === $page ? 'bg-deep-green text-white' : 'hover:bg-lime-accent' ?> transition-all text-sm md:text-base"
-                    >
-                        <?= $i ?>
-                    </a>
-                <?php endfor; ?>
-
-                <?php if ($page < $totalPages): ?>
-                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $page + 1])) ?>" class="px-3 md:px-4 py-2 border-4 border-deep-green hover:bg-lime-accent transition-all text-sm md:text-base">
-                        Next →
-                    </a>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
-    <?php endif; ?>
-</main>
+            <?php endif; ?>
+        </main>
     </div>
 </section>
+
+<!-- Cart Script (Directly Embedded) -->
+<script>
+async function addToCart(medicineId, shopId, quantity) {
+    const siteUrl = '<?= SITE_URL ?>';
+    
+    try {
+        const formData = new FormData();
+        formData.append('medicine_id', medicineId);
+        formData.append('shop_id', shopId);
+        formData.append('quantity', quantity);
+
+        const response = await fetch(siteUrl + '/ajax/add_to_cart.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Added!',
+                text: 'Item added to cart',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                background: '#065f46',
+                color: '#fff'
+            });
+            
+            // Update Badge Logic
+            const badges = document.querySelectorAll('.cart-count, .absolute.-top-2');
+            badges.forEach(b => {
+                b.innerText = result.cart_count;
+                b.classList.remove('hidden');
+            });
+            
+        } else {
+            if (result.message === 'login_required') {
+                Swal.fire({
+                    title: 'Login Required',
+                    text: 'Please login to shop',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Login',
+                    confirmButtonColor: '#065f46'
+                }).then((res) => {
+                    if(res.isConfirmed) window.location.href = siteUrl + '/login.php';
+                });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: result.message, confirmButtonColor: '#065f46' });
+            }
+        }
+    } catch (error) {
+        console.error(error);
+        Swal.fire({ icon: 'error', title: 'System Error', text: 'Check console for details' });
+    }
+}
+</script>
 
 <?php include 'includes/footer.php'; ?>

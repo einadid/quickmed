@@ -16,17 +16,18 @@ include 'includes/header.php';
 <!-- Hero Section with Search -->
 <?php include 'includes/homepage/hero.php'; ?>
 
+<!-- Flash Sale -->
+<?php include 'includes/homepage/flash_sale.php'; ?>
+
 <!-- Shop by Categories -->
 <?php include 'includes/homepage/categories.php'; ?>
 
-<!-- Flash Sale -->
-<?php include 'includes/homepage/flash_sale.php'; ?>
+<!-- Stats Counter -->
+<?php include 'includes/homepage/stats.php'; ?>
 
 <!-- Featured Products -->
 <?php include 'includes/homepage/featured.php'; ?>
 
-<!-- Stats Counter -->
-<?php include 'includes/homepage/stats.php'; ?>
 
 <!-- Customer Reviews -->
 <?php include 'includes/homepage/testimonials.php'; ?>

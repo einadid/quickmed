@@ -1,6 +1,6 @@
 <?php
 /**
- * Compact POS Invoice - Thermal Printer Friendly
+ * Professional POS Invoice - VAT & Member Info Included
  */
 
 require_once __DIR__ . '/../../config.php';
@@ -11,13 +11,14 @@ requireRole('salesman');
 $orderId = intval($_GET['id'] ?? 0);
 
 if (!$orderId) {
-    echo "Invalid Order ID";
-    exit;
+    die("Invalid Order ID");
 }
 
-// Get order details
-$orderQuery = "SELECT o.*, p.parcel_number, s.name as shop_name, s.location, s.phone as shop_phone
+// Get Order Details
+$orderQuery = "SELECT o.*, u.member_id, u.points as current_points, 
+               s.name as shop_name, s.location, s.phone as shop_phone, s.email as shop_email
                FROM orders o
+               LEFT JOIN users u ON o.user_id = u.id
                LEFT JOIN parcels p ON o.id = p.order_id
                LEFT JOIN shops s ON p.shop_id = s.id
                WHERE o.id = ?";
@@ -27,103 +28,129 @@ $stmt->execute();
 $order = $stmt->get_result()->fetch_assoc();
 
 if (!$order) {
-    echo "Order not found";
-    exit;
+    die("Order not found");
 }
 
-// Get items
+// Get Items
 $itemsQuery = "SELECT * FROM order_items WHERE order_id = ?";
 $itemsStmt = $conn->prepare($itemsQuery);
 $itemsStmt->bind_param("i", $orderId);
 $itemsStmt->execute();
 $items = $itemsStmt->get_result();
+
+// VAT Calculation (5%)
+$vatRate = 0.05;
+$subtotal = $order['subtotal'];
+$discount = $order['points_discount'];
+$vatAmount = ($subtotal - $discount) * $vatRate;
+$grandTotal = ($subtotal - $discount) + $vatAmount;
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Receipt #<?= $order['order_number'] ?></title>
+    <title>Invoice #<?= $order['order_number'] ?></title>
     <style>
         @media print {
-            body { margin: 0; padding: 0; }
-            .no-print { display: none; }
+            @page { margin: 0; }
+            body { margin: 10px; }
+            .no-print { display: none !important; }
         }
         body {
             font-family: 'Courier New', monospace;
             font-size: 12px;
-            width: 58mm; /* Standard Thermal Paper Width */
-            margin: 0 auto;
+            max-width: 80mm; /* Standard POS Paper Width */
+            margin: 20px auto;
             background: #fff;
             color: #000;
         }
-        .header {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .header h2 { margin: 0; font-size: 16px; font-weight: bold; }
-        .header p { margin: 2px 0; font-size: 10px; }
+        .header { text-align: center; margin-bottom: 10px; }
+        .header h2 { margin: 0; font-size: 18px; font-weight: bold; text-transform: uppercase; }
+        .header p { margin: 2px 0; font-size: 11px; }
         
-        .divider { border-top: 1px dashed #000; margin: 5px 0; }
+        .divider { border-top: 1px dashed #000; margin: 8px 0; }
+        .divider-solid { border-top: 1px solid #000; margin: 8px 0; }
         
-        .details { font-size: 10px; margin-bottom: 5px; }
-        .details div { display: flex; justify-content: space-between; }
+        .info { font-size: 11px; margin-bottom: 5px; }
+        .info div { display: flex; justify-content: space-between; }
         
-        table { width: 100%; border-collapse: collapse; font-size: 10px; }
-        th { text-align: left; border-bottom: 1px solid #000; padding: 2px 0; }
-        td { padding: 2px 0; vertical-align: top; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        th { text-align: left; padding: 4px 0; border-bottom: 1px solid #000; }
+        td { padding: 4px 0; vertical-align: top; }
         .text-right { text-align: right; }
         .text-center { text-align: center; }
         
-        .totals { margin-top: 5px; font-size: 11px; }
-        .totals div { display: flex; justify-content: space-between; margin-bottom: 2px; }
-        .bold { font-weight: bold; }
+        .totals { margin-top: 5px; font-size: 12px; }
+        .totals div { display: flex; justify-content: space-between; margin-bottom: 3px; }
+        .grand-total { font-weight: bold; font-size: 14px; border-top: 1px solid #000; padding-top: 5px; margin-top: 5px; }
         
-        .footer { text-align: center; margin-top: 10px; font-size: 10px; }
+        .footer { text-align: center; margin-top: 15px; font-size: 10px; }
+        .barcode { text-align: center; margin-top: 10px; font-family: 'Libre Barcode 39', cursive; font-size: 30px; }
         
-        .actions {
-            margin-top: 20px;
+        /* Print Button Style */
+        .action-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
             text-align: center;
-            padding-bottom: 20px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         }
-        button {
-            padding: 8px 16px;
-            cursor: pointer;
+        .btn {
+            padding: 10px 20px;
             background: #000;
             color: #fff;
             border: none;
-            font-family: monospace;
+            cursor: pointer;
             font-weight: bold;
+            margin: 0 5px;
+            border-radius: 4px;
         }
+        .btn-outline { background: #fff; color: #000; border: 2px solid #000; }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+39&display=swap" rel="stylesheet">
 </head>
-<body onload="window.print()">
+<body>
 
+    <!-- Header -->
     <div class="header">
-        <h2>QUICKMED</h2>
-        <p><?= htmlspecialchars($order['shop_name']) ?></p>
-        <p><?= htmlspecialchars($order['location']) ?></p>
-        <p>Tel: <?= htmlspecialchars($order['shop_phone']) ?></p>
+        <h2><?= htmlspecialchars($order['shop_name'] ?? 'QuickMed Pharmacy') ?></h2>
+        <p><?= htmlspecialchars($order['location'] ?? 'Dhaka, Bangladesh') ?></p>
+        <p>Phone: <?= htmlspecialchars($order['shop_phone'] ?? '09678-100100') ?></p>
+        <p>Email: <?= htmlspecialchars($order['shop_email'] ?? 'support@quickmed.com') ?></p>
     </div>
 
-    <div class="divider"></div>
+    <div class="divider-solid"></div>
 
-    <div class="details">
-        <div><span>Order:</span> <span>#<?= $order['order_number'] ?></span></div>
-        <div><span>Date:</span> <span><?= date('d-m-y H:i') ?></span></div>
-        <div><span>Customer:</span> <span><?= htmlspecialchars($order['customer_name']) ?></span></div>
-        <?php if($order['member_id']): ?>
-        <div><span>Member ID:</span> <span><?= htmlspecialchars($order['member_id']) ?></span></div>
+    <!-- Order Info -->
+    <div class="info">
+        <div><span>Invoice:</span> <strong>#<?= $order['order_number'] ?></strong></div>
+        <div><span>Date:</span> <span><?= date('d-M-Y h:i A', strtotime($order['created_at'])) ?></span></div>
+        
+        <!-- Customer / Member Info -->
+        <div style="margin-top: 5px;">
+            <span>Customer:</span> 
+            <span><?= htmlspecialchars($order['customer_name']) ?></span>
+        </div>
+        
+        <?php if (!empty($order['member_id'])): ?>
+        <div><span>Member ID:</span> <strong><?= htmlspecialchars($order['member_id']) ?></strong></div>
         <?php endif; ?>
     </div>
 
     <div class="divider"></div>
 
+    <!-- Items Table -->
     <table>
         <thead>
             <tr>
-                <th style="width: 50%">Item</th>
+                <th style="width: 45%">Item</th>
                 <th class="text-center" style="width: 15%">Qty</th>
-                <th class="text-right" style="width: 35%">Total</th>
+                <th class="text-right" style="width: 20%">Price</th>
+                <th class="text-right" style="width: 20%">Total</th>
             </tr>
         </thead>
         <tbody>
@@ -131,6 +158,7 @@ $items = $itemsStmt->get_result();
                 <tr>
                     <td><?= htmlspecialchars($item['medicine_name']) ?></td>
                     <td class="text-center"><?= $item['quantity'] ?></td>
+                    <td class="text-right"><?= number_format($item['price'], 2) ?></td>
                     <td class="text-right"><?= number_format($item['subtotal'], 2) ?></td>
                 </tr>
             <?php endwhile; ?>
@@ -139,48 +167,64 @@ $items = $itemsStmt->get_result();
 
     <div class="divider"></div>
 
+    <!-- Calculations -->
     <div class="totals">
         <div>
             <span>Subtotal:</span>
-            <span><?= number_format($order['subtotal'], 2) ?></span>
+            <span><?= number_format($subtotal, 2) ?></span>
         </div>
         
-        <?php if ($order['points_discount'] > 0): ?>
+        <?php if ($discount > 0): ?>
         <div>
-            <span>Discount:</span>
-            <span>-<?= number_format($order['points_discount'], 2) ?></span>
+            <span>Points Discount:</span>
+            <span>-<?= number_format($discount, 2) ?></span>
         </div>
         <?php endif; ?>
 
-        <div class="bold" style="font-size: 14px; margin-top: 5px;">
-            <span>TOTAL:</span>
-            <span><?= number_format($order['total_amount'], 2) ?></span>
+        <div>
+            <span>VAT (5%):</span>
+            <span><?= number_format($vatAmount, 2) ?></span>
+        </div>
+
+        <div class="grand-total">
+            <span>GRAND TOTAL:</span>
+            <span>৳<?= number_format($grandTotal, 2) ?></span>
         </div>
         
-        <div style="margin-top: 5px; font-size: 10px;">
+        <div>
             <span>Paid (Cash):</span>
-            <span><?= number_format($order['total_amount'], 2) ?></span>
+            <span>৳<?= number_format($grandTotal, 2) ?></span>
         </div>
     </div>
 
-    <?php if ($order['points_earned'] > 0): ?>
     <div class="divider"></div>
-    <div style="text-align: center; font-weight: bold;">
-        ⭐ You earned <?= $order['points_earned'] ?> points!
+
+    <!-- Member Points Summary -->
+    <?php if ($order['points_earned'] > 0 || !empty($order['member_id'])): ?>
+    <div class="info" style="text-align: center;">
+        <?php if ($order['points_earned'] > 0): ?>
+            <p>⭐ Points Earned: <strong>+<?= $order['points_earned'] ?></strong></p>
+        <?php endif; ?>
+        
+        <?php if (!empty($order['current_points'])): ?>
+            <p>Current Balance: <strong><?= $order['current_points'] ?> Pts</strong></p>
+        <?php endif; ?>
     </div>
+    <div class="divider"></div>
     <?php endif; ?>
 
-    <div class="divider"></div>
-
+    <!-- Footer -->
     <div class="footer">
+        <p>Goods sold are not returnable without receipt.</p>
         <p>Thank you for shopping with us!</p>
-        <p>Please visit again.</p>
+        <div class="barcode">*<?= $order['order_number'] ?>*</div>
         <p>www.quickmed.com</p>
     </div>
 
-    <div class="actions no-print">
-        <button onclick="window.print()">PRINT</button>
-        <button onclick="window.close()" style="background: #ccc; color: #000; margin-left: 10px;">CLOSE</button>
+    <!-- Print Buttons -->
+    <div class="action-bar no-print">
+        <button onclick="window.print()" class="btn">🖨️ PRINT</button>
+        <button onclick="window.close()" class="btn btn-outline">CLOSE</button>
     </div>
 
 </body>

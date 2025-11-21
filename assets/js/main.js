@@ -1,29 +1,22 @@
 /**
  * QuickMed - Main JavaScript - FIXED
  */
-
-// Add to Cart Function
+/**
+ * Add to Cart Function (FIXED)
+ */
 async function addToCart(medicineId, shopId, quantity) {
-    if (!medicineId || !shopId) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Invalid product data',
-            confirmButtonColor: '#065f46'
-        });
-        return;
-    }
-
     quantity = quantity || 1;
 
+    // Get Base URL dynamically
+    const siteUrl = window.location.origin + '/quickmed';
+
     try {
-        const siteUrl = window.location.origin + '/quickmed';
         const formData = new FormData();
         formData.append('medicine_id', medicineId);
         formData.append('shop_id', shopId);
         formData.append('quantity', quantity);
 
-        const response = await fetch(siteUrl + '/ajax/add_to_cart.php', {
+        const response = await fetch(`${siteUrl}/ajax/add_to_cart.php`, {
             method: 'POST',
             body: formData
         });
@@ -31,67 +24,63 @@ async function addToCart(medicineId, shopId, quantity) {
         const result = await response.json();
 
         if (result.success) {
+            // Show Success Message
             Swal.fire({
                 icon: 'success',
-                title: 'Added to Cart!',
-                text: result.message,
-                confirmButtonColor: '#065f46',
-                timer: 2000
+                title: 'Added!',
+                text: 'Item added to your cart.',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                background: '#065f46',
+                color: '#fff'
             });
 
-            // Update cart count in navbar
-            if (result.cart_count) {
-                updateCartCount(result.cart_count);
-            }
+            // Update Cart Badge
+            updateCartCount(result.cart_count);
         } else {
-            if (result.message.includes('login')) {
+            if (result.message === 'login_required') {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Login Required',
-                    text: result.message,
-                    confirmButtonColor: '#065f46',
-                    confirmButtonText: 'Login Now'
-                }).then(function(result) {
-                    if (result.isConfirmed) {
-                        window.location.href = siteUrl + '/login.php';
-                    }
+                    text: 'Please login to shop.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Login',
+                    confirmButtonColor: '#065f46'
+                }).then((res) => {
+                    if (res.isConfirmed) window.location.href = `${siteUrl}/login.php`;
                 });
             } else {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error',
+                    title: 'Oops...',
                     text: result.message,
                     confirmButtonColor: '#065f46'
                 });
             }
         }
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Cart Error:', error);
         Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: 'Failed to add item to cart',
+            text: 'Something went wrong. Please try again.',
             confirmButtonColor: '#065f46'
         });
     }
 }
 
-// Update cart count in navbar
+// Update Cart Badges in Navbar (Desktop & Mobile)
 function updateCartCount(count) {
-    // Find all cart count elements
-    const cartBadges = document.querySelectorAll('[class*="cart-count"], .absolute.-top-2.-right-2');
-    cartBadges.forEach(function(badge) {
-        badge.textContent = count;
-        if (count > 0) {
-            badge.classList.remove('hidden');
-            badge.classList.add('animate-bounce');
-            setTimeout(function() {
-                badge.classList.remove('animate-bounce');
-            }, 1000);
-        }
+    const badges = document.querySelectorAll('.cart-count, .absolute.-top-2, .absolute.top-1');
+    badges.forEach(badge => {
+        badge.innerText = count;
+        badge.classList.remove('hidden');
+        badge.classList.add('animate-bounce');
+        setTimeout(() => badge.classList.remove('animate-bounce'), 1000);
     });
 }
-
 // Smooth scroll to top
 window.addEventListener('scroll', function() {
     const scrollBtn = document.getElementById('scrollToTop');

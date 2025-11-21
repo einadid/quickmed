@@ -1,92 +1,95 @@
 <?php
 /**
- * Add Medicine to Cart
+ * Add to Cart Handler (FIXED)
  */
 
 require_once __DIR__ . '/../config.php';
 
 header('Content-Type: application/json');
 
+// 1. Check if user is logged in
 if (!isLoggedIn()) {
-    echo json_encode(['success' => false, 'message' => 'Please login to add items to cart']);
+    echo json_encode(['success' => false, 'message' => 'login_required']);
     exit;
 }
 
-if (!hasRole('customer')) {
-    echo json_encode(['success' => false, 'message' => 'Only customers can add to cart']);
+// 2. Check Role (Only Customers)
+$user = getCurrentUser();
+if ($user['role_name'] !== 'customer') {
+    echo json_encode(['success' => false, 'message' => 'Only customers can add to cart.']);
     exit;
 }
 
+// 3. Validate Inputs
 $medicineId = intval($_POST['medicine_id'] ?? 0);
 $shopId = intval($_POST['shop_id'] ?? 0);
 $quantity = intval($_POST['quantity'] ?? 1);
 
 if ($medicineId <= 0 || $shopId <= 0 || $quantity <= 0) {
-    echo json_encode(['success' => false, 'message' => 'Invalid parameters']);
+    echo json_encode(['success' => false, 'message' => 'Invalid item details.']);
     exit;
 }
 
-// Check stock availability
-$stockQuery = "SELECT stock_quantity FROM shop_medicines WHERE medicine_id = ? AND shop_id = ?";
+// 4. Check Stock Availability
+$stockQuery = "SELECT stock_quantity, price FROM shop_medicines WHERE medicine_id = ? AND shop_id = ?";
 $stmt = $conn->prepare($stockQuery);
 $stmt->bind_param("ii", $medicineId, $shopId);
 $stmt->execute();
 $stockResult = $stmt->get_result();
 
 if ($stockResult->num_rows === 0) {
-    echo json_encode(['success' => false, 'message' => 'Medicine not available']);
+    echo json_encode(['success' => false, 'message' => 'Item not available in this shop.']);
     exit;
 }
 
-$stock = $stockResult->fetch_assoc()['stock_quantity'];
+$itemData = $stockResult->fetch_assoc();
+$currentStock = $itemData['stock_quantity'];
 
-if ($stock < $quantity) {
-    echo json_encode(['success' => false, 'message' => "Only $stock items available"]);
-    exit;
-}
-
-$userId = $_SESSION['user_id'];
-
-// Check if already in cart
+// 5. Check Existing Cart Quantity
 $checkCart = "SELECT id, quantity FROM cart WHERE user_id = ? AND medicine_id = ? AND shop_id = ?";
-$checkStmt = $conn->prepare($checkCart);
-$checkStmt->bind_param("iii", $userId, $medicineId, $shopId);
-$checkStmt->execute();
-$cartResult = $checkStmt->get_result();
+$cartStmt = $conn->prepare($checkCart);
+$cartStmt->bind_param("iii", $user['id'], $medicineId, $shopId);
+$cartStmt->execute();
+$cartRes = $cartStmt->get_result();
 
-if ($cartResult->num_rows > 0) {
-    // Update quantity
-    $cartItem = $cartResult->fetch_assoc();
-    $newQuantity = $cartItem['quantity'] + $quantity;
+$newQuantity = $quantity;
+
+if ($cartRes->num_rows > 0) {
+    $cartItem = $cartRes->fetch_assoc();
+    $newQuantity += $cartItem['quantity'];
+    $cartId = $cartItem['id'];
     
-    if ($newQuantity > $stock) {
-        echo json_encode(['success' => false, 'message' => "Cannot add more. Only $stock items available"]);
+    // Check total stock limit
+    if ($newQuantity > $currentStock) {
+        echo json_encode(['success' => false, 'message' => "Only $currentStock items available in stock."]);
         exit;
     }
     
+    // Update
     $updateQuery = "UPDATE cart SET quantity = ? WHERE id = ?";
     $updateStmt = $conn->prepare($updateQuery);
-    $updateStmt->bind_param("ii", $newQuantity, $cartItem['id']);
+    $updateStmt->bind_param("ii", $newQuantity, $cartId);
     $updateStmt->execute();
 } else {
-    // Insert new item
+    // Check stock for new item
+    if ($quantity > $currentStock) {
+        echo json_encode(['success' => false, 'message' => "Only $currentStock items available in stock."]);
+        exit;
+    }
+    
+    // Insert
     $insertQuery = "INSERT INTO cart (user_id, medicine_id, shop_id, quantity) VALUES (?, ?, ?, ?)";
     $insertStmt = $conn->prepare($insertQuery);
-    $insertStmt->bind_param("iiii", $userId, $medicineId, $shopId, $quantity);
+    $insertStmt->bind_param("iiii", $user['id'], $medicineId, $shopId, $quantity);
     $insertStmt->execute();
 }
 
-// Get updated cart count
+// 6. Get Updated Cart Count
 $countQuery = "SELECT SUM(quantity) as total FROM cart WHERE user_id = ?";
 $countStmt = $conn->prepare($countQuery);
-$countStmt->bind_param("i", $userId);
+$countStmt->bind_param("i", $user['id']);
 $countStmt->execute();
-$cartCount = $countStmt->get_result()->fetch_assoc()['total'] ?? 0;
+$total = $countStmt->get_result()->fetch_assoc()['total'] ?? 0;
 
-logAudit('ADD_TO_CART', 'cart', null, null, ['medicine_id' => $medicineId, 'quantity' => $quantity]);
-
-echo json_encode([
-    'success' => true, 
-    'message' => 'Item added to cart!',
-    'cart_count' => $cartCount
-]);
+echo json_encode(['success' => true, 'message' => 'Added to cart!', 'cart_count' => $total]);
+?>
