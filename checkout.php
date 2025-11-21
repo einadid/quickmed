@@ -1,6 +1,6 @@
 <?php
 /**
- * Checkout Page - Fixed Calculation Logic
+ * Checkout Page - Fixed Calculation Logic with Free Delivery (>1000 TK)
  */
 
 require_once 'config.php';
@@ -90,6 +90,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Calculate delivery charge
             $deliveryCharge = ($deliveryType === 'home') ? HOME_DELIVERY_CHARGE : 0;
             
+            // --- FREE DELIVERY LOGIC (PHP) ---
+            if ($subtotal >= 1000) {
+                $deliveryCharge = 0;
+            }
+            
             // Calculate points discount
             $pointsDiscount = 0;
             if ($usePoints > 0 && $usePoints <= $user['points']) {
@@ -105,10 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception('Minimum order amount is ৳' . MIN_ORDER_AMOUNT);
             }
             
-            // ============================================================
-            // NEW LOGIC: Calculate Proportional Points Earned
-            // Formula: (Total / 1000) * POINTS_PER_1000_BDT
-            // ============================================================
+            // Calculate Proportional Points Earned
             $pointsEarned = floor(($totalAmount / 1000) * POINTS_PER_1000_BDT);
             
             // Create order
@@ -146,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Create parcel
                 $parcelNumber = generateParcelNumber($orderId, $shopId);
                 $parcelQuery = "INSERT INTO parcels (order_id, shop_id, parcel_number, items_count, subtotal, status)
-                               VALUES (?, ?, ?, ?, ?, 'processing')";
+                                VALUES (?, ?, ?, ?, ?, 'processing')";
                 $parcelStmt = $conn->prepare($parcelQuery);
                 
                 if ($parcelStmt === false) {
@@ -333,7 +335,12 @@ include 'includes/header.php';
                                 <div class="text-5xl mb-3">🏠</div>
                                 <h4 class="text-xl font-bold mb-2"><?= __('home_delivery') ?></h4>
                                 <p class="text-gray-600 mb-2">Delivered to your doorstep</p>
-                                <p class="text-2xl font-bold text-deep-green">+ ৳<?= HOME_DELIVERY_CHARGE ?></p>
+                                
+                                <?php if ($subtotal >= 1000): ?>
+                                    <p class="text-2xl font-bold text-green-600">FREE</p>
+                                <?php else: ?>
+                                    <p class="text-2xl font-bold text-deep-green">+ ৳<?= HOME_DELIVERY_CHARGE ?></p>
+                                <?php endif; ?>
                             </div>
                         </label>
                         
@@ -461,8 +468,6 @@ const homeDeliveryCharge = <?= HOME_DELIVERY_CHARGE ?>;
 // Delivery type change
 document.querySelectorAll('input[name="delivery_type"]').forEach(radio => {
     radio.addEventListener('change', function() {
-        const deliveryCharge = this.value === 'home' ? homeDeliveryCharge : 0;
-        document.getElementById('deliveryCharge').textContent = '৳' + deliveryCharge.toFixed(2);
         calculateTotal();
     });
 });
@@ -487,7 +492,21 @@ function calculateDiscount() {
 
 function calculateTotal() {
     const deliveryType = document.querySelector('input[name="delivery_type"]:checked').value;
-    const deliveryCharge = deliveryType === 'home' ? homeDeliveryCharge : 0;
+    let deliveryCharge = deliveryType === 'home' ? homeDeliveryCharge : 0;
+    
+    // FREE DELIVERY LOGIC (JS)
+    if (subtotal >= 1000) {
+        deliveryCharge = 0;
+        document.getElementById('deliveryCharge').innerHTML = '<span class="text-green-600 font-bold">FREE</span>';
+    } else {
+        // Reset to normal amount if pickup or subtotal < 1000 (though for pickup it remains 0)
+        if(deliveryType === 'home') {
+             document.getElementById('deliveryCharge').innerText = '৳' + deliveryCharge.toFixed(2);
+        } else {
+             document.getElementById('deliveryCharge').innerHTML = '<span class="text-green-600 font-bold">FREE</span>';
+        }
+    }
+
     const usePoints = parseInt(document.getElementById('usePoints')?.value || 0);
     
     // Calculate Discount
@@ -498,10 +517,7 @@ function calculateTotal() {
     const total = subtotal + deliveryCharge - pointsDiscount;
     document.getElementById('grandTotal').textContent = '৳' + total.toFixed(2);
     
-    // ==========================================================
-    // UPDATED LOGIC: Calculate Proportional Points
-    // Formula: (Total / 1000) * 100 (assuming 100 points per 1000)
-    // ==========================================================
+    // Calculate Proportional Points
     const pointsEarn = Math.floor((total / 1000) * <?= POINTS_PER_1000_BDT ?>);
     
     document.getElementById('pointsEarn').textContent = '⭐ ' + pointsEarn;

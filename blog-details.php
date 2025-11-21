@@ -26,11 +26,15 @@ $conn->query("UPDATE health_posts SET views = views + 1 WHERE id = $postId");
 // Fetch Related Posts
 $related = $conn->query("SELECT * FROM health_posts WHERE category = '{$post['category']}' AND id != $postId LIMIT 3");
 
+// Prepare Share Data
+$currentUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+$shareUrl = urlencode($currentUrl);
+$shareTitle = urlencode($post['title']);
+
 $pageTitle = $post['title'];
 include 'includes/header.php';
 ?>
 
-<!-- Hero Image -->
 <div class="relative h-[60vh] w-full overflow-hidden">
     <div class="absolute inset-0 bg-black/50 z-10"></div>
     <img src="<?= SITE_URL ?>/uploads/news/<?= $post['image'] ?>" class="w-full h-full object-cover" alt="<?= htmlspecialchars($post['title']) ?>">
@@ -59,13 +63,12 @@ include 'includes/header.php';
 
 <section class="container mx-auto px-4 py-16 grid lg:grid-cols-12 gap-12">
     
-    <!-- Main Content -->
     <div class="lg:col-span-8">
-        <div class="bg-white p-8 md:p-12 rounded-2xl shadow-xl border-t-4 border-deep-green prose max-w-none">
-            <?= nl2br($post['content']) ?> <!-- You can use html_entity_decode if storing HTML -->
-        </div>
+        <!-- Content Section in blog-details.php -->
+<div class="prose max-w-none text-gray-800 leading-relaxed text-lg space-y-4 text-justify">
+    <?= nl2br(htmlspecialchars_decode($post['content'])) ?>
+</div>
 
-        <!-- Author Box -->
         <div class="mt-12 bg-off-white p-8 rounded-xl border-l-8 border-lime-accent flex items-center gap-6 shadow-sm">
             <img src="<?= $post['profile_image'] ? SITE_URL.'/uploads/profiles/'.$post['profile_image'] : 'https://ui-avatars.com/api/?name='.urlencode($post['full_name']) ?>" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md">
             <div>
@@ -79,20 +82,29 @@ include 'includes/header.php';
         </div>
     </div>
 
-    <!-- Sidebar -->
     <div class="lg:col-span-4 space-y-8">
         
-        <!-- Share -->
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <h3 class="font-bold text-lg mb-4 border-b pb-2">Share this Article</h3>
             <div class="flex gap-2">
-                <button class="flex-1 bg-blue-600 text-white py-2 rounded font-bold hover:opacity-90">FB</button>
-                <button class="flex-1 bg-sky-500 text-white py-2 rounded font-bold hover:opacity-90">TW</button>
-                <button class="flex-1 bg-green-500 text-white py-2 rounded font-bold hover:opacity-90">WA</button>
+                <a href="https://www.facebook.com/sharer/sharer.php?u=<?= $shareUrl ?>" 
+                   target="_blank" 
+                   class="flex-1 bg-blue-600 text-white py-2 rounded font-bold hover:opacity-90 text-center transition">
+                   FB
+                </a>
+                <a href="https://twitter.com/intent/tweet?text=<?= $shareTitle ?>&url=<?= $shareUrl ?>" 
+                   target="_blank" 
+                   class="flex-1 bg-sky-500 text-white py-2 rounded font-bold hover:opacity-90 text-center transition">
+                   TW
+                </a>
+                <a href="https://api.whatsapp.com/send?text=<?= $shareTitle ?>%20<?= $shareUrl ?>" 
+                   target="_blank" 
+                   class="flex-1 bg-green-500 text-white py-2 rounded font-bold hover:opacity-90 text-center transition">
+                   WA
+                </a>
             </div>
         </div>
 
-        <!-- Related Posts -->
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <h3 class="font-bold text-lg mb-6 border-b pb-2 text-deep-green">Related Articles</h3>
             <div class="space-y-6">

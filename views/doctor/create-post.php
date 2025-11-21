@@ -1,6 +1,6 @@
 <?php
 /**
- * Doctor - Create Health Post
+ * Doctor - Create Health Post (FIXED)
  */
 require_once __DIR__ . '/../../config.php';
 requireLogin();
@@ -13,11 +13,13 @@ $user = getCurrentUser();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['publish_post'])) {
     $title = clean($_POST['title']);
     $category = clean($_POST['category']);
-    $content = clean($_POST['content']); // Allow HTML if needed, but be careful
+    
+    // FIX: Don't use clean() for content to preserve new lines, just escape
+    $content = htmlspecialchars($_POST['content'], ENT_QUOTES, 'UTF-8');
     
     $image = null;
     if (isset($_FILES['post_image']) && $_FILES['post_image']['error'] === UPLOAD_ERR_OK) {
-        $uploadRes = uploadFile($_FILES['post_image'], NEWS_DIR); // Reusing news dir or create 'posts'
+        $uploadRes = uploadFile($_FILES['post_image'], NEWS_DIR);
         if ($uploadRes['success']) $image = $uploadRes['filename'];
     }
     
@@ -62,7 +64,7 @@ include __DIR__ . '/../../includes/header.php';
 
             <div>
                 <label class="block font-bold text-gray-700 mb-2">Content</label>
-                <textarea name="content" rows="10" class="input w-full border-2 border-deep-green" placeholder="Write your article here..." required></textarea>
+                <textarea name="content" rows="10" class="input w-full border-2 border-deep-green font-sans text-lg leading-relaxed p-4" placeholder="Write your article here... (New lines are preserved)" required></textarea>
             </div>
 
             <button type="submit" name="publish_post" class="btn btn-primary w-full py-4 text-xl font-bold shadow-lg transform hover:scale-105 transition">

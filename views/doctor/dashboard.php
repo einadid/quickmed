@@ -193,11 +193,11 @@ include __DIR__ . '/../../includes/header.php';
                     </a>
 
                     <div class="glass-card p-6 rounded-2xl flex items-center gap-4 opacity-75">
-                        <div class="text-4xl">📅</div>
-                        <div>
-                            <h3 class="text-xl font-bold text-gray-400">Appointments</h3>
-                            <p class="text-sm text-gray-400">Coming Soon...</p>
-                        </div>
+                        <a href="add-news.php" class="card bg-white border-4 border-deep-green hover:bg-light-green p-8 text-center transition group">
+    <span class="text-5xl mb-4 block group-hover:scale-110 transition">📰</span>
+    <h3 class="text-xl font-bold text-deep-green">Publish News</h3>
+    <p class="text-sm text-gray-500 mt-2">Share medical updates</p>
+</a>
                     </div>
 
                 </div>
