@@ -90,6 +90,7 @@ if (isLoggedIn() && $currentUser && isset($currentUser['role_name']) && $current
     </style>
 </head>
 <body class="retro-texture">
+    
 
 <div class="hidden md:block bg-deep-green text-white py-2 text-sm">
     <div class="container mx-auto px-4 flex justify-between items-center">
@@ -441,3 +442,4 @@ const Toast = Swal.mixin({
     <?php unset($_SESSION['error']); ?>
 <?php endif; ?>
 </script>
+

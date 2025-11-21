@@ -129,6 +129,14 @@ include __DIR__ . '/../../includes/header.php';
             </div>
            
         </div>
+
+        <div>
+            <a href="prescriptions.php" class="btn btn-outline btn-lg border-4 border-lime-accent text-deep-green hover:bg-lime-accent w-full py-6 flex flex-col items-center justify-center gap-2 transform hover:scale-105 transition-all shadow-lg">
+    <span class="text-4xl">📋</span>
+    <span class="font-bold text-xl">Prescriptions</span>
+    <span class="text-sm">Process Customer Requests</span>
+</a>
+        </div>
         
         <div>
             <a href="online-orders.php" class="btn btn-outline btn-lg border-4 border-lime-accent text-deep-green hover:bg-lime-accent w-full py-6 flex flex-col items-center justify-center gap-2 transform hover:scale-105 transition-all shadow-lg mb-12">

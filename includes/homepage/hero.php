@@ -75,11 +75,9 @@
     @keyframes typing { from { max-width: 0 } to { max-width: 100% } }
     @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: #84cc16; } }
 </style>
-
 <section class="dynamic-bg-glow text-white py-24 border-b-4 border-lime-accent relative overflow-hidden">
     
     <div class="absolute inset-0 aesthetic-stripes pointer-events-none" style="z-index: 0;"></div>
-
     <div class="absolute inset-0 scan-lines pointer-events-none" style="opacity: 0.3; z-index: 2;"></div>
     
     <div class="absolute inset-0 overflow-hidden pointer-events-none" style="z-index: 1;">
@@ -149,40 +147,46 @@
                 </div>
             </div>
             
-            <div class="relative z-10 flex flex-wrap justify-center gap-6 mb-16" data-aos="fade-up" data-aos-delay="800">
-                <button 
-                    onclick="openPrescriptionModal()" 
-                    class="group bg-lime-accent text-deep-green px-8 py-4 font-bold text-xl border-4 border-white rounded hover:scale-105 transition-all duration-300 shadow-[0_0_15px_rgba(132,204,22,0.6)] flex items-center gap-3 neon-border"
-                >
-                    <span class="text-3xl group-hover:rotate-12 transition-transform">📋</span> <?= __('upload_prescription') ?>
-                </button>
+            <div class="flex flex-wrap justify-center gap-4 mb-12 relative z-10" data-aos="fade-up" data-aos-delay="800">
                 
-                <a href="<?= SITE_URL ?>/shop.php" class="group bg-transparent text-white px-8 py-4 font-bold text-xl border-4 border-white rounded hover:bg-white hover:text-deep-green hover:scale-105 transition-all duration-300 flex items-center gap-3">
-                    <span class="text-3xl group-hover:-rotate-12 transition-transform">🛍️</span> <?= __('shop') ?> NOW
+                <a href="<?= SITE_URL ?>/prescription-upload.php"
+                   class="btn btn-lime btn-lg text-xl transform transition-all duration-300 hover:scale-110 hover:rotate-2 neon-border flex items-center gap-2 bg-lime-accent text-deep-green px-6 py-3 font-bold border-2 border-white rounded shadow-lg">
+                    <span class="text-2xl">📋</span> Upload Prescription
                 </a>
+
+                <a href="<?= SITE_URL ?>/shop.php"
+                   class="btn btn-outline btn-lg text-xl border-4 border-white text-white hover:bg-white hover:text-deep-green transform transition-all duration-300 hover:scale-110 hover:-rotate-2 flex items-center gap-2 px-6 py-3 font-bold rounded shadow-lg">
+                    <span class="text-2xl">🛍️</span> Shop Now
+                </a>
+                
             </div>
             
             <div class="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto" data-aos="zoom-in" data-aos-delay="1000">
+                
                 <div class="bg-deep-green bg-opacity-40 border-2 border-lime-accent p-6 backdrop-blur-md transform transition-all duration-500 hover:scale-110 hover:bg-opacity-60 rounded-xl shadow-[0_0_10px_rgba(132,204,22,0.2)] hover:shadow-[0_0_20px_rgba(132,204,22,0.5)] group">
                     <div class="text-5xl mb-3 group-hover:animate-bounce">✅</div>
                     <div class="text-3xl font-bold mb-1 counter text-lime-accent" data-target="100">0</div>
                     <div class="font-bold text-sm md:text-base font-mono">% Genuine</div>
                 </div>
+                
                 <div class="bg-deep-green bg-opacity-40 border-2 border-lime-accent p-6 backdrop-blur-md transform transition-all duration-500 hover:scale-110 hover:bg-opacity-60 rounded-xl shadow-[0_0_10px_rgba(132,204,22,0.2)] hover:shadow-[0_0_20px_rgba(132,204,22,0.5)] group" style="animation-delay: 0.2s;">
                     <div class="text-5xl mb-3 group-hover:animate-pulse">🚚</div>
                     <div class="text-3xl font-bold mb-1 counter text-lime-accent" data-target="24">0</div>
                     <div class="font-bold text-sm md:text-base font-mono">Hour Delivery</div>
                 </div>
+                
                 <div class="bg-deep-green bg-opacity-40 border-2 border-lime-accent p-6 backdrop-blur-md transform transition-all duration-500 hover:scale-110 hover:bg-opacity-60 rounded-xl shadow-[0_0_10px_rgba(132,204,22,0.2)] hover:shadow-[0_0_20px_rgba(132,204,22,0.5)] group" style="animation-delay: 0.4s;">
                     <div class="text-5xl mb-3 group-hover:rotate-12 transition-transform">💰</div>
                     <div class="text-3xl font-bold mb-1 counter text-lime-accent" data-target="30">0</div>
                     <div class="font-bold text-sm md:text-base font-mono">% Savings</div>
                 </div>
+                
                 <div class="bg-deep-green bg-opacity-40 border-2 border-lime-accent p-6 backdrop-blur-md transform transition-all duration-500 hover:scale-110 hover:bg-opacity-60 rounded-xl shadow-[0_0_10px_rgba(132,204,22,0.2)] hover:shadow-[0_0_20px_rgba(132,204,22,0.5)] group" style="animation-delay: 0.6s;">
                     <div class="text-5xl mb-3 group-hover:scale-110 transition-transform">🔒</div>
                     <div class="text-3xl font-bold mb-1 counter text-lime-accent" data-target="100">0</div>
                     <div class="font-bold text-sm md:text-base font-mono">% Secure</div>
                 </div>
+                
             </div>
         </div>
     </div>

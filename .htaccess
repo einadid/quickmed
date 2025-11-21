@@ -1,47 +1,43 @@
 # QuickMed - Apache Configuration
 # InfinityFree Compatible
 
-# Enable Rewrite Engine
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteBase /
-    
-    # Remove .php extension (optional)
-    # RewriteCond %{REQUEST_FILENAME} !-d
-    # RewriteCond %{REQUEST_FILENAME}\.php -f
-    # RewriteRule ^(.*)$ $1.php [L]
-</IfModule>
-
-# Prevent Directory Listing
+# 1. Prevent Directory Listing (Security)
 Options -Indexes
 
-# Custom Error Pages
-ErrorDocument 404 /404.php
-ErrorDocument 403 /403.php
-ErrorDocument 500 /500.php
+# 2. Rewrite Engine & URL Handling
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # IMPORTANT: If your site is in a folder named 'quickmed', keep this.
+    # If it is in the root (public_html), change to: RewriteBase /
+    RewriteBase /quickmed/
 
-# PHP Settings
-<IfModule mod_php7.c>
-    php_value upload_max_filesize 10M
-    php_value post_max_size 10M
-    php_value max_execution_time 300
-    php_value max_input_time 300
+    # Custom Error Pages
+    ErrorDocument 404 /quickmed/404.php
+    ErrorDocument 403 /quickmed/404.php
+    ErrorDocument 500 /quickmed/404.php
+
+    # Remove .php extension (Cleaner URLs)
+    # Example: /login instead of /login.php
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME}\.php -f
+    RewriteRule ^(.*)$ $1.php [L]
 </IfModule>
 
-# Security Headers
+# 3. Protect Sensitive Files
+<FilesMatch "^(config\.php|\.env|\.htaccess|composer\.json)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# 4. Security Headers
 <IfModule mod_headers.c>
     Header set X-Content-Type-Options "nosniff"
     Header set X-Frame-Options "SAMEORIGIN"
     Header set X-XSS-Protection "1; mode=block"
 </IfModule>
 
-# Protect sensitive files
-<FilesMatch "^(config\.php|\.env)$">
-    Order allow,deny
-    Deny from all
-</FilesMatch>
-
-# Cache Control
+# 5. Browser Caching (Speed Optimization)
 <IfModule mod_expires.c>
     ExpiresActive On
     ExpiresByType image/jpg "access plus 1 year"

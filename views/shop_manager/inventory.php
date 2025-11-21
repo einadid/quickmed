@@ -22,6 +22,14 @@ if (!$shopId) {
 // =============================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_medicine') {
     $medicineId = intval($_POST['medicine_id']);
+    
+    // If medicine_id is 0 (from the hidden input when empty), stop processing
+    if ($medicineId === 0) {
+        $_SESSION['error'] = 'Invalid medicine selection.';
+        header("Location: inventory.php");
+        exit();
+    }
+
     $stock = intval($_POST['stock']);
     $reorder = intval($_POST['reorder_level']);
     $expiryDate = clean($_POST['expiry_date']);
@@ -83,15 +91,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // 3. DATA FETCHING
 // =============================================
 
-// Fetch Available Medicines (for Add Dropdown)
-$availableMedicinesQuery = "SELECT id, name, power, form 
-                            FROM medicines 
-                            WHERE id NOT IN (SELECT medicine_id FROM shop_medicines WHERE shop_id = ?)
-                            ORDER BY name ASC";
+// Get medicines available in GLOBAL list but NOT in THIS SHOP
+// Using LEFT JOIN instead of NOT IN for better performance & reliability
+$availableMedicinesQuery = "SELECT m.id, m.name, m.power, m.form 
+                            FROM medicines m 
+                            LEFT JOIN shop_medicines sm ON m.id = sm.medicine_id AND sm.shop_id = ?
+                            WHERE sm.medicine_id IS NULL
+                            ORDER BY m.name ASC";
 $stmt = $conn->prepare($availableMedicinesQuery);
 $stmt->bind_param("i", $shopId);
 $stmt->execute();
 $availableMedicines = $stmt->get_result();
+
+// Debug: If no medicines found, check if global medicines exist
+if ($availableMedicines->num_rows === 0) {
+    // Check if any medicines exist globally
+    $globalCheck = $conn->query("SELECT COUNT(*) as total FROM medicines");
+    $totalGlobal = $globalCheck->fetch_assoc()['total'];
+    
+    if ($totalGlobal == 0) {
+        $medicineStatus = "No medicines in global database. Ask Admin to add medicines.";
+    } else {
+        $medicineStatus = "All global medicines are already added to your shop.";
+    }
+}
 
 // Fetch Inventory List with Filters
 $search = clean($_GET['search'] ?? '');
@@ -134,6 +157,8 @@ include __DIR__ . '/../../includes/header.php';
 <style>
     .select2-container { z-index: 999999 !important; width: 100% !important; }
     .select2-dropdown { z-index: 999999 !important; }
+    .select2-selection--single { height: 50px !important; display: flex; align-items: center; border: 2px solid #065f46 !important; border-radius: 0.5rem !important; }
+    .select2-selection__arrow { height: 48px !important; }
 </style>
 
 <section class="container mx-auto px-4 py-16 min-h-screen">
@@ -216,61 +241,65 @@ include __DIR__ . '/../../includes/header.php';
 </section>
 
 <div id="addMedicineModal" class="modal-overlay hidden">
-    <div class="modal max-w-lg w-full">
+    <div class="modal max-w-2xl w-full">
         <div class="modal-header bg-deep-green text-white">
-            <h3 class="text-xl font-bold">Add Medicine to Inventory</h3>
-            <button onclick="closeAddModal()" class="text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold">Add Medicine to Branch</h3>
+            <button onclick="closeAddModal()" class="text-3xl text-white">&times;</button>
         </div>
-        <div class="modal-body p-6">
+        <div class="modal-body">
             <form method="POST" action="inventory.php">
                 <input type="hidden" name="action" value="add_medicine">
                 
                 <div class="mb-6">
-                    <label class="block font-bold mb-2 text-deep-green">Select Medicine *</label>
-                    <select name="medicine_id" class="input select2" required>
-                        <option value="">-- Type to Search --</option>
-                        <?php 
-                        if ($availableMedicines->num_rows > 0) {
+                    <label class="block font-bold mb-2 text-deep-green">Select Medicine (Global List) *</label>
+                    
+                    <?php if ($availableMedicines->num_rows > 0): ?>
+                        <select name="medicine_id" class="input border-4 border-deep-green select2" required style="width: 100%;">
+                            <option value="">-- Search Medicine --</option>
+                            <?php 
                             $availableMedicines->data_seek(0);
                             while ($med = $availableMedicines->fetch_assoc()): 
-                        ?>
-                            <option value="<?= $med['id'] ?>">
-                                <?= htmlspecialchars($med['name']) ?> (<?= htmlspecialchars($med['power']) ?>) - <?= htmlspecialchars($med['form']) ?>
-                            </option>
-                        <?php endwhile; } ?>
-                    </select>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label class="block font-bold mb-2 text-deep-green">Initial Stock *</label>
-                        <input type="number" name="stock" placeholder="Qty" class="input border-2 border-gray-300 focus:border-deep-green" required min="1">
-                    </div>
-                    <div>
-                        <label class="block font-bold mb-2 text-deep-green">Alert Level *</label>
-                        <input type="number" name="reorder_level" value="10" placeholder="Min Qty" class="input border-2 border-gray-300 focus:border-deep-green" required min="1">
-                    </div>
-                </div>
-
-                <div class="mb-6">
-                    <label class="block font-bold mb-2 text-deep-green">Expiry Date *</label>
-                    <input type="date" name="expiry_date" class="input border-2 border-gray-300 focus:border-deep-green w-full" required>
-                </div>
-
-                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            ⚠️
+                            ?>
+                                <option value="<?= $med['id'] ?>">
+                                    <?= htmlspecialchars($med['name']) ?> (<?= htmlspecialchars($med['power']) ?>) - <?= htmlspecialchars($med['form']) ?>
+                                </option>
+                            <?php endwhile; ?>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">Select from global database to add to your shop.</p>
+                    <?php else: ?>
+                        <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 text-yellow-700 rounded-r">
+                            <p class="font-bold text-lg">⚠️ <?= $medicineStatus ?? "No new medicines available." ?></p>
+                            <p class="text-sm mt-1">All global medicines are already in your inventory, or the global list is empty.</p>
                         </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-yellow-700">
-                                You cannot set prices. The price will be set to <strong>0.00</strong> until an Admin updates it.
+                        <input type="hidden" name="medicine_id" value="0"> <?php endif; ?>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <?php if ($availableMedicines->num_rows > 0): ?>
+                        <div>
+                            <label class="block font-bold mb-2 text-deep-green">Stock Qty *</label>
+                            <input type="number" name="stock" class="input border-4 border-deep-green" required min="1">
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-2 text-deep-green">Reorder Level</label>
+                            <input type="number" name="reorder_level" class="input border-4 border-deep-green" value="10" required>
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block font-bold mb-2 text-deep-green">Expiry Date *</label>
+                            <input type="date" name="expiry_date" class="input border-4 border-deep-green" required>
+                        </div>
+                        
+                        <div class="col-span-2 bg-blue-50 border-l-4 border-blue-500 p-3">
+                            <p class="text-sm text-blue-700 font-bold">
+                                ℹ️ Price will be set by Admin (Default: 0.00)
                             </p>
                         </div>
-                    </div>
+                    <?php endif; ?>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-full py-3 text-lg font-bold">Save to Inventory</button>
+                <button type="submit" class="btn btn-primary w-full mt-6 py-3 text-lg font-bold shadow-md" <?= $availableMedicines->num_rows === 0 ? 'disabled' : '' ?>>
+                    📥 Add to Inventory
+                </button>
             </form>
         </div>
     </div>
@@ -330,7 +359,7 @@ $(document).ready(function() {
         document.getElementById('addMedicineModal').classList.add('hidden');
     };
 
-    // Open Update Modal (Removed Price Argument)
+    // Open Update Modal
     window.openUpdateModal = function(id, name, stock, expiry) {
         document.getElementById('updateMedId').value = id;
         document.getElementById('updateMedName').textContent = name;
