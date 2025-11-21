@@ -165,6 +165,9 @@ include __DIR__ . '/../../includes/header.php';
             <a href="<?= SITE_URL ?>/views/admin/flash-sales.php" class="btn btn-outline text-center py-6 border-lime-accent text-deep-green hover:bg-lime-accent">
     ⚡ Flash Sales
 </a>
+<a href="<?= SITE_URL ?>/views/admin/messages.php" class="btn btn-outline text-center py-6 border-lime-accent text-deep-green hover:bg-lime-accent">
+    💬 Messages
+</a>
         </div>
 
         <div class="grid lg:grid-cols-2 gap-8">
