@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin - Manage Medicines
+ * Admin - Manage Medicines (FIXED)
  */
 
 require_once __DIR__ . '/../../config.php';
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     if ($id > 0) {
-        // Update
+        // Update existing medicine
         $query = "UPDATE medicines SET name=?, generic_name=?, brand=?, category=?, power=?, 
                   form=?, description=?, manufacturer=?, requires_prescription=?";
         $types = "ssssssssi";
@@ -55,10 +55,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($stmt->execute()) {
             $_SESSION['success'] = 'Medicine updated successfully';
         } else {
-            $_SESSION['error'] = 'Failed to update medicine';
+            $_SESSION['error'] = 'Failed to update medicine: ' . $stmt->error;
         }
     } else {
-        // Add new
+        // Add new medicine
         $query = "INSERT INTO medicines (name, generic_name, brand, category, power, form, description, image, manufacturer, requires_prescription)
                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($query);
@@ -67,11 +67,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($stmt->execute()) {
             $_SESSION['success'] = 'Medicine added successfully';
         } else {
-            $_SESSION['error'] = 'Failed to add medicine';
+            $_SESSION['error'] = 'Failed to add medicine: ' . $stmt->error;
         }
     }
     
-    redirect('medicines.php');
+    redirect('views/admin/medicines.php');
 }
 
 // Handle Delete
@@ -87,10 +87,10 @@ if (isset($_GET['delete'])) {
         $_SESSION['error'] = 'Failed to delete medicine';
     }
     
-    redirect('medicines.php');
+    redirect('views/admin/medicines.php');
 }
 
-// Get all medicines
+// Search Filter
 $search = clean($_GET['search'] ?? '');
 $whereClause = "";
 $params = [];
@@ -103,15 +103,17 @@ if ($search) {
     $types = "sss";
 }
 
+// Get all medicines
 $query = "SELECT m.*, 
           (SELECT COUNT(*) FROM shop_medicines WHERE medicine_id = m.id) as shop_count,
           (SELECT SUM(stock_quantity) FROM shop_medicines WHERE medicine_id = m.id) as total_stock
           FROM medicines m
           $whereClause
           ORDER BY m.name ASC";
+
 $stmt = $conn->prepare($query);
 
-if ($params) {
+if (!empty($params)) {
     $stmt->bind_param($types, ...$params);
 }
 
@@ -160,47 +162,56 @@ include __DIR__ . '/../../includes/header.php';
                             <th>Generic</th>
                             <th>Category</th>
                             <th>Power</th>
-                            <th>Stock</th>
+                            <th>Total Stock</th>
                             <th>Shops</th>
                             <th>Rx</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while ($med = $medicines->fetch_assoc()): ?>
+                        <?php if ($medicines->num_rows === 0): ?>
                             <tr>
-                                <td>
-                                    <img 
-                                        src="<?= SITE_URL ?>/uploads/medicines/<?= $med['image'] ?? 'placeholder.png' ?>" 
-                                        alt="<?= htmlspecialchars($med['name']) ?>"
-                                        class="w-16 h-16 object-contain border-2 border-deep-green"
-                                    >
-                                </td>
-                                <td class="font-bold"><?= htmlspecialchars($med['name']) ?></td>
-                                <td><?= htmlspecialchars($med['generic_name']) ?></td>
-                                <td><span class="badge badge-info"><?= htmlspecialchars($med['category']) ?></span></td>
-                                <td><?= htmlspecialchars($med['power']) ?></td>
-                                <td class="font-bold"><?= $med['total_stock'] ?? 0 ?></td>
-                                <td><?= $med['shop_count'] ?></td>
-                                <td>
-                                    <?php if ($med['requires_prescription']): ?>
-                                        <span class="badge badge-warning">Yes</span>
-                                    <?php else: ?>
-                                        <span class="badge badge-success">No</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <div class="flex gap-2">
-                                        <button onclick='editMedicine(<?= json_encode($med) ?>)' class="btn btn-outline btn-sm">
-                                            ✏️ Edit
-                                        </button>
-                                        <button onclick="deleteMedicine(<?= $med['id'] ?>)" class="btn btn-outline btn-sm border-red-500 text-red-600">
-                                            🗑️ Delete
-                                        </button>
-                                    </div>
+                                <td colspan="9" class="text-center py-8 text-xl text-gray-500">
+                                    No medicines found.
                                 </td>
                             </tr>
-                        <?php endwhile; ?>
+                        <?php else: ?>
+                            <?php while ($med = $medicines->fetch_assoc()): ?>
+                                <tr>
+                                    <td>
+                                        <img 
+                                            src="<?= SITE_URL ?>/uploads/medicines/<?= $med['image'] ?? 'placeholder.png' ?>" 
+                                            alt="<?= htmlspecialchars($med['name']) ?>"
+                                            class="w-16 h-16 object-contain border-2 border-deep-green bg-white"
+                                            onerror="this.src='<?= SITE_URL ?>/assets/images/placeholder.png'"
+                                        >
+                                    </td>
+                                    <td class="font-bold text-deep-green"><?= htmlspecialchars($med['name']) ?></td>
+                                    <td><?= htmlspecialchars($med['generic_name']) ?></td>
+                                    <td><span class="badge badge-info"><?= htmlspecialchars($med['category']) ?></span></td>
+                                    <td><?= htmlspecialchars($med['power']) ?></td>
+                                    <td class="font-bold"><?= $med['total_stock'] ?? 0 ?></td>
+                                    <td><?= $med['shop_count'] ?></td>
+                                    <td>
+                                        <?php if ($med['requires_prescription']): ?>
+                                            <span class="badge badge-warning">Yes</span>
+                                        <?php else: ?>
+                                            <span class="badge badge-success">No</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <div class="flex gap-2">
+                                            <button onclick='editMedicine(<?= json_encode($med) ?>)' class="btn btn-outline btn-sm">
+                                                ✏️ Edit
+                                            </button>
+                                            <button onclick="deleteMedicine(<?= $med['id'] ?>)" class="btn btn-outline btn-sm border-red-500 text-red-600">
+                                                🗑️ Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -211,9 +222,9 @@ include __DIR__ . '/../../includes/header.php';
 <!-- Add/Edit Modal -->
 <div id="medicineModal" class="modal-overlay hidden">
     <div class="modal max-w-4xl">
-        <div class="modal-header">
+        <div class="modal-header bg-deep-green text-white">
             <h3 class="text-2xl font-bold" id="modalTitle">Add Medicine</h3>
-            <button onclick="closeModal()" class="modal-close">×</button>
+            <button onclick="closeModal()" class="text-3xl text-white">&times;</button>
         </div>
         <div class="modal-body">
             <form method="POST" enctype="multipart/form-data" id="medicineForm">
@@ -298,8 +309,8 @@ include __DIR__ . '/../../includes/header.php';
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-full mt-6 text-xl py-4">
-                    Save Medicine
+                <button type="submit" class="btn btn-primary w-full mt-6 text-xl py-4 neon-border">
+                    💾 Save Medicine
                 </button>
             </form>
         </div>
@@ -348,6 +359,14 @@ async function deleteMedicine(id) {
 
     if (result.isConfirmed) {
         window.location.href = '?delete=' + id;
+    }
+}
+
+// Close modal on outside click
+window.onclick = function(event) {
+    const modal = document.getElementById('medicineModal');
+    if (event.target == modal) {
+        closeModal();
     }
 }
 </script>
