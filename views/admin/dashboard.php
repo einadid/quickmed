@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin Dashboard - Complete System Overview
+ * Admin Dashboard - Master Control (Re-designed)
  */
 
 require_once __DIR__ . '/../../config.php';
@@ -8,297 +8,236 @@ require_once __DIR__ . '/../../config.php';
 requireLogin();
 requireRole('admin');
 
-$pageTitle = 'Admin Dashboard - QuickMed';
+$pageTitle = 'Master Control - Admin';
 
-// --- 1. KEY METRICS & PROFIT CALCULATION ---
-// (Added profit logic into the main query)
+// --- 1. LIVE STATS LOGIC (From Code 1) ---
 $statsQuery = "SELECT 
     (SELECT COUNT(*) FROM users WHERE role_id = 1) as total_customers,
-    (SELECT COUNT(*) FROM users WHERE role_id IN (2,3) AND is_active = 1) as total_staff,
-    (SELECT COUNT(*) FROM medicines) as total_medicines,
     (SELECT COUNT(*) FROM shops WHERE is_active = 1) as active_shops,
     (SELECT COUNT(*) FROM orders) as total_orders,
     (SELECT COALESCE(SUM(total_amount), 0) FROM orders) as total_revenue,
-    (SELECT COALESCE(SUM((oi.price - sm.purchase_price) * oi.quantity), 0)
-      FROM order_items oi
-      JOIN shop_medicines sm ON oi.medicine_id = sm.medicine_id AND oi.shop_id = sm.shop_id) as total_profit,
-    (SELECT COUNT(*) FROM prescriptions WHERE status = 'pending') as pending_prescriptions,
-    (SELECT COUNT(*) FROM parcels WHERE status = 'delivered') as delivered_parcels,
-    (SELECT COUNT(*) FROM parcels) as total_parcels";
+    (SELECT COUNT(*) FROM prescriptions WHERE status = 'pending') as pending_rx,
+    (SELECT COUNT(*) FROM contact_messages) as total_messages,
+    (SELECT COUNT(*) FROM reviews WHERE is_approved = 0) as pending_reviews";
 $stats = $conn->query($statsQuery)->fetch_assoc();
 
-// --- 2. TODAY'S STATS ---
-$today = date('Y-m-d');
-$todayQuery = "SELECT 
-    COUNT(*) as today_orders,
-    SUM(total_amount) as today_revenue
-    FROM orders
-    WHERE DATE(created_at) = ?";
-$todayStmt = $conn->prepare($todayQuery);
-$todayStmt->bind_param("s", $today);
-$todayStmt->execute();
-$todayStats = $todayStmt->get_result()->fetch_assoc();
+// Profit Calc (From Code 1)
+$profitQuery = "SELECT COALESCE(SUM((oi.price - sm.purchase_price) * oi.quantity), 0) as profit 
+                FROM order_items oi 
+                JOIN shop_medicines sm ON oi.medicine_id = sm.medicine_id AND oi.shop_id = sm.shop_id";
+$profit = $conn->query($profitQuery)->fetch_assoc()['profit'];
 
-// --- 3. RECENT ORDERS ---
-$recentOrdersQuery = "SELECT o.*, u.full_name
-                      FROM orders o
-                      LEFT JOIN users u ON o.user_id = u.id
-                      ORDER BY o.created_at DESC
-                      LIMIT 10";
-$recentOrders = $conn->query($recentOrdersQuery);
+// Recent Activities (From Code 1)
+$recentOrders = $conn->query("SELECT o.*, u.full_name FROM orders o LEFT JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC LIMIT 10");
 
-// --- 4. SHOP PERFORMANCE ---
-$shopPerformanceQuery = "SELECT s.name, s.city,
-                          COUNT(p.id) as total_orders,
-                          SUM(p.subtotal) as total_sales
-                          FROM shops s
-                          LEFT JOIN parcels p ON s.id = p.shop_id
-                          WHERE s.is_active = 1
-                          GROUP BY s.id
-                          ORDER BY total_sales DESC";
-$shopPerformance = $conn->query($shopPerformanceQuery);
-
-// --- 5. TOP SELLING MEDICINES (NEW FUNCTION) ---
-$topSellingQuery = "SELECT m.name, SUM(oi.quantity) as sold
-                    FROM order_items oi
-                    JOIN medicines m ON oi.medicine_id = m.id
-                    GROUP BY m.id 
-                    ORDER BY sold DESC 
-                    LIMIT 5";
-$topSelling = $conn->query($topSellingQuery);
-
-// --- 6. LOW STOCK ALERT ---
-$lowStockQuery = "SELECT m.name, s.name as shop_name, sm.stock_quantity, sm.reorder_level
-                  FROM shop_medicines sm
-                  JOIN medicines m ON sm.medicine_id = m.id
-                  JOIN shops s ON sm.shop_id = s.id
-                  WHERE sm.stock_quantity <= sm.reorder_level
-                  ORDER BY sm.stock_quantity ASC
-                  LIMIT 10";
-$lowStock = $conn->query($lowStockQuery);
-
-// Delivery success rate
-$deliveryRate = 0;
-if ($stats['total_parcels'] > 0) {
-    $deliveryRate = round(($stats['delivered_parcels'] / $stats['total_parcels']) * 100, 1);
-}
+// Calculate Total Pending Tasks for the Alert Card
+$totalPendingTasks = $stats['pending_rx'] + $stats['total_messages'] + $stats['pending_reviews'];
 
 include __DIR__ . '/../../includes/header.php';
 ?>
 
 <section class="container mx-auto px-4 py-16 min-h-screen">
     <div class="max-w-7xl mx-auto">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-12" data-aos="fade-down">
+        
+        <div class="flex flex-col md:flex-row justify-between items-center mb-12 gap-4" data-aos="fade-down">
             <div>
                 <h1 class="text-5xl font-bold text-deep-green mb-2 font-mono uppercase">
-                    👑 Admin Dashboard
+                    👑 Master Control
                 </h1>
-                <p class="text-xl text-gray-600">Complete System Overview</p>
+                <p class="text-xl text-gray-600">Admin Panel & System Overview</p>
             </div>
-            <div class="text-right">
-                <p class="text-sm text-gray-500">Logged in as</p>
-                <p class="text-xl font-bold text-deep-green"><?= htmlspecialchars(getCurrentUser()['full_name']) ?></p>
+            <div class="text-right bg-white border-4 border-deep-green p-4 shadow-[4px_4px_0px_0px_rgba(6,95,70,1)]">
+                <p class="text-sm font-bold text-gray-500 uppercase tracking-wider">SYSTEM TIME</p>
+                <p class="text-xl font-mono font-bold text-deep-green"><?= date('h:i A | d M Y') ?></p>
             </div>
         </div>
 
-        <!-- Today's Stats -->
         <div class="grid md:grid-cols-2 gap-6 mb-8" data-aos="fade-up">
-            <div class="card bg-lime-accent border-4 border-deep-green">
-                <div class="flex items-center justify-between">
+            <div class="card bg-lime-accent border-4 border-deep-green p-6 shadow-sm relative overflow-hidden group hover:shadow-lg transition-all">
+                <div class="flex items-center justify-between z-10 relative">
                     <div>
-                        <p class="text-sm font-bold text-deep-green mb-2">TODAY'S ORDERS</p>
-                        <p class="text-5xl font-bold text-deep-green"><?= $todayStats['today_orders'] ?? 0 ?></p>
+                        <p class="text-sm font-bold text-deep-green mb-2 uppercase tracking-wider">Total Revenue</p>
+                        <p class="text-5xl font-bold text-deep-green">৳<?= number_format($stats['total_revenue']) ?></p>
+                        <p class="text-sm font-bold text-deep-green mt-2 opacity-75">Lifetime Earnings</p>
                     </div>
-                    <div class="text-7xl">📦</div>
+                    <div class="text-7xl opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">💰</div>
                 </div>
             </div>
 
-            <div class="card bg-white border-4 border-deep-green">
-                <div class="flex items-center justify-between">
+            <div class="card bg-white border-4 border-deep-green p-6 shadow-sm relative overflow-hidden group hover:shadow-lg transition-all">
+                <div class="flex items-center justify-between z-10 relative">
                     <div>
-                        <p class="text-sm font-bold text-deep-green mb-2">TODAY'S REVENUE</p>
-                        <p class="text-4xl font-bold text-deep-green">৳<?= number_format($todayStats['today_revenue'] ?? 0, 2) ?></p>
+                        <p class="text-sm font-bold text-deep-green mb-2 uppercase tracking-wider">Net Profit</p>
+                        <p class="text-5xl font-bold text-deep-green">৳<?= number_format($profit) ?></p>
+                        <p class="text-sm font-bold text-green-600 mt-2">Pure Income</p>
                     </div>
-                    <div class="text-7xl">💰</div>
+                    <div class="text-7xl opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">📈</div>
                 </div>
             </div>
         </div>
 
-        <!-- Overall Stats Grid (Updated with Profit) -->
-        <div class="grid md:grid-cols-5 gap-6 mb-12">
-            <div class="card bg-white border-4 border-deep-green" data-aos="fade-up" data-aos-delay="0">
-                <p class="text-sm font-bold text-deep-green mb-2">TOTAL REVENUE</p>
-                <p class="text-2xl font-bold text-deep-green">৳<?= number_format($stats['total_revenue'] ?? 0) ?></p>
-                <p class="text-xs text-gray-600">Lifetime</p>
+        <div class="grid md:grid-cols-4 gap-6 mb-12">
+            <div class="card bg-white border-4 border-deep-green p-6" data-aos="fade-up" data-aos-delay="0">
+                <p class="text-sm font-bold text-deep-green mb-2 uppercase">Total Orders</p>
+                <p class="text-3xl font-bold text-deep-green"><?= number_format($stats['total_orders']) ?></p>
+                <p class="text-sm text-gray-600 mt-1">Processed</p>
             </div>
 
-            <!-- NEW PROFIT CARD -->
-            <div class="card bg-white border-4 border-lime-600" data-aos="fade-up" data-aos-delay="100">
-                <p class="text-sm font-bold text-lime-700 mb-2">NET PROFIT</p>
-                <p class="text-2xl font-bold text-lime-700">৳<?= number_format($stats['total_profit'] ?? 0) ?></p>
-                <p class="text-xs text-gray-600">Calculated Margin</p>
+            <div class="card bg-white border-4 border-deep-green p-6" data-aos="fade-up" data-aos-delay="100">
+                <p class="text-sm font-bold text-deep-green mb-2 uppercase">Customers</p>
+                <p class="text-3xl font-bold text-deep-green"><?= number_format($stats['total_customers']) ?></p>
+                <p class="text-sm text-gray-600 mt-1">Registered Users</p>
             </div>
 
-            <div class="card bg-white border-4 border-deep-green" data-aos="fade-up" data-aos-delay="200">
-                <p class="text-sm font-bold text-deep-green mb-2">CUSTOMERS</p>
-                <p class="text-3xl font-bold text-deep-green"><?= $stats['total_customers'] ?></p>
-                <p class="text-xs text-gray-600">Registered</p>
-            </div>
-
-            <div class="card bg-white border-4 border-deep-green" data-aos="fade-up" data-aos-delay="300">
-                <p class="text-sm font-bold text-deep-green mb-2">ACTIVE SHOPS</p>
+            <div class="card bg-white border-4 border-deep-green p-6" data-aos="fade-up" data-aos-delay="200">
+                <p class="text-sm font-bold text-deep-green mb-2 uppercase">Active Shops</p>
                 <p class="text-3xl font-bold text-deep-green"><?= $stats['active_shops'] ?></p>
-                <p class="text-xs text-gray-600"><?= $stats['total_staff'] ?> Staff</p>
+                <p class="text-sm text-gray-600 mt-1">Branches</p>
             </div>
 
-            <div class="card bg-white border-4 border-lime-accent" data-aos="fade-up" data-aos-delay="400">
-                <p class="text-sm font-bold text-deep-green mb-2">DELIVERY RATE</p>
-                <p class="text-3xl font-bold text-lime-accent"><?= $deliveryRate ?>%</p>
-                <p class="text-xs text-gray-600">Success</p>
+            <div class="card <?= $totalPendingTasks > 0 ? 'bg-red-50 border-red-500' : 'bg-white border-lime-accent' ?> border-4 p-6" data-aos="fade-up" data-aos-delay="300">
+                <p class="text-sm font-bold <?= $totalPendingTasks > 0 ? 'text-red-600' : 'text-deep-green' ?> mb-2 uppercase">Needs Attention</p>
+                <p class="text-3xl font-bold <?= $totalPendingTasks > 0 ? 'text-red-600' : 'text-deep-green' ?>">
+                    <?= $totalPendingTasks ?>
+                </p>
+                <p class="text-sm <?= $totalPendingTasks > 0 ? 'text-red-500' : 'text-gray-600' ?> mt-1">Pending Tasks</p>
             </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="grid md:grid-cols-6 gap-4 mb-12" data-aos="fade-up">
-            <a href="<?= SITE_URL ?>/views/admin/medicines.php" class="btn btn-primary text-center py-6">
-                💊 Medicines
+        <h2 class="text-2xl font-bold text-deep-green mb-6 uppercase border-b-4 border-deep-green pb-3 inline-block">
+            🚀 Quick Actions
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-12" data-aos="fade-up">
+            
+            <a href="medicines.php" class="btn btn-outline h-auto flex flex-col gap-2 py-6 border-2 hover:bg-deep-green hover:text-white transition-all group">
+                <span class="text-3xl group-hover:scale-110 transition-transform">💊</span>
+                <span class="font-bold uppercase tracking-wide">Medicines</span>
             </a>
-            <a href="<?= SITE_URL ?>/views/admin/shops.php" class="btn btn-outline text-center py-6">
-                🏪 Shops
+
+            <a href="shops.php" class="btn btn-outline h-auto flex flex-col gap-2 py-6 border-2 hover:bg-deep-green hover:text-white transition-all group">
+                <span class="text-3xl group-hover:scale-110 transition-transform">🏪</span>
+                <span class="font-bold uppercase tracking-wide">Shops</span>
             </a>
-            <a href="<?= SITE_URL ?>/views/admin/users.php" class="btn btn-outline text-center py-6">
-                👥 Users
+
+            <a href="users.php" class="btn btn-outline h-auto flex flex-col gap-2 py-6 border-2 hover:bg-deep-green hover:text-white transition-all group">
+                <span class="text-3xl group-hover:scale-110 transition-transform">👥</span>
+                <span class="font-bold uppercase tracking-wide">Users</span>
             </a>
-            <a href="<?= SITE_URL ?>/views/admin/codes.php" class="btn btn-outline text-center py-6">
-                🎫 Codes
+
+            <a href="codes.php" class="btn btn-outline h-auto flex flex-col gap-2 py-6 border-2 hover:bg-deep-green hover:text-white transition-all group">
+                <span class="text-3xl group-hover:scale-110 transition-transform">🎫</span>
+                <span class="font-bold uppercase tracking-wide">Codes</span>
             </a>
-            <a href="<?= SITE_URL ?>/views/admin/prescriptions.php" class="btn btn-outline text-center py-6">
-                📋 Rx
-                <?php if ($stats['pending_prescriptions'] > 0): ?>
-                    <span class="badge badge-danger ml-1"><?= $stats['pending_prescriptions'] ?></span>
+
+            <a href="prescriptions.php" class="btn btn-outline h-auto flex flex-col gap-2 py-6 border-2 hover:bg-deep-green hover:text-white transition-all group relative">
+                <span class="text-3xl group-hover:scale-110 transition-transform">📋</span>
+                <span class="font-bold uppercase tracking-wide">Prescriptions</span>
+                <?php if ($stats['pending_rx'] > 0): ?>
+                    <span class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+                        <?= $stats['pending_rx'] ?>
+                    </span>
                 <?php endif; ?>
             </a>
-            <a href="<?= SITE_URL ?>/views/admin/reports.php" class="btn btn-outline text-center py-6">
-                📊 Reports
+
+            <a href="reports.php" class="btn btn-outline h-auto flex flex-col gap-2 py-6 border-2 hover:bg-deep-green hover:text-white transition-all group">
+                <span class="text-3xl group-hover:scale-110 transition-transform">📊</span>
+                <span class="font-bold uppercase tracking-wide">Reports</span>
+            </a>
+
+            <a href="flash-sales.php" class="btn btn-outline h-auto flex flex-col gap-2 py-6 border-2 border-lime-accent text-deep-green hover:bg-lime-accent hover:text-deep-green transition-all group">
+                <span class="text-3xl group-hover:scale-110 transition-transform">⚡</span>
+                <span class="font-bold uppercase tracking-wide">Flash Sales</span>
+            </a>
+
+            <a href="messages.php" class="btn btn-outline h-auto flex flex-col gap-2 py-6 border-2 hover:bg-deep-green hover:text-white transition-all group relative">
+                <span class="text-3xl group-hover:scale-110 transition-transform">💬</span>
+                <span class="font-bold uppercase tracking-wide">Messages</span>
+                <?php if ($stats['total_messages'] > 0): ?>
+                    <span class="absolute top-2 right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+                        <?= $stats['total_messages'] ?>
+                    </span>
+                <?php endif; ?>
+            </a>
+
+            <a href="reviews.php" class="btn btn-outline h-auto flex flex-col gap-2 py-6 border-2 hover:bg-deep-green hover:text-white transition-all group relative">
+                <span class="text-3xl group-hover:scale-110 transition-transform">⭐</span>
+                <span class="font-bold uppercase tracking-wide">Reviews</span>
+                <?php if ($stats['pending_reviews'] > 0): ?>
+                    <span class="absolute top-2 right-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+                        <?= $stats['pending_reviews'] ?>
+                    </span>
+                <?php endif; ?>
+            </a>
+
+            <a href="audit-logs.php" class="btn btn-outline h-auto flex flex-col gap-2 py-6 border-2 hover:bg-deep-green hover:text-white transition-all group">
+                <span class="text-3xl group-hover:scale-110 transition-transform">🛡️</span>
+                <span class="font-bold uppercase tracking-wide">Audit Logs</span>
             </a>
         </div>
 
-        <div class="grid lg:grid-cols-2 gap-8">
-            <!-- Recent Orders -->
-            <div class="card bg-white border-4 border-deep-green" data-aos="fade-right">
-                <h2 class="text-2xl font-bold text-deep-green mb-6 uppercase border-b-4 border-deep-green pb-3">
-                    📋 Recent Orders
+        <div class="card bg-white border-4 border-deep-green shadow-lg" data-aos="fade-up">
+            <div class="p-6 border-b-4 border-deep-green bg-gray-50 flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-deep-green uppercase tracking-wide">
+                    📋 Recent Transactions
                 </h2>
+                <a href="reports.php" class="text-xs bg-deep-green text-white px-4 py-2 rounded font-bold hover:bg-lime-accent hover:text-deep-green transition uppercase tracking-wider">View All</a>
+            </div>
 
-                <div class="overflow-x-auto">
-                    <table class="table w-full">
-                        <thead>
-                            <tr>
-                                <th>Order #</th>
-                                <th>Customer</th>
-                                <th>Amount</th>
-                                <th>Date</th>
+            <div class="overflow-x-auto">
+                <table class="table w-full text-left">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-600 uppercase text-sm">
+                            <th class="p-4 font-bold border-b-2 border-gray-200">Order ID</th>
+                            <th class="p-4 font-bold border-b-2 border-gray-200">Customer</th>
+                            <th class="p-4 font-bold border-b-2 border-gray-200">Status</th>
+                            <th class="p-4 font-bold border-b-2 border-gray-200">Amount</th>
+                            <th class="p-4 font-bold border-b-2 border-gray-200">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <?php while ($order = $recentOrders->fetch_assoc()): ?>
+                            <tr class="hover:bg-lime-50 transition-colors duration-200">
+                                <td class="p-4 font-mono font-bold text-deep-green">
+                                    #<?= $order['order_number'] ?>
+                                </td>
+                                <td class="p-4 font-medium text-gray-700">
+                                    <?= htmlspecialchars($order['full_name'] ?: $order['customer_name']) ?>
+                                </td>
+                                <td class="p-4">
+                                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold border border-green-200 uppercase">
+                                        Paid
+                                    </span>
+                                </td>
+                                <td class="p-4 font-mono font-bold text-deep-green">
+                                    ৳<?= number_format($order['total_amount']) ?>
+                                </td>
+                                <td class="p-4 text-sm text-gray-500 font-mono">
+                                    <?= date('d M Y', strtotime($order['created_at'])) ?>
+                                    <span class="text-xs text-gray-400 block"><?= date('h:i A', strtotime($order['created_at'])) ?></span>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <?php while ($order = $recentOrders->fetch_assoc()): ?>
-                                <tr>
-                                    <td class="font-mono"><?= htmlspecialchars($order['order_number']) ?></td>
-                                    <td><?= htmlspecialchars($order['full_name'] ?? $order['customer_name']) ?></td>
-                                    <td class="font-bold">৳<?= number_format($order['total_amount']) ?></td>
-                                    <td class="text-sm"><?= timeAgo($order['created_at']) ?></td>
-                                </tr>
-                            <?php endwhile; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Right Column: Shop Performance & Top Selling -->
-            <div class="space-y-8" data-aos="fade-left">
-                
-                <!-- Shop Performance -->
-                <div class="card bg-white border-4 border-deep-green">
-                    <h2 class="text-2xl font-bold text-deep-green mb-6 uppercase border-b-4 border-deep-green pb-3">
-                        🏪 Shop Performance
-                    </h2>
-                    <div class="space-y-4">
-                        <?php while ($shop = $shopPerformance->fetch_assoc()): ?>
-                            <div class="border-2 border-gray-200 p-3 hover:border-lime-accent transition-all">
-                                <div class="flex justify-between items-center mb-2">
-                                    <div>
-                                        <p class="font-bold"><?= htmlspecialchars($shop['name']) ?></p>
-                                        <p class="text-xs text-gray-600">📍 <?= htmlspecialchars($shop['city']) ?></p>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-lg font-bold text-deep-green">৳<?= number_format($shop['total_sales'] ?? 0) ?></p>
-                                    </div>
-                                </div>
-                                <div class="bg-gray-200 h-2 border-2 border-gray-300">
-                                    <?php
-                                    $maxSales = $stats['total_revenue'] > 0 ? $stats['total_revenue'] : 1;
-                                    $percentage = ($shop['total_sales'] / $maxSales) * 100;
-                                    ?>
-                                    <div class="bg-lime-accent h-full transition-all" style="width: <?= $percentage ?>%"></div>
-                                </div>
-                            </div>
                         <?php endwhile; ?>
-                    </div>
-                </div>
-
-                <!-- NEW: Top Selling Medicines -->
-                <div class="card bg-white border-4 border-lime-600">
-                    <h2 class="text-2xl font-bold text-deep-green mb-6 uppercase border-b-4 border-lime-600 pb-3">
-                        🔥 Top Selling Items
-                    </h2>
-                    <div class="space-y-3">
-                        <?php $rank = 1; while ($top = $topSelling->fetch_assoc()): ?>
-                            <div class="flex items-center gap-3">
-                                <span class="text-xl font-bold text-gray-300">#<?= $rank++ ?></span>
-                                <div class="flex-1">
-                                    <div class="flex justify-between mb-1">
-                                        <span class="font-bold text-gray-700"><?= htmlspecialchars($top['name']) ?></span>
-                                        <span class="text-sm text-gray-600"><?= $top['sold'] ?> sold</span>
-                                    </div>
-                                    <div class="bg-gray-200 h-2 rounded-full overflow-hidden">
-                                        <div class="bg-deep-green h-full" style="width: <?= rand(40, 90) ?>%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endwhile; ?>
-                    </div>
-                </div>
-
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <!-- Low Stock Alert -->
-        <?php if ($lowStock->num_rows > 0): ?>
-        <div class="card bg-red-50 border-4 border-red-500 mt-8" data-aos="fade-up">
-            <h2 class="text-2xl font-bold text-red-600 mb-6 uppercase border-b-4 border-red-500 pb-3">
-                ⚠️ Critical Stock Alert
-            </h2>
-
-            <div class="grid md:grid-cols-2 gap-4">
-                <?php while ($item = $lowStock->fetch_assoc()): ?>
-                    <div class="bg-white border-2 border-red-300 p-4">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-bold text-red-600"><?= htmlspecialchars($item['name']) ?></p>
-                                <p class="text-sm text-gray-600">🏪 <?= htmlspecialchars($item['shop_name']) ?></p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-3xl font-bold text-red-600"><?= $item['stock_quantity'] ?></p>
-                                <p class="text-xs text-gray-500">Min: <?= $item['reorder_level'] ?></p>
-                            </div>
-                        </div>
-                    </div>
-                <?php endwhile; ?>
-            </div>
-        </div>
-        <?php endif; ?>
     </div>
 </section>
+
+<style>
+    /* Custom overrides to ensure the brutalist look matches Code 2 perfectly */
+    .card {
+        border-radius: 0.5rem; /* Standard rounded usually, but Code 2 implies sharper or slightly rounded */
+    }
+    .btn-outline {
+        background: white;
+        color: #065f46; /* Deep Green */
+        border-color: #e5e7eb;
+    }
+    .btn-outline:hover {
+        border-color: #065f46;
+    }
+</style>
 
 <?php include __DIR__ . '/../../includes/footer.php'; ?>

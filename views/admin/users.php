@@ -94,7 +94,6 @@ include __DIR__ . '/../../includes/header.php';
             <a href="<?= SITE_URL ?>/views/admin/dashboard.php" class="btn btn-outline">← Dashboard</a>
         </div>
 
-        <!-- Filters -->
         <div class="card bg-white border-4 border-deep-green mb-8" data-aos="fade-up">
             <form method="GET" class="grid md:grid-cols-4 gap-4">
                 <div class="md:col-span-2">
@@ -128,7 +127,6 @@ include __DIR__ . '/../../includes/header.php';
             </form>
         </div>
 
-        <!-- Users Table -->
         <div class="card bg-white border-4 border-deep-green" data-aos="fade-up">
             <div class="overflow-x-auto">
                 <table class="table w-full">
@@ -150,7 +148,14 @@ include __DIR__ . '/../../includes/header.php';
                         <?php while ($user = $users->fetch_assoc()): ?>
                             <tr class="<?= $user['is_banned'] ? 'bg-red-50' : '' ?>">
                                 <td class="font-mono">#<?= $user['id'] ?></td>
-                                <td class="font-bold"><?= htmlspecialchars($user['full_name']) ?></td>
+                                
+                                <td class="font-bold">
+                                    <a href="user-details.php?id=<?= $user['id'] ?>" class="hover:text-lime-600 hover:underline flex items-center gap-2">
+                                        <?= htmlspecialchars($user['full_name']) ?> 
+                                        <span class="text-xs text-gray-400">↗</span>
+                                    </a>
+                                </td>
+
                                 <td><?= htmlspecialchars($user['email']) ?></td>
                                 <td><?= htmlspecialchars($user['phone']) ?></td>
                                 <td>

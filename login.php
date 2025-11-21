@@ -154,24 +154,6 @@ include 'includes/header.php';
             </form>
         </div>
         
-        <!-- Quick Login Info (for demo) -->
-        <div class="card bg-light-green mt-6" data-aos="fade-up">
-            <h3 class="font-bold text-green mb-3 uppercase">🔑 Demo Login Credentials</h3>
-            <div class="space-y-2 text-sm">
-                <div class="bg-white border-2 border-green p-2">
-                    <strong>Admin:</strong> admin@quickmed.com / Admin@123
-                </div>
-                <div class="bg-white border-2 border-green p-2">
-                    <strong>Customer:</strong> customer@gmail.com / Customer@123
-                </div>
-                <div class="bg-white border-2 border-green p-2">
-                    <strong>Salesman:</strong> salesman@quickmed.com / Staff@123
-                </div>
-                <div class="bg-white border-2 border-green p-2">
-                    <strong>Manager:</strong> manager@quickmed.com / Staff@123
-                </div>
-            </div>
-        </div>
     </div>
 </section>
 
