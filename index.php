@@ -164,4 +164,84 @@ include 'includes/header.php';
     </div>
 </section>
 
+
+<!-- CART SCRIPT (Directly Embedded to Fix ReferenceError) -->
+<script>
+async function addToCart(medicineId, shopId, quantity) {
+    quantity = quantity || 1;
+    const siteUrl = '<?= SITE_URL ?>'; // Get dynamic URL from PHP
+
+    try {
+        const formData = new FormData();
+        formData.append('medicine_id', medicineId);
+        formData.append('shop_id', shopId);
+        formData.append('quantity', quantity);
+
+        const response = await fetch(siteUrl + '/ajax/add_to_cart.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const text = await response.text();
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (e) {
+            throw new Error('Server Error: ' + text);
+        }
+
+        if (result.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Added!',
+                text: 'Item added to cart successfully.',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                background: '#065f46',
+                color: '#fff'
+            });
+
+            // Update Cart Badge
+            const badges = document.querySelectorAll('.cart-count, .absolute.-top-2');
+            badges.forEach(b => {
+                b.innerText = result.cart_count;
+                b.classList.remove('hidden');
+                b.classList.add('animate-bounce');
+            });
+
+        } else {
+            if (result.message === 'login_required') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Login Required',
+                    text: 'Please login to continue shopping.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Login',
+                    confirmButtonColor: '#065f46'
+                }).then((res) => {
+                    if(res.isConfirmed) window.location.href = siteUrl + '/login.php';
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: result.message,
+                    confirmButtonColor: '#065f46'
+                });
+            }
+        }
+    } catch (error) {
+        console.error(error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Something went wrong. Check console.',
+            confirmButtonColor: '#065f46'
+        });
+    }
+}
+</script>
+
 <?php include 'includes/footer.php'; ?>
