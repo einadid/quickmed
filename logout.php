@@ -1,37 +1,57 @@
 <?php
 /**
- * QuickMed - Logout
+ * QuickMed - Secure Logout Handler
  */
 
-require_once 'config.php';
-
-if (isLoggedIn()) {
-    $userId = $_SESSION['user_id'];
-    
-    // Log audit
-    logAudit('USER_LOGOUT', 'users', $userId);
-    
-    // Clear remember me cookie
-    if (isset($_COOKIE['remember_token'])) {
-        $token = $_COOKIE['remember_token'];
-        
-        // Delete from database
-        $deleteToken = "DELETE FROM sessions WHERE token = ?";
-        $stmt = $conn->prepare($deleteToken);
-        $stmt->bind_param("s", $token);
-        $stmt->execute();
-        
-        // Delete cookie
-        setcookie('remember_token', '', time() - 3600, '/');
-    }
-    
-    // Destroy session
-    session_unset();
-    session_destroy();
-    
-    // Start new session for message
+// 1. Load Config (Auto Path Detection)
+if (file_exists('config.php')) {
+    require_once 'config.php';
+} elseif (file_exists('../config.php')) {
+    require_once '../config.php';
+} elseif (file_exists('../../config.php')) {
+    require_once '../../config.php';
+} else {
+    // Fallback if config not found
     session_start();
-    $_SESSION['success'] = 'Logged out successfully!';
+    $site_url = 'index.php';
 }
 
-redirect('index.php');
+$site_url = defined('SITE_URL') ? SITE_URL : 'index.php';
+
+// 2. Log Audit if User Exists
+if (function_exists('isLoggedIn') && isLoggedIn()) {
+    $userId = $_SESSION['user_id'];
+    if (function_exists('logAudit')) {
+        logAudit('USER_LOGOUT', 'users', $userId);
+    }
+}
+
+// 3. Clear Cookies (Forcefully)
+if (isset($_COOKIE['remember_token'])) {
+    unset($_COOKIE['remember_token']);
+    setcookie('remember_token', '', time() - 3600, '/'); // Clear from root
+    setcookie('remember_token', '', time() - 3600, '/', $_SERVER['HTTP_HOST']); // Clear from domain
+}
+
+// 4. Destroy Session
+$_SESSION = array(); // Clear session data
+
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000,
+        $params["path"], $params["domain"],
+        $params["secure"], $params["httponly"]
+    );
+}
+
+session_destroy(); // Destroy session completely
+
+// 5. Safe Redirect (JS + PHP)
+if (!headers_sent()) {
+    header("Location: " . $site_url);
+} else {
+    echo "<script>window.location.href='" . $site_url . "';</script>";
+    echo "<noscript><meta http-equiv='refresh' content='0;url=" . $site_url . "'></noscript>";
+}
+exit();
+?>

@@ -1,71 +1,48 @@
-# ====================================================
-# QuickMed - Master Configuration File
-# Optimized for InfinityFree & Localhost
-# ====================================================
+# QuickMed - Localhost Configuration
 
-# 1. Basic Setup & Security
-# ----------------------------------------------------
-# Prevent directory listing (Hides file list if index.php is missing)
+RewriteEngine On
+
+# IMPORTANT: Change this if your folder name is different
+# If URL is localhost/quickmed, then use /quickmed/
+RewriteBase /quickmed/
+
+# 1. Custom Error Pages (Must include folder name)
+ErrorDocument 404 /quickmed/404.php
+ErrorDocument 403 /quickmed/404.php
+ErrorDocument 500 /quickmed/404.php
+
+# 2. Remove .php extension
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.*)$ $1.php [L]
+
+# 3. Prevent Directory Listing
 Options -Indexes
 
-# Protect sensitive files from direct access
-<FilesMatch "^(config\.php|\.env|\.htaccess|composer\.json|includes/.*)$">
+# 4. Protect Sensitive Files
+<FilesMatch "^(config\.php|\.env|\.htaccess)$">
     Order allow,deny
     Deny from all
 </FilesMatch>
 
-# 2. Rewrite Engine (URL Handling)
-# ----------------------------------------------------
-<IfModule mod_rewrite.c>
-    RewriteEngine On
+RewriteEngine On
+RewriteBase /quickmed/
 
-    # IMPORTANT: PATH CONFIGURATION
-    # For InfinityFree (Live Site): Use / 
-    # For XAMPP (Localhost): Use /quickmed/ (Uncomment the line below if testing locally)
-    RewriteBase /
-    # RewriteBase /quickmed/
+# 1. Custom Error Pages
+ErrorDocument 404 /quickmed/404.php
+ErrorDocument 403 /quickmed/404.php
+ErrorDocument 500 /quickmed/404.php
 
-    # Force HTTPS (Secure connection)
-    # Only runs if HTTPS is off to prevent infinite loops
-    RewriteCond %{HTTPS} off
-    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# 2. To remove .php extension (Optional)
+# যদি কেউ browser এ .php ছাড়া লেখে, তবে সার্ভার সেটাকে .php ফাইল হিসেবে চিনবে
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.*)$ $1.php [L]
 
-    # Remove .php extension (e.g., site.com/login -> site.com/login.php)
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME}\.php -f
-    RewriteRule ^(.*)$ $1.php [L]
+# 3. Allow direct access to existing files
+# যদি ফাইলটি বাস্তবে থাকে (যেমন index.php), তবে রিরাইট রুল এপ্লাই হবে না
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
 
-    # Custom Error Pages
-    # Ensure you have a 404.php file in your root directory
-    ErrorDocument 404 /404.php
-    ErrorDocument 403 /404.php
-    ErrorDocument 500 /404.php
-</IfModule>
-
-# 3. Security Headers (Protection against attacks)
-# ----------------------------------------------------
-<IfModule mod_headers.c>
-    # Protect against MIME sniffing
-    Header set X-Content-Type-Options "nosniff"
-    # Prevent clickjacking (allows framing only by same site)
-    Header set X-Frame-Options "SAMEORIGIN"
-    # Enable XSS filtering in browser
-    Header set X-XSS-Protection "1; mode=block"
-</IfModule>
-
-# 4. Browser Caching (Speed Optimization)
-# ----------------------------------------------------
-<IfModule mod_expires.c>
-    ExpiresActive On
-    # Images cache for 1 year
-    ExpiresByType image/jpg "access plus 1 year"
-    ExpiresByType image/jpeg "access plus 1 year"
-    ExpiresByType image/gif "access plus 1 year"
-    ExpiresByType image/png "access plus 1 year"
-    ExpiresByType image/webp "access plus 1 year"
-    
-    # CSS & JS cache for 1 month
-    ExpiresByType text/css "access plus 1 month"
-    ExpiresByType application/javascript "access plus 1 month"
-    ExpiresByType text/javascript "access plus 1 month"
-</IfModule>
+# 4. Prevent Directory Listing
+Options -Indexes
