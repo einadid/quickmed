@@ -14,47 +14,7 @@ include 'includes/header.php';
 
 <?php include 'includes/homepage/hero.php'; ?>
 
-<section class="relative z-20 -mt-10 px-4">
-    <div class="container mx-auto">
-        <div class="bg-white rounded-2xl shadow-2xl border-b-4 border-lime-accent p-8 md:p-12">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                
-                <div class="text-center group" data-aos="fade-up" data-aos-delay="0">
-                    <div class="w-20 h-20 mx-auto bg-green-50 rounded-full flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition duration-500 shadow-sm">
-                        ✅
-                    </div>
-                    <h3 class="text-xl font-bold text-deep-green mb-2">100% Genuine</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed">Sourced directly from authorized manufacturers with warranty.</p>
-                </div>
-
-                <div class="text-center group" data-aos="fade-up" data-aos-delay="100">
-                    <div class="w-20 h-20 mx-auto bg-blue-50 rounded-full flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition duration-500 shadow-sm">
-                        🚚
-                    </div>
-                    <h3 class="text-xl font-bold text-deep-green mb-2">Fast Delivery</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed">Express home delivery within 24-48 hours nationwide.</p>
-                </div>
-
-                <div class="text-center group" data-aos="fade-up" data-aos-delay="200">
-                    <div class="w-20 h-20 mx-auto bg-purple-50 rounded-full flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition duration-500 shadow-sm">
-                        🔒
-                    </div>
-                    <h3 class="text-xl font-bold text-deep-green mb-2">Secure Payment</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed">100% safe digital payments and Cash on Delivery.</p>
-                </div>
-
-                <div class="text-center group" data-aos="fade-up" data-aos-delay="300">
-                    <div class="w-20 h-20 mx-auto bg-yellow-50 rounded-full flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition duration-500 shadow-sm">
-                        💰
-                    </div>
-                    <h3 class="text-xl font-bold text-deep-green mb-2">Best Prices</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed">Competitive pricing with regular discounts and offers.</p>
-                </div>
-
-            </div>
-        </div>
-    </div>
-</section>
+<?php include 'includes/homepage/stats.php'; ?>
 
 <div class="mt-16">
     <?php include 'includes/homepage/categories.php'; ?>
@@ -145,7 +105,48 @@ include 'includes/header.php';
     </div>
 </section>
 
-<?php include 'includes/homepage/stats.php'; ?>
+
+<section class="relative z-20 -mt-10 px-4">
+    <div class="container mx-auto">
+        <div class="bg-white rounded-2xl shadow-2xl border-b-4 border-lime-accent p-8 md:p-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                
+                <div class="text-center group" data-aos="fade-up" data-aos-delay="0">
+                    <div class="w-20 h-20 mx-auto bg-green-50 rounded-full flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition duration-500 shadow-sm">
+                        ✅
+                    </div>
+                    <h3 class="text-xl font-bold text-deep-green mb-2">100% Genuine</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">Sourced directly from authorized manufacturers with warranty.</p>
+                </div>
+
+                <div class="text-center group" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-20 h-20 mx-auto bg-blue-50 rounded-full flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition duration-500 shadow-sm">
+                        🚚
+                    </div>
+                    <h3 class="text-xl font-bold text-deep-green mb-2">Fast Delivery</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">Express home delivery within 24-48 hours nationwide.</p>
+                </div>
+
+                <div class="text-center group" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-20 h-20 mx-auto bg-purple-50 rounded-full flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition duration-500 shadow-sm">
+                        🔒
+                    </div>
+                    <h3 class="text-xl font-bold text-deep-green mb-2">Secure Payment</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">100% safe digital payments and Cash on Delivery.</p>
+                </div>
+
+                <div class="text-center group" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-20 h-20 mx-auto bg-yellow-50 rounded-full flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition duration-500 shadow-sm">
+                        💰
+                    </div>
+                    <h3 class="text-xl font-bold text-deep-green mb-2">Best Prices</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">Competitive pricing with regular discounts and offers.</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
 
 <?php include 'includes/homepage/health_blog.php'; ?>
 

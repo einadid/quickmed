@@ -197,17 +197,33 @@ if (isLoggedIn() && isset($_SESSION['user_id'])) {
                         <?php endif; ?>
 
                         <?php 
-                            // Dashboard Logic
-                            $dashboardLink = SITE_URL . "/views/customer/index.php";
+                            // --- FIXED DASHBOARD LOGIC ---
+                            $dashboardLink = SITE_URL . "/views/customer/index.php"; // Default
+                            $dashLabel = "DASHBOARD";
+
                             if(isset($currentUser['role_name'])) {
-                                if($currentUser['role_name'] == 'admin') $dashboardLink = SITE_URL . "/views/admin/dashboard.php";
-                                elseif($currentUser['role_name'] == 'doctor') $dashboardLink = SITE_URL . "/views/doctor/prescriptions.php";
-                                elseif($currentUser['role_name'] == 'salesman') $dashboardLink = SITE_URL . "/views/salesman/pos.php";
+                                $role = $currentUser['role_name'];
+                                if($role === 'admin') {
+                                    $dashboardLink = SITE_URL . "/views/admin/dashboard.php";
+                                    $dashLabel = "ADMIN";
+                                } 
+                                elseif($role === 'shop_manager') {
+                                    $dashboardLink = SITE_URL . "/views/shop_manager/dashboard.php";
+                                    $dashLabel = "MANAGER";
+                                }
+                                elseif($role === 'doctor') {
+                                    $dashboardLink = SITE_URL . "/views/doctor/prescriptions.php";
+                                    $dashLabel = "DOCTOR";
+                                }
+                                elseif($role === 'salesman') {
+                                    $dashboardLink = SITE_URL . "/views/salesman/pos.php";
+                                    $dashLabel = "POS";
+                                }
                             }
                         ?>
 
                         <a href="<?= $dashboardLink ?>" class="bg-lime-accent text-deep-green px-5 py-2 rounded-lg font-bold border-2 border-lime-accent shadow-[3px_3px_0px_#000] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all uppercase flex items-center gap-2">
-                            <span>⚡</span> DASHBOARD
+                            <span>⚡</span> <?= $dashLabel ?>
                         </a>
                         
                         <a href="<?= SITE_URL ?>/profile.php" class="hover:text-lime-accent transition-all flex items-center gap-1 font-mono">
@@ -235,14 +251,22 @@ if (isLoggedIn() && isset($_SESSION['user_id'])) {
     <div class="mobile-bottom-nav fixed bottom-0 left-0 right-0 bg-deep-green border-t-4 border-lime-accent z-50 flex justify-around items-center h-16 pb-safe text-white shadow-[0_-5px_20px_rgba(0,0,0,0.3)] hidden">
         <?php if (isLoggedIn()): ?>
             <?php 
-                // Mobile Dashboard Link Logic
+                // --- MOBILE DASHBOARD LOGIC (FIXED) ---
                 $mDashLink = SITE_URL . "/views/customer/index.php";
                 $mLabel = "DASH";
                 $mIcon = "📊";
+                
                 if (isset($currentUser['role_name'])) {
-                    if ($currentUser['role_name'] === 'salesman') { $mLabel = "POS"; $mIcon = "🧾"; $mDashLink = SITE_URL . "/views/salesman/pos.php"; }
-                    elseif ($currentUser['role_name'] === 'doctor') { $mLabel = "RX"; $mIcon = "📋"; $mDashLink = SITE_URL . "/views/doctor/prescriptions.php"; }
-                    elseif ($currentUser['role_name'] === 'admin') { $mDashLink = SITE_URL . "/views/admin/dashboard.php"; }
+                    $role = $currentUser['role_name'];
+                    if ($role === 'salesman') { 
+                        $mLabel = "POS"; $mIcon = "🧾"; $mDashLink = SITE_URL . "/views/salesman/pos.php"; 
+                    } elseif ($role === 'doctor') { 
+                        $mLabel = "RX"; $mIcon = "📋"; $mDashLink = SITE_URL . "/views/doctor/prescriptions.php"; 
+                    } elseif ($role === 'shop_manager') { 
+                        $mLabel = "MGR"; $mIcon = "💼"; $mDashLink = SITE_URL . "/views/shop_manager/dashboard.php"; 
+                    } elseif ($role === 'admin') { 
+                        $mLabel = "ADMIN"; $mIcon = "⚡"; $mDashLink = SITE_URL . "/views/admin/dashboard.php"; 
+                    }
                 }
             ?>
             

@@ -1,6 +1,7 @@
 <?php
 /**
  * Shop Manager Dashboard - QuickMed (Redesigned)
+ * Updated: Removed POS System Link
  */
 
 require_once __DIR__ . '/../../config.php';
@@ -178,20 +179,12 @@ include __DIR__ . '/../../includes/header.php';
                 <h3 class="text-xl font-bold text-deep-green mb-4">⚡ Quick Actions</h3>
                 
                 <div class="grid grid-cols-2 gap-4 h-full">
-                    <a href="pos.php" class="col-span-2 bg-deep-green text-white p-4 rounded-xl flex items-center justify-between hover:bg-opacity-90 transition shadow-lg group">
-                        <div>
-                            <div class="text-2xl mb-1 group-hover:scale-110 transition-transform">🖥️</div>
-                            <div class="font-bold">Open POS</div>
-                        </div>
-                        <span class="text-2xl">→</span>
-                    </a>
-
-                    <a href="inventory.php" class="bg-gray-50 p-4 rounded-xl hover:bg-lime-50 hover:border-lime-accent border border-transparent transition text-center group">
+                    <a href="inventory.php" class="bg-gray-50 p-4 rounded-xl hover:bg-lime-50 hover:border-lime-accent border border-transparent transition text-center group flex flex-col justify-center items-center">
                         <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">💊</div>
                         <div class="text-sm font-bold text-gray-700">Inventory</div>
                     </a>
 
-                    <a href="online-orders.php" class="bg-gray-50 p-4 rounded-xl hover:bg-blue-50 hover:border-blue-300 border border-transparent transition text-center group relative">
+                    <a href="online-orders.php" class="bg-gray-50 p-4 rounded-xl hover:bg-blue-50 hover:border-blue-300 border border-transparent transition text-center group relative flex flex-col justify-center items-center">
                         <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">🌐</div>
                         <div class="text-sm font-bold text-gray-700">Online Orders</div>
                         <?php if ($stats['delivered_orders'] < $stats['total_orders']): ?>
@@ -199,12 +192,12 @@ include __DIR__ . '/../../includes/header.php';
                         <?php endif; ?>
                     </a>
 
-                    <a href="stock-alert.php" class="bg-gray-50 p-4 rounded-xl hover:bg-red-50 hover:border-red-300 border border-transparent transition text-center group">
+                    <a href="stock-alert.php" class="bg-gray-50 p-4 rounded-xl hover:bg-red-50 hover:border-red-300 border border-transparent transition text-center group flex flex-col justify-center items-center">
                         <div class="text-3xl mb-2 group-hover:rotate-12 transition-transform">📉</div>
                         <div class="text-sm font-bold text-gray-700">Low Stock</div>
                     </a>
 
-                    <a href="reports.php" class="bg-gray-50 p-4 rounded-xl hover:bg-purple-50 hover:border-purple-300 border border-transparent transition text-center group">
+                    <a href="reports.php" class="bg-gray-50 p-4 rounded-xl hover:bg-purple-50 hover:border-purple-300 border border-transparent transition text-center group flex flex-col justify-center items-center">
                         <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">📑</div>
                         <div class="text-sm font-bold text-gray-700">Reports</div>
                     </a>

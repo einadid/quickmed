@@ -158,7 +158,7 @@ include __DIR__ . '/../../includes/header.php';
 </section>
 
 <script>
-async function updateStatus(id, status) {
+async function updateStatus(parcelId, status) {
     // Confirmation alert
     const result = await Swal.fire({
         title: 'Update Status?',

@@ -31,7 +31,7 @@ if ($isLocal) {
     define('DB_PASS', '');
     define('DB_NAME', 'quickmed');
     
-    define('SITE_URL', 'http://localhost/quickmed');
+    define('SITE_URL', 'https://localhost/quickmed');
     define('UPLOAD_ROOT', __DIR__ . '/uploads/'); // Simple path for XAMPP
 } else {
     // --- LIVE SERVER SETTINGS (INFINITYFREE) ---
