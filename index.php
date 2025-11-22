@@ -106,44 +106,64 @@ include 'includes/header.php';
 </section>
 
 
-<section class="relative z-20 -mt-10 px-4">
+<section class="relative z-20 -mt-16 px-4">
     <div class="container mx-auto">
-        <div class="bg-white rounded-2xl shadow-2xl border-b-4 border-lime-accent p-8 md:p-12">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-white/20 p-8 md:p-12 relative overflow-hidden">
+            
+            <div class="absolute top-0 right-0 w-64 h-64 bg-lime-accent/10 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-10">
                 
-                <div class="text-center group" data-aos="fade-up" data-aos-delay="0">
-                    <div class="w-20 h-20 mx-auto bg-green-50 rounded-full flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition duration-500 shadow-sm">
-                        ✅
+                <div class="group relative p-6 rounded-2xl border border-transparent hover:border-lime-accent/30 hover:bg-green-50/50 transition-all duration-300" data-aos="fade-up" data-aos-delay="0">
+                    <div class="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span class="text-xs font-mono font-bold text-lime-600 bg-lime-100 px-2 py-1 rounded">VERIFIED</span>
                     </div>
-                    <h3 class="text-xl font-bold text-deep-green mb-2">100% Genuine</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed">Sourced directly from authorized manufacturers with warranty.</p>
+                    <div class="w-16 h-16 bg-deep-green/10 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:bg-deep-green group-hover:text-white transition-all duration-300 shadow-sm relative">
+                        👨‍⚕️
+                        <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-lime-500 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-3 w-3 bg-lime-500"></span>
+                        </span>
+                    </div>
+                    <h3 class="text-lg font-bold font-mono text-deep-green mb-2 group-hover:text-lime-600 transition-colors">Doctor Review</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">
+                        Your health is serious. Every prescription is <span class="font-bold text-gray-700">double-checked</span> by our panel of registered doctors before dispatch.
+                    </p>
                 </div>
 
-                <div class="text-center group" data-aos="fade-up" data-aos-delay="100">
-                    <div class="w-20 h-20 mx-auto bg-blue-50 rounded-full flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition duration-500 shadow-sm">
-                        🚚
+                <div class="group relative p-6 rounded-2xl border border-transparent hover:border-blue-200 hover:bg-blue-50/50 transition-all duration-300" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-sm">
+                        ❄️
                     </div>
-                    <h3 class="text-xl font-bold text-deep-green mb-2">Fast Delivery</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed">Express home delivery within 24-48 hours nationwide.</p>
+                    <h3 class="text-lg font-bold font-mono text-deep-green mb-2 group-hover:text-blue-600 transition-colors">Cold-Chain Storage</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">
+                        Insulin & Vaccines are stored and delivered in specialized <span class="font-bold text-gray-700">temperature-controlled</span> boxes to maintain potency.
+                    </p>
                 </div>
 
-                <div class="text-center group" data-aos="fade-up" data-aos-delay="200">
-                    <div class="w-20 h-20 mx-auto bg-purple-50 rounded-full flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition duration-500 shadow-sm">
-                        🔒
+                <div class="group relative p-6 rounded-2xl border border-transparent hover:border-purple-200 hover:bg-purple-50/50 transition-all duration-300" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 shadow-sm">
+                        🛡️
                     </div>
-                    <h3 class="text-xl font-bold text-deep-green mb-2">Secure Payment</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed">100% safe digital payments and Cash on Delivery.</p>
+                    <h3 class="text-lg font-bold font-mono text-deep-green mb-2 group-hover:text-purple-600 transition-colors">100% Authentic</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">
+                        Zero tolerance for fakes. We source directly from top <span class="font-bold text-gray-700">GMP Certified</span> pharma manufacturers only.
+                    </p>
                 </div>
 
-                <div class="text-center group" data-aos="fade-up" data-aos-delay="300">
-                    <div class="w-20 h-20 mx-auto bg-yellow-50 rounded-full flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition duration-500 shadow-sm">
-                        💰
+                <div class="group relative p-6 rounded-2xl border border-transparent hover:border-orange-200 hover:bg-orange-50/50 transition-all duration-300" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:bg-orange-500 group-hover:text-white transition-all duration-300 shadow-sm">
+                        💊
                     </div>
-                    <h3 class="text-xl font-bold text-deep-green mb-2">Best Prices</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed">Competitive pricing with regular discounts and offers.</p>
+                    <h3 class="text-lg font-bold font-mono text-deep-green mb-2 group-hover:text-orange-600 transition-colors">Expert Counseling</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">
+                        Confused about dosage? Chat anytime with our <span class="font-bold text-gray-700">A-Grade Pharmacists</span> for free medication advice.
+                    </p>
                 </div>
 
             </div>
+            
+            <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-lime-accent to-transparent opacity-50"></div>
         </div>
     </div>
 </section>
@@ -154,16 +174,108 @@ include 'includes/header.php';
 
 <?php include 'includes/homepage/testimonials.php'; ?>
 
-<section class="py-16 bg-lime-accent text-deep-green text-center relative overflow-hidden">
-    <div class="container mx-auto px-4 relative z-10" data-aos="zoom-in">
-        <h2 class="text-3xl md:text-4xl font-bold mb-4">Still have questions?</h2>
-        <p class="text-lg mb-8 font-medium">Our pharmacists are ready to help you.</p>
-        <div class="flex justify-center gap-4">
-            <a href="contact.php" class="bg-deep-green text-white px-8 py-3 rounded-lg font-bold hover:bg-opacity-90 transition shadow-lg">Contact Us</a>
-            <a href="tel:09678100100" class="bg-white text-deep-green px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition shadow-lg">📞 Call 09678-100100</a>
+<section class="relative bg-[#022c22] py-20 overflow-hidden border-t-4 border-lime-accent">
+    
+    <div class="absolute inset-0 z-0 opacity-20 pointer-events-none" 
+         style="background-image: linear-gradient(#065f46 1px, transparent 1px), linear-gradient(90deg, #065f46 1px, transparent 1px); background-size: 40px 40px;">
+    </div>
+
+    <svg class="absolute top-1/2 left-0 w-full h-32 -translate-y-1/2 z-0 opacity-30 pointer-events-none" viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,60 L200,60 L220,30 L240,90 L260,10 L280,110 L300,60 L1200,60" 
+              fill="none" stroke="#84cc16" stroke-width="2" 
+              class="animate-dash" stroke-dasharray="1200" stroke-dashoffset="1200">
+        </path>
+    </svg>
+    <style>
+        .animate-dash { animation: dash 3s linear infinite; }
+        @keyframes dash { to { stroke-dashoffset: 0; } }
+        .blink-cursor { animation: blink 1s step-end infinite; }
+    </style>
+
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="flex flex-col lg:flex-row items-center justify-between gap-12">
+            
+            <div class="lg:w-1/2 text-left" data-aos="fade-right">
+                <div class="inline-flex items-center gap-2 bg-lime-accent/10 border border-lime-accent/30 rounded-full px-4 py-1 mb-6">
+                    <span class="w-2 h-2 rounded-full bg-lime-accent animate-ping"></span>
+                    <span class="text-lime-accent font-mono text-xs font-bold tracking-widest uppercase">System Online</span>
+                </div>
+                
+                <h2 class="text-4xl md:text-5xl font-bold text-white mb-4 font-mono leading-tight">
+                    NEED <span class="text-lime-accent">EMERGENCY</span> HELP?
+                </h2>
+                
+                <p class="text-gray-400 text-lg mb-8 font-mono leading-relaxed border-l-4 border-lime-accent pl-4">
+                    Our certified pharmacists are standing by on the secured channel to assist with your prescriptions.
+                </p>
+
+                <div class="flex flex-wrap gap-4">
+                    <a href="tel:09678100100" class="group relative bg-lime-accent text-deep-green px-8 py-4 font-bold font-mono tracking-wider hover:bg-white transition-all overflow-hidden">
+                        <span class="relative z-10 flex items-center gap-2">
+                            📞 CALL HOTLINE
+                        </span>
+                        <div class="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-0"></div>
+                    </a>
+
+                    <a href="contact.php" class="px-8 py-4 border-2 border-lime-accent text-lime-accent font-bold font-mono hover:bg-lime-accent/10 transition flex items-center gap-2">
+                        <span>✉️</span> SEND MESSAGE
+                    </a>
+                </div>
+            </div>
+
+            <div class="lg:w-1/2 w-full" data-aos="fade-left">
+                <div class="bg-black/60 backdrop-blur-md border-2 border-[#065f46] p-6 rounded-lg font-mono relative shadow-[0_0_20px_rgba(6,95,70,0.5)]">
+                    <div class="flex gap-2 mb-4 border-b border-[#065f46] pb-2">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        <div class="ml-auto text-[#065f46] text-xs">TERMINAL_V.2.0</div>
+                    </div>
+
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between text-gray-400">
+                            <span>> CONNECTING TO SERVER...</span>
+                            <span class="text-lime-accent">SUCCESS</span>
+                        </div>
+                        <div class="flex justify-between text-gray-400">
+                            <span>> CHECKING PHARMACIST STATUS...</span>
+                            <span class="text-lime-accent">ACTIVE</span>
+                        </div>
+                        
+                        <hr class="border-[#065f46] opacity-50 my-2">
+
+                        <div class="grid grid-cols-2 gap-4 mt-4">
+                            <div class="bg-deep-green/50 p-3 border border-lime-accent/20">
+                                <span class="text-xs text-gray-400 block mb-1">PHARMACISTS ONLINE</span>
+                                <span class="text-2xl text-lime-accent font-bold" id="pharmacist-count">08</span>
+                            </div>
+                            <div class="bg-deep-green/50 p-3 border border-lime-accent/20">
+                                <span class="text-xs text-gray-400 block mb-1">AVG. RESPONSE TIME</span>
+                                <span class="text-2xl text-yellow-400 font-bold">~2 MIN</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 text-lime-accent animate-pulse">
+                            > WAITING FOR USER INPUT<span class="blink-cursor">_</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </section>
+
+<script>
+    // Simulate changing numbers for "Live" feel
+    setInterval(() => {
+        const countEl = document.getElementById('pharmacist-count');
+        // Random number between 5 and 12
+        const randomNum = Math.floor(Math.random() * (12 - 5 + 1) + 5);
+        // Add leading zero
+        countEl.innerText = randomNum < 10 ? '0' + randomNum : randomNum;
+    }, 5000); // Updates every 5 seconds
+</script>
 
 
 <!-- CART SCRIPT (Directly Embedded to Fix ReferenceError) -->
