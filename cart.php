@@ -1,6 +1,6 @@
 <?php
 /**
- * Shopping Cart Page (AJAX Update Without Reload)
+ * Shopping Cart Page (Responsive Fixed & AJAX Enabled)
  */
 
 require_once 'config.php';
@@ -55,108 +55,126 @@ while ($item = $cartItems->fetch_assoc()) {
 include 'includes/header.php';
 ?>
 
-<section class="container mx-auto px-4 py-16 min-h-screen">
-    <div class="max-w-6xl mx-auto">
-        <div class="text-center mb-12" data-aos="fade-down">
-            <h1 class="text-5xl font-bold text-deep-green mb-4 font-mono uppercase">
+<section class="w-full max-w-[100vw] overflow-x-hidden px-4 py-8 md:py-16 min-h-screen">
+    <div class="container mx-auto max-w-6xl">
+        
+        <div class="text-center mb-8 md:mb-12" data-aos="fade-down">
+            <h1 class="text-3xl md:text-5xl font-bold text-deep-green mb-4 font-mono uppercase">
                 🛒 <?= __('your_cart') ?>
             </h1>
-            <div class="bg-lime-accent inline-block px-6 py-3 border-4 border-deep-green">
-                <p class="text-deep-green font-bold text-xl">
+            <div class="bg-lime-accent inline-block px-4 py-2 md:px-6 md:py-3 border-4 border-deep-green">
+                <p class="text-deep-green font-bold text-base md:text-xl">
                     <span id="total-items-count"><?= $totalItems ?></span> Items in Your Cart
                 </p>
             </div>
         </div>
 
         <?php if (empty($cartByShop)): ?>
-            <div class="card bg-white text-center py-20" data-aos="zoom-in">
-                <div class="text-9xl mb-6">🛒</div>
-                <h2 class="text-3xl font-bold text-gray-600 mb-6"><?= __('cart_empty') ?></h2>
-                <a href="<?= SITE_URL ?>/shop.php" class="btn btn-primary btn-lg">
+            <div class="bg-white text-center py-12 md:py-20 rounded-lg shadow-sm mx-auto" data-aos="zoom-in">
+                <div class="text-7xl md:text-9xl mb-6">🛒</div>
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-600 mb-6"><?= __('cart_empty') ?></h2>
+                <a href="<?= SITE_URL ?>/shop.php" class="inline-block bg-deep-green text-white px-8 py-3 rounded-lg font-bold hover:bg-lime-accent hover:text-deep-green transition">
                     🛍️ <?= __('continue_shopping') ?>
                 </a>
             </div>
         <?php else: ?>
-            <div class="grid lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-2 space-y-6">
+            
+            <div class="flex flex-col lg:grid lg:grid-cols-3 gap-8 relative">
+                
+                <div class="lg:col-span-2 space-y-6 order-1">
                     <?php foreach ($cartByShop as $shopId => $shopData): ?>
-                        <div class="card bg-white border-4 border-deep-green" data-aos="fade-right">
-                            <div class="bg-deep-green text-white px-6 py-4 -mx-5 -mt-5 mb-5 flex justify-between items-center">
+                        <div class="bg-white border-2 md:border-4 border-deep-green rounded-lg overflow-hidden shadow-sm" data-aos="fade-up">
+                            
+                            <div class="bg-deep-green text-white p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                                 <div>
-                                    <h3 class="text-2xl font-bold">🏪 <?= htmlspecialchars($shopData['shop_name']) ?></h3>
-                                    <p class="text-lime-accent">📍 <?= htmlspecialchars($shopData['city']) ?></p>
+                                    <h3 class="text-lg md:text-2xl font-bold">🏪 <?= htmlspecialchars($shopData['shop_name']) ?></h3>
+                                    <p class="text-lime-accent text-sm">📍 <?= htmlspecialchars($shopData['city']) ?></p>
                                 </div>
-                                <div class="text-right">
-                                    <p class="text-sm">Shop Subtotal</p>
-                                    <p class="text-2xl font-bold text-lime-accent">
+                                <div class="w-full sm:w-auto border-t sm:border-t-0 border-white/20 pt-2 sm:pt-0 mt-2 sm:mt-0 flex justify-between sm:block">
+                                    <span class="text-xs text-gray-300 sm:block">Shop Subtotal: </span>
+                                    <span class="text-xl font-bold text-lime-accent">
                                         ৳<span id="shop-subtotal-<?= $shopId ?>"><?= number_format($shopData['subtotal'], 2) ?></span>
-                                    </p>
+                                    </span>
                                 </div>
                             </div>
 
-                            <div class="space-y-4" id="shop-items-<?= $shopId ?>">
+                            <div class="p-3 md:p-4 space-y-4" id="shop-items-<?= $shopId ?>">
                                 <?php foreach ($shopData['items'] as $item): ?>
-                                    <div class="flex gap-4 p-4 border-2 border-gray-200 hover:border-lime-accent transition-all cart-item shop-item-<?= $shopId ?>" 
+                                    <div class="flex flex-col sm:flex-row gap-4 p-3 border border-gray-200 rounded-lg hover:border-lime-accent transition-all cart-item shop-item-<?= $shopId ?>" 
                                          id="item-row-<?= $item['cart_id'] ?>"
                                          data-price="<?= $item['price'] ?>"
                                          data-shop-id="<?= $shopId ?>">
                                         
-                                        <img 
-                                            src="<?= SITE_URL ?>/uploads/medicines/<?= $item['image'] ?? 'placeholder.png' ?>" 
-                                            alt="<?= htmlspecialchars($item['name']) ?>"
-                                            class="w-24 h-24 object-contain border-2 border-deep-green bg-gray-50"
-                                        >
+                                        <div class="flex justify-center sm:justify-start flex-shrink-0">
+                                            <img 
+                                                src="<?= SITE_URL ?>/uploads/medicines/<?= $item['image'] ?? 'placeholder.png' ?>" 
+                                                alt="<?= htmlspecialchars($item['name']) ?>"
+                                                class="w-24 h-24 object-contain border border-gray-200 rounded bg-gray-50"
+                                            >
+                                        </div>
                                         
-                                        <div class="flex-1">
-                                            <h4 class="text-xl font-bold text-deep-green mb-2">
-                                                <?= htmlspecialchars($item['name']) ?>
-                                            </h4>
-                                            <p class="text-gray-600 mb-2">
-                                                <?= htmlspecialchars($item['power']) ?> | <?= htmlspecialchars($item['form']) ?>
-                                            </p>
-                                            
-                                            <?php if ($item['requires_prescription']): ?>
-                                                <span class="badge badge-warning text-xs">⚠️ Prescription Required</span>
-                                            <?php endif; ?>
-                                            
-                                            <div class="flex items-center gap-4 mt-3">
-                                                <div class="flex items-center border-2 border-deep-green">
+                                        <div class="flex-1 flex flex-col justify-between w-full">
+                                            <div>
+                                                <div class="flex justify-between items-start">
+                                                    <h4 class="text-lg font-bold text-deep-green break-words">
+                                                        <?= htmlspecialchars($item['name']) ?>
+                                                    </h4>
+                                                    
+                                                    <button onclick="removeFromCart(<?= $item['cart_id'] ?>)" class="sm:hidden text-red-500 px-2 -mr-2">
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                                
+                                                <p class="text-sm text-gray-600">
+                                                    <?= htmlspecialchars($item['power']) ?> | <?= htmlspecialchars($item['form']) ?>
+                                                </p>
+                                                
+                                                <?php if ($item['requires_prescription']): ?>
+                                                    <span class="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded mt-1">
+                                                        ⚠️ Prescription Required
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+
+                                            <div class="flex flex-wrap items-center justify-between mt-4 gap-3">
+                                                
+                                                <div class="flex items-center border border-deep-green rounded overflow-hidden h-10">
                                                     <button 
                                                         onclick="updateQuantity(<?= $item['cart_id'] ?>, -1, <?= $item['stock_quantity'] ?>)"
-                                                        class="px-4 py-2 bg-gray-100 hover:bg-deep-green hover:text-white font-bold text-xl transition-all"
+                                                        class="px-3 h-full bg-gray-100 hover:bg-deep-green hover:text-white font-bold text-xl transition-colors active:bg-deep-green active:text-white flex items-center"
                                                     >-</button>
                                                     <input 
                                                         type="number" 
                                                         value="<?= $item['quantity'] ?>" 
                                                         id="qty-<?= $item['cart_id'] ?>"
-                                                        class="w-16 text-center font-bold text-lg border-x-2 border-deep-green py-2 item-qty"
+                                                        class="w-12 h-full text-center font-bold text-base border-x border-deep-green item-qty focus:outline-none appearance-none m-0"
                                                         min="1"
                                                         max="<?= $item['stock_quantity'] ?>"
                                                         onchange="updateQuantityDirect(<?= $item['cart_id'] ?>, this.value, <?= $item['stock_quantity'] ?>)"
                                                     >
                                                     <button 
                                                         onclick="updateQuantity(<?= $item['cart_id'] ?>, 1, <?= $item['stock_quantity'] ?>)"
-                                                        class="px-4 py-2 bg-gray-100 hover:bg-deep-green hover:text-white font-bold text-xl transition-all"
+                                                        class="px-3 h-full bg-gray-100 hover:bg-deep-green hover:text-white font-bold text-xl transition-colors active:bg-deep-green active:text-white flex items-center"
                                                     >+</button>
                                                 </div>
                                                 
-                                                <div class="text-right flex-1">
-                                                    <p class="text-sm text-gray-500">৳<?= number_format($item['price'], 2) ?> × <span id="display-qty-<?= $item['cart_id'] ?>"><?= $item['quantity'] ?></span></p>
-                                                    <p class="text-2xl font-bold text-deep-green">
+                                                <div class="text-right">
+                                                    <p class="text-xs text-gray-500 hidden sm:block">Price</p>
+                                                    <p class="text-xl font-bold text-deep-green">
                                                         ৳<span id="item-total-<?= $item['cart_id'] ?>"><?= number_format($item['item_total'], 2) ?></span>
                                                     </p>
                                                 </div>
                                                 
                                                 <button 
                                                     onclick="removeFromCart(<?= $item['cart_id'] ?>)"
-                                                    class="px-4 py-2 bg-red-100 text-red-600 hover:bg-red-600 hover:text-white border-2 border-red-600 font-bold transition-all"
+                                                    class="hidden sm:block px-3 py-2 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-600 rounded transition-colors ml-auto sm:ml-0"
                                                     title="Remove"
                                                 >
                                                     🗑️
                                                 </button>
                                             </div>
                                             
-                                            <p class="text-xs text-gray-500 mt-2">
+                                            <p class="text-xs text-gray-400 mt-2">
                                                 Stock: <?= $item['stock_quantity'] ?> available
                                             </p>
                                         </div>
@@ -167,35 +185,35 @@ include 'includes/header.php';
                     <?php endforeach; ?>
                 </div>
 
-                <div class="lg:col-span-1">
-                    <div class="card bg-light-green border-4 border-deep-green sticky top-24" data-aos="fade-left">
-                        <h3 class="text-2xl font-bold text-deep-green mb-6 uppercase border-b-4 border-deep-green pb-3">
+                <div class="lg:col-span-1 order-2">
+                    <div class="bg-green-50 border-4 border-deep-green p-6 rounded-lg sticky top-24 shadow-lg w-full" data-aos="fade-left">
+                        <h3 class="text-xl font-bold text-deep-green mb-4 uppercase border-b-2 border-deep-green pb-2">
                             📋 Order Summary
                         </h3>
                         
-                        <div class="space-y-4 mb-6">
-                            <div class="flex justify-between text-lg">
+                        <div class="space-y-3 mb-6">
+                            <div class="flex justify-between text-base text-gray-700">
                                 <span>Subtotal (<span id="summary-items-count"><?= $totalItems ?></span> items):</span>
                                 <span class="font-bold">৳<span id="global-subtotal"><?= number_format($totalAmount, 2) ?></span></span>
                             </div>
                             
-                            <div class="flex justify-between text-lg border-t-2 border-deep-green pt-4">
+                            <div class="flex justify-between text-base text-gray-700 border-t border-gray-300 pt-2">
                                 <span>Delivery Charge:</span>
                                 <span class="font-bold text-orange-600">+ ৳<?= number_format(HOME_DELIVERY_CHARGE, 2) ?></span>
                             </div>
                             
-                            <div class="flex justify-between text-2xl font-bold bg-white border-4 border-deep-green px-4 py-4">
+                            <div class="flex justify-between text-2xl font-bold bg-white border-2 border-deep-green px-3 py-3 mt-2 rounded">
                                 <span>Total:</span>
                                 <span class="text-deep-green">৳<span id="global-total"><?= number_format($totalAmount + HOME_DELIVERY_CHARGE, 2) ?></span></span>
                             </div>
                         </div>
                         
-                        <a href="<?= SITE_URL ?>/checkout.php" class="btn btn-primary w-full mb-4 text-xl py-4 neon-border">
-                            ✅ <?= __('proceed_checkout') ?>
+                        <a href="<?= SITE_URL ?>/checkout.php" class="block w-full bg-deep-green text-white text-center font-bold py-3 rounded hover:bg-lime-accent hover:text-deep-green transition-all uppercase shadow-md mb-3">
+                            ✅ Proceed to Checkout
                         </a>
                         
-                        <a href="<?= SITE_URL ?>/shop.php" class="btn btn-outline w-full">
-                            ← <?= __('continue_shopping') ?>
+                        <a href="<?= SITE_URL ?>/shop.php" class="block w-full bg-white text-deep-green text-center font-bold py-3 rounded border-2 border-deep-green hover:bg-gray-50 transition-all uppercase">
+                            ← Continue Shopping
                         </a>
                         
                         <?php
@@ -205,16 +223,17 @@ include 'includes/header.php';
                         ?>
                         
                         <?php if ($availablePoints >= 100): ?>
-                            <div class="bg-white border-4 border-lime-accent p-4 mt-4">
-                                <p class="font-bold text-deep-green mb-2">💰 Available Points</p>
-                                <p class="text-3xl font-bold text-lime-accent mb-2">⭐ <?= $availablePoints ?></p>
-                                <p class="text-sm text-gray-600">
+                            <div class="bg-white border-2 border-lime-accent p-3 mt-4 rounded text-center">
+                                <p class="font-bold text-deep-green text-sm mb-1">💰 Available Points</p>
+                                <p class="text-2xl font-bold text-lime-accent mb-1">⭐ <?= $availablePoints ?></p>
+                                <p class="text-xs text-gray-600">
                                     You can get ৳<?= $pointsDiscount ?> discount at checkout!
                                 </p>
                             </div>
                         <?php endif; ?>
                     </div>
                 </div>
+                
             </div>
         <?php endif; ?>
     </div>
@@ -225,7 +244,7 @@ const DELIVERY_CHARGE = <?= HOME_DELIVERY_CHARGE ?>;
 
 // Helper function to format currency
 function formatMoney(amount) {
-    return amount.toFixed(2);
+    return amount.toLocaleString('en-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 // Button Click Handler
@@ -327,7 +346,8 @@ function updateCartVisuals(cartId, newQuantity) {
     const newItemTotal = unitPrice * newQuantity;
     
     document.getElementById(`item-total-${cartId}`).textContent = formatMoney(newItemTotal);
-    document.getElementById(`display-qty-${cartId}`).textContent = newQuantity;
+    // Update input value visually if direct manipulation didn't already
+    document.getElementById(`qty-${cartId}`).value = newQuantity;
 
     // 2. Recalculate Shop Subtotal
     const shopId = itemRow.dataset.shopId;
@@ -387,10 +407,7 @@ async function removeFromCart(cartId) {
             const data = await response.json();
             
             if (data.success) {
-                // Remove row immediately
-                const row = document.getElementById(`item-row-${cartId}`);
-                // Check if it's the last item in shop or cart
-                location.reload(); // For removal, reload is safer to clean up empty shops
+                location.reload(); 
             } else {
                 Swal.fire({
                     icon: 'error',

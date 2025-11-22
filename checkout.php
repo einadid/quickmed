@@ -1,6 +1,6 @@
 <?php
 /**
- * Checkout Page - Fixed Calculation Logic with Free Delivery (>1000 TK)
+ * Checkout Page - Responsive Mobile Fix with Overflow Protection
  */
 
 require_once 'config.php';
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Check if prescription required items have uploaded prescription
     if ($requiresPrescription) {
         $prescCheck = "SELECT COUNT(*) as count FROM prescriptions 
-                       WHERE user_id = ? AND status IN ('pending', 'approved')";
+                        WHERE user_id = ? AND status IN ('pending', 'approved')";
         $prescStmt = $conn->prepare($prescCheck);
         
         if ($prescStmt === false) {
@@ -267,102 +267,106 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 include 'includes/header.php';
 ?>
 
-<section class="container mx-auto px-4 py-16 min-h-screen">
+<section class="container mx-auto px-2 md:px-4 py-8 md:py-16 min-h-screen w-full overflow-x-hidden">
     <div class="max-w-6xl mx-auto">
-        <div class="text-center mb-12" data-aos="fade-down">
-            <h1 class="text-5xl font-bold text-deep-green mb-4 font-mono uppercase">
+        <div class="text-center mb-8 md:mb-12" data-aos="fade-down">
+            <h1 class="text-3xl md:text-5xl font-bold text-deep-green mb-4 font-mono uppercase">
                 💳 <?= __('checkout') ?>
             </h1>
-            <div class="bg-lime-accent inline-block px-6 py-3 border-4 border-deep-green">
-                <p class="text-deep-green font-bold text-xl">Complete Your Order</p>
+            <div class="bg-lime-accent inline-block px-4 py-2 md:px-6 md:py-3 border-2 md:border-4 border-deep-green">
+                <p class="text-deep-green font-bold text-lg md:text-xl">Complete Your Order</p>
             </div>
         </div>
 
-        <form method="POST" action="" class="grid lg:grid-cols-3 gap-8">
+        <form method="POST" action="" class="grid lg:grid-cols-3 gap-6 lg:gap-8">
             <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
             
             <div class="lg:col-span-2 space-y-6">
-                <div class="card bg-white border-4 border-deep-green" data-aos="fade-right">
-                    <h3 class="text-2xl font-bold text-deep-green mb-6 uppercase border-b-4 border-deep-green pb-3">
-                        📋 <?= __('delivery_info') ?>
-                    </h3>
-                    
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block font-bold mb-2 text-deep-green text-lg">👤 <?= __('full_name') ?> *</label>
-                            <input 
-                                type="text" 
-                                name="customer_name" 
-                                class="input border-4 border-deep-green focus:border-lime-accent transition-all" 
-                                required
-                                value="<?= htmlspecialchars($user['full_name']) ?>"
-                            >
-                        </div>
+                <div class="card bg-white border-2 md:border-4 border-deep-green rounded-lg overflow-hidden" data-aos="fade-right">
+                    <div class="p-4 md:p-6">
+                        <h3 class="text-xl md:text-2xl font-bold text-deep-green mb-4 md:mb-6 uppercase border-b-2 md:border-b-4 border-deep-green pb-3">
+                            📋 <?= __('delivery_info') ?>
+                        </h3>
                         
-                        <div>
-                            <label class="block font-bold mb-2 text-deep-green text-lg">📱 <?= __('phone') ?> *</label>
-                            <input 
-                                type="tel" 
-                                name="customer_phone" 
-                                class="input border-4 border-deep-green focus:border-lime-accent transition-all" 
-                                required
-                                value="<?= htmlspecialchars($user['phone']) ?>"
-                            >
-                        </div>
-                        
-                        <div class="md:col-span-2">
-                            <label class="block font-bold mb-2 text-deep-green text-lg">📍 <?= __('address') ?> *</label>
-                            <textarea 
-                                name="customer_address" 
-                                rows="3" 
-                                class="input border-4 border-deep-green focus:border-lime-accent transition-all"
-                                required
-                                placeholder="House/Flat, Road, Area, City"
-                            ><?= htmlspecialchars($user['address'] ?? '') ?></textarea>
+                        <div class="grid md:grid-cols-2 gap-4 md:gap-6">
+                            <div>
+                                <label class="block font-bold mb-2 text-deep-green text-base md:text-lg">👤 <?= __('full_name') ?> *</label>
+                                <input 
+                                    type="text" 
+                                    name="customer_name" 
+                                    class="input w-full p-3 border-2 md:border-4 border-deep-green focus:border-lime-accent transition-all rounded" 
+                                    required
+                                    value="<?= htmlspecialchars($user['full_name']) ?>"
+                                >
+                            </div>
+                            
+                            <div>
+                                <label class="block font-bold mb-2 text-deep-green text-base md:text-lg">📱 <?= __('phone') ?> *</label>
+                                <input 
+                                    type="tel" 
+                                    name="customer_phone" 
+                                    class="input w-full p-3 border-2 md:border-4 border-deep-green focus:border-lime-accent transition-all rounded" 
+                                    required
+                                    value="<?= htmlspecialchars($user['phone']) ?>"
+                                >
+                            </div>
+                            
+                            <div class="md:col-span-2">
+                                <label class="block font-bold mb-2 text-deep-green text-base md:text-lg">📍 <?= __('address') ?> *</label>
+                                <textarea 
+                                    name="customer_address" 
+                                    rows="3" 
+                                    class="input w-full p-3 border-2 md:border-4 border-deep-green focus:border-lime-accent transition-all rounded"
+                                    required
+                                    placeholder="House/Flat, Road, Area, City"
+                                ><?= htmlspecialchars($user['address'] ?? '') ?></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="card bg-white border-4 border-deep-green" data-aos="fade-right" data-aos-delay="100">
-                    <h3 class="text-2xl font-bold text-deep-green mb-6 uppercase border-b-4 border-deep-green pb-3">
-                        🚚 <?= __('delivery_type') ?>
-                    </h3>
-                    
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <label class="cursor-pointer">
-                            <input type="radio" name="delivery_type" value="home" checked class="hidden peer">
-                            <div class="border-4 border-deep-green p-6 peer-checked:bg-lime-accent peer-checked:border-lime-accent transition-all transform hover:scale-105">
-                                <div class="text-5xl mb-3">🏠</div>
-                                <h4 class="text-xl font-bold mb-2"><?= __('home_delivery') ?></h4>
-                                <p class="text-gray-600 mb-2">Delivered to your doorstep</p>
-                                
-                                <?php if ($subtotal >= 1000): ?>
-                                    <p class="text-2xl font-bold text-green-600">FREE</p>
-                                <?php else: ?>
-                                    <p class="text-2xl font-bold text-deep-green">+ ৳<?= HOME_DELIVERY_CHARGE ?></p>
-                                <?php endif; ?>
-                            </div>
-                        </label>
+                <div class="card bg-white border-2 md:border-4 border-deep-green rounded-lg overflow-hidden" data-aos="fade-right" data-aos-delay="100">
+                    <div class="p-4 md:p-6">
+                        <h3 class="text-xl md:text-2xl font-bold text-deep-green mb-4 md:mb-6 uppercase border-b-2 md:border-b-4 border-deep-green pb-3">
+                            🚚 <?= __('delivery_type') ?>
+                        </h3>
                         
-                        <label class="cursor-pointer">
-                            <input type="radio" name="delivery_type" value="pickup" class="hidden peer">
-                            <div class="border-4 border-deep-green p-6 peer-checked:bg-lime-accent peer-checked:border-lime-accent transition-all transform hover:scale-105">
-                                <div class="text-5xl mb-3">🏪</div>
-                                <h4 class="text-xl font-bold mb-2"><?= __('store_pickup') ?></h4>
-                                <p class="text-gray-600 mb-2">Pick up from nearest shop</p>
-                                <p class="text-2xl font-bold text-green-600">FREE</p>
-                            </div>
-                        </label>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <label class="cursor-pointer group">
+                                <input type="radio" name="delivery_type" value="home" checked class="hidden peer">
+                                <div class="border-2 md:border-4 border-deep-green p-4 md:p-6 peer-checked:bg-lime-accent peer-checked:border-lime-accent transition-all transform group-hover:scale-[1.02] rounded h-full">
+                                    <div class="text-4xl md:text-5xl mb-3">🏠</div>
+                                    <h4 class="text-lg md:text-xl font-bold mb-2"><?= __('home_delivery') ?></h4>
+                                    <p class="text-gray-600 mb-2 text-sm">Delivered to your doorstep</p>
+                                    
+                                    <?php if ($subtotal >= 1000): ?>
+                                        <p class="text-xl md:text-2xl font-bold text-green-600">FREE</p>
+                                    <?php else: ?>
+                                        <p class="text-xl md:text-2xl font-bold text-deep-green">+ ৳<?= HOME_DELIVERY_CHARGE ?></p>
+                                    <?php endif; ?>
+                                </div>
+                            </label>
+                            
+                            <label class="cursor-pointer group">
+                                <input type="radio" name="delivery_type" value="pickup" class="hidden peer">
+                                <div class="border-2 md:border-4 border-deep-green p-4 md:p-6 peer-checked:bg-lime-accent peer-checked:border-lime-accent transition-all transform group-hover:scale-[1.02] rounded h-full">
+                                    <div class="text-4xl md:text-5xl mb-3">🏪</div>
+                                    <h4 class="text-lg md:text-xl font-bold mb-2"><?= __('store_pickup') ?></h4>
+                                    <p class="text-gray-600 mb-2 text-sm">Pick up from nearest shop</p>
+                                    <p class="text-xl md:text-2xl font-bold text-green-600">FREE</p>
+                                </div>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
                 <?php if ($user['points'] >= 100): ?>
-                <div class="card bg-lime-accent border-4 border-deep-green" data-aos="fade-right" data-aos-delay="200">
-                    <h3 class="text-2xl font-bold text-deep-green mb-4 uppercase">
+                <div class="card bg-lime-accent border-2 md:border-4 border-deep-green rounded-lg overflow-hidden p-4 md:p-6" data-aos="fade-right" data-aos-delay="200">
+                    <h3 class="text-xl md:text-2xl font-bold text-deep-green mb-4 uppercase">
                         ⭐ Use Loyalty Points
                     </h3>
-                    <p class="mb-4 text-lg">You have <strong class="text-3xl"><?= $user['points'] ?></strong> points available</p>
-                    <div class="flex items-center gap-4">
+                    <p class="mb-4 text-base md:text-lg">You have <strong class="text-2xl md:text-3xl"><?= $user['points'] ?></strong> points available</p>
+                    <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
                         <input 
                             type="number" 
                             name="use_points" 
@@ -370,26 +374,26 @@ include 'includes/header.php';
                             min="0"
                             max="<?= $user['points'] ?>"
                             step="100"
-                            class="input border-4 border-deep-green flex-1 text-lg"
+                            class="input border-4 border-deep-green w-full md:flex-1 text-lg p-3 rounded"
                             placeholder="Enter points (multiples of 100)"
                             onchange="calculateDiscount()"
                             onkeyup="calculateDiscount()"
                         >
-                        <span id="pointsDiscount" class="text-xl font-bold text-deep-green"></span>
+                        <span id="pointsDiscount" class="text-lg md:text-xl font-bold text-deep-green"></span>
                     </div>
                     <p class="text-sm mt-2 text-gray-700 font-bold">💡 100 points = ৳10 discount</p>
                 </div>
                 <?php endif; ?>
 
                 <?php if ($requiresPrescription): ?>
-                <div class="card bg-yellow-100 border-4 border-yellow-500" data-aos="fade-right" data-aos-delay="300">
-                    <h3 class="text-xl font-bold text-yellow-800 mb-3">
+                <div class="card bg-yellow-100 border-2 md:border-4 border-yellow-500 rounded-lg p-4 md:p-6" data-aos="fade-right" data-aos-delay="300">
+                    <h3 class="text-lg md:text-xl font-bold text-yellow-800 mb-3">
                         ⚠️ Prescription Required
                     </h3>
-                    <p class="text-gray-700 mb-4">
+                    <p class="text-gray-700 mb-4 text-sm md:text-base">
                         Some items in your cart require a valid prescription. Please ensure you have uploaded your prescription.
                     </p>
-                    <a href="<?= SITE_URL ?>/index.php#upload" class="btn btn-outline border-yellow-500 text-yellow-800 hover:bg-yellow-500 hover:text-white">
+                    <a href="<?= SITE_URL ?>/index.php#upload" class="inline-block btn border-2 border-yellow-500 text-yellow-800 hover:bg-yellow-500 hover:text-white px-4 py-2 rounded font-bold transition-all">
                         📋 Upload Prescription
                     </a>
                 </div>
@@ -397,63 +401,65 @@ include 'includes/header.php';
             </div>
 
             <div class="lg:col-span-1">
-                <div class="card bg-white border-4 border-deep-green sticky top-24" data-aos="fade-left">
-                    <h3 class="text-2xl font-bold text-deep-green mb-6 uppercase border-b-4 border-deep-green pb-3">
-                        📦 Order Summary
-                    </h3>
-                    
-                    <div class="space-y-3 mb-6 max-h-64 overflow-y-auto">
-                        <?php foreach ($cartData as $item): ?>
-                            <div class="flex gap-3 p-3 bg-gray-50 border-2 border-gray-200 hover:border-lime-accent transition-all">
-                                <div class="flex-1">
-                                    <p class="font-bold text-sm"><?= htmlspecialchars($item['name']) ?></p>
-                                    <p class="text-xs text-gray-600">Qty: <?= $item['quantity'] ?> × ৳<?= number_format($item['price'], 2) ?></p>
+                <div class="card bg-white border-2 md:border-4 border-deep-green rounded-lg sticky top-24 overflow-hidden" data-aos="fade-left">
+                    <div class="p-4 md:p-6">
+                        <h3 class="text-xl md:text-2xl font-bold text-deep-green mb-4 md:mb-6 uppercase border-b-2 md:border-b-4 border-deep-green pb-3">
+                            📦 Order Summary
+                        </h3>
+                        
+                        <div class="space-y-3 mb-6 max-h-64 overflow-y-auto custom-scrollbar">
+                            <?php foreach ($cartData as $item): ?>
+                                <div class="flex gap-3 p-3 bg-gray-50 border border-gray-200 rounded hover:border-lime-accent transition-all">
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-bold text-sm truncate"><?= htmlspecialchars($item['name']) ?></p>
+                                        <p class="text-xs text-gray-600">Qty: <?= $item['quantity'] ?> × ৳<?= number_format($item['price'], 2) ?></p>
+                                    </div>
+                                    <p class="font-bold text-deep-green whitespace-nowrap">৳<?= number_format($item['price'] * $item['quantity'], 2) ?></p>
                                 </div>
-                                <p class="font-bold text-deep-green">৳<?= number_format($item['price'] * $item['quantity'], 2) ?></p>
+                            <?php endforeach; ?>
+                        </div>
+                        
+                        <div class="space-y-3 mb-6 border-t-2 md:border-t-4 border-deep-green pt-4">
+                            <div class="flex justify-between text-base md:text-lg">
+                                <span>Subtotal:</span>
+                                <span class="font-bold">৳<?= number_format($subtotal, 2) ?></span>
                             </div>
-                        <?php endforeach; ?>
-                    </div>
-                    
-                    <div class="space-y-3 mb-6 border-t-4 border-deep-green pt-4">
-                        <div class="flex justify-between text-lg">
-                            <span>Subtotal:</span>
-                            <span class="font-bold">৳<?= number_format($subtotal, 2) ?></span>
+                            
+                            <div class="flex justify-between text-base md:text-lg">
+                                <span>Delivery:</span>
+                                <span class="font-bold" id="deliveryCharge">৳<?= number_format(HOME_DELIVERY_CHARGE, 2) ?></span>
+                            </div>
+                            
+                            <div class="flex justify-between text-base md:text-lg text-green-600" id="pointsDiscountRow" style="display: none;">
+                                <span>Points Discount:</span>
+                                <span class="font-bold" id="pointsDiscountAmount">- ৳0.00</span>
+                            </div>
+                            
+                            <div class="flex justify-between text-xl md:text-2xl font-bold bg-deep-green text-white p-4 -mx-4 md:-mx-6 -mb-0 neon-border mt-4">
+                                <span>Total:</span>
+                                <span id="grandTotal">৳<?= number_format($subtotal + HOME_DELIVERY_CHARGE, 2) ?></span>
+                            </div>
                         </div>
                         
-                        <div class="flex justify-between text-lg">
-                            <span>Delivery:</span>
-                            <span class="font-bold" id="deliveryCharge">৳<?= number_format(HOME_DELIVERY_CHARGE, 2) ?></span>
+                        <div class="bg-lime-accent border-2 md:border-4 border-deep-green p-3 md:p-4 mb-6 rounded">
+                            <p class="text-xs md:text-sm font-bold text-deep-green mb-1">🎁 Points You'll Earn</p>
+                            <p class="text-2xl md:text-3xl font-bold text-deep-green" id="pointsEarn">
+                                ⭐ <?= floor(($subtotal + HOME_DELIVERY_CHARGE) / 1000) * POINTS_PER_1000_BDT ?>
+                            </p>
                         </div>
                         
-                        <div class="flex justify-between text-lg text-green-600" id="pointsDiscountRow" style="display: none;">
-                            <span>Points Discount:</span>
-                            <span class="font-bold" id="pointsDiscountAmount">- ৳0.00</span>
-                        </div>
+                        <button type="submit" class="btn w-full bg-deep-green text-white text-lg md:text-xl py-3 md:py-4 font-bold rounded hover:bg-lime-accent hover:text-deep-green transition-all shadow-lg transform hover:scale-105">
+                            ✅ PLACE ORDER
+                        </button>
                         
-                        <div class="flex justify-between text-2xl font-bold bg-deep-green text-white px-4 py-4 -mx-5 neon-border">
-                            <span>Total:</span>
-                            <span id="grandTotal">৳<?= number_format($subtotal + HOME_DELIVERY_CHARGE, 2) ?></span>
+                        <div class="text-center mt-4 space-y-2">
+                            <p class="text-xs md:text-sm text-gray-600">
+                                🔒 Secure Cash on Delivery
+                            </p>
+                            <p class="text-[10px] md:text-xs text-gray-500">
+                                By placing order, you agree to our Terms & Conditions
+                            </p>
                         </div>
-                    </div>
-                    
-                    <div class="bg-lime-accent border-4 border-deep-green p-4 mb-6">
-                        <p class="text-sm font-bold text-deep-green mb-2">🎁 Points You'll Earn</p>
-                        <p class="text-3xl font-bold text-deep-green" id="pointsEarn">
-                            ⭐ <?= floor(($subtotal + HOME_DELIVERY_CHARGE) / 1000) * POINTS_PER_1000_BDT ?>
-                        </p>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary w-full text-xl py-4 neon-border transform hover:scale-105 transition-all">
-                        ✅ PLACE ORDER
-                    </button>
-                    
-                    <div class="text-center mt-4 space-y-2">
-                        <p class="text-sm text-gray-600">
-                            🔒 Secure Cash on Delivery
-                        </p>
-                        <p class="text-xs text-gray-500">
-                            By placing order, you agree to our Terms & Conditions
-                        </p>
                     </div>
                 </div>
             </div>
@@ -499,7 +505,7 @@ function calculateTotal() {
         deliveryCharge = 0;
         document.getElementById('deliveryCharge').innerHTML = '<span class="text-green-600 font-bold">FREE</span>';
     } else {
-        // Reset to normal amount if pickup or subtotal < 1000 (though for pickup it remains 0)
+        // Reset to normal amount if pickup or subtotal < 1000
         if(deliveryType === 'home') {
              document.getElementById('deliveryCharge').innerText = '৳' + deliveryCharge.toFixed(2);
         } else {
