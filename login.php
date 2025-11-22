@@ -137,68 +137,89 @@ include 'includes/header.php';
                 <p class="text-gray-500 text-sm font-bold uppercase tracking-wider">Access your dashboard</p>
             </div>
             
-            <form method="POST" action="">
-                <?php if(function_exists('generateCSRFToken')): ?>
-                    <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
-                <?php endif; ?>
-                
-                <div class="mb-5 group">
-                    <label class="block font-bold mb-2 text-deep-green group-hover:text-lime-600 transition"><?= __('email') ?> *</label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-3.5 text-gray-400">📧</span>
-                        <input 
-                            type="email" 
-                            name="email" 
-                            class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl py-3 pl-10 pr-4 text-gray-800 focus:outline-none focus:border-lime-accent focus:shadow-[4px_4px_0px_#84cc16] transition-all font-mono" 
-                            required 
-                            placeholder="your@email.com"
-                            value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
-                        >
-                    </div>
-                </div>
-                
-                <div class="mb-6 group">
-                    <label class="block font-bold mb-2 text-deep-green group-hover:text-lime-600 transition"><?= __('password') ?> *</label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-3.5 text-gray-400">🔑</span>
-                        <input 
-                            type="password" 
-                            name="password" 
-                            class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl py-3 pl-10 pr-4 text-gray-800 focus:outline-none focus:border-lime-accent focus:shadow-[4px_4px_0px_#84cc16] transition-all font-mono" 
-                            required 
-                            placeholder="••••••••"
-                        >
-                    </div>
-                </div>
-                
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center">
-                        <input 
-                            type="checkbox" 
-                            name="remember_me" 
-                            id="rememberMe" 
-                            class="w-4 h-4 text-lime-600 border-2 border-gray-300 rounded focus:ring-lime-500"
-                        >
-                        <label for="rememberMe" class="ml-2 text-sm font-bold text-gray-600 cursor-pointer hover:text-deep-green">
-                            <?= __('remember_me') ?>
-                        </label>
-                    </div>
-                    <a href="<?= SITE_URL ?>/forgot-password.php" class="text-sm font-bold text-lime-600 hover:text-deep-green hover:underline">
-                        Forgot Password?
-                    </a>
-                </div>
-                
-                <button type="submit" class="w-full bg-deep-green text-white font-bold py-3 rounded-xl shadow-[4px_4px_0px_#000] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
-                    <span>🚀</span> Access Account
-                </button>
-                
-                <div class="text-center mt-8 pt-6 border-t-2 border-dashed border-gray-200">
-                    <p class="text-gray-500 text-sm mb-2">New to QuickMed?</p>
-                    <a href="<?= SITE_URL ?>/signup.php" class="inline-block font-bold text-deep-green border-b-2 border-lime-accent hover:bg-lime-accent hover:text-white px-1 transition-all">
-                        Create New Account →
-                    </a>
-                </div>
-            </form>
+          <form method="POST" action="">
+    <?php if(function_exists('generateCSRFToken')): ?>
+        <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
+    <?php endif; ?>
+    
+    <div class="mb-5 group">
+        <label class="block font-bold mb-2 text-deep-green group-hover:text-lime-600 transition"><?= __('email') ?> *</label>
+        <div class="relative">
+            <input 
+                type="email" 
+                name="email" 
+                class="peer w-full bg-gray-50 border-2 border-gray-200 rounded-xl py-3 pl-10 pr-4 text-gray-800 focus:outline-none focus:border-lime-accent focus:shadow-[4px_4px_0px_#84cc16] transition-all font-mono z-10 relative bg-transparent" 
+                required 
+                placeholder="your@email.com"
+                value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
+            >
+            <span class="absolute left-3 top-3.5 text-gray-400 transition-opacity duration-200 peer-focus:opacity-0 peer-[&:not(:placeholder-shown)]:opacity-0 z-0">📧</span>
+        </div>
+    </div>
+    
+    <div class="mb-6 group">
+        <label class="block font-bold mb-2 text-deep-green group-hover:text-lime-600 transition"><?= __('password') ?> *</label>
+        <div class="relative">
+            <input 
+                type="password" 
+                name="password" 
+                id="passwordInput"
+                class="peer w-full bg-gray-50 border-2 border-gray-200 rounded-xl py-3 pl-10 pr-12 text-gray-800 focus:outline-none focus:border-lime-accent focus:shadow-[4px_4px_0px_#84cc16] transition-all font-mono z-10 relative bg-transparent" 
+                required 
+                placeholder="••••••••"
+            >
+            
+            <span class="absolute left-3 top-3.5 text-gray-400 transition-opacity duration-200 peer-focus:opacity-0 peer-[&:not(:placeholder-shown)]:opacity-0 z-0">🔑</span>
+            
+            <button type="button" onclick="togglePassword()" class="absolute right-3 top-3 text-gray-500 hover:text-deep-green z-20 focus:outline-none">
+                <span id="eyeIcon">👁️</span>
+            </button>
+        </div>
+    </div>
+    
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center">
+            <input 
+                type="checkbox" 
+                name="remember_me" 
+                id="rememberMe" 
+                class="w-4 h-4 text-lime-600 border-2 border-gray-300 rounded focus:ring-lime-500"
+            >
+            <label for="rememberMe" class="ml-2 text-sm font-bold text-gray-600 cursor-pointer hover:text-deep-green">
+                <?= __('remember_me') ?>
+            </label>
+        </div>
+        <a href="<?= SITE_URL ?>/forgot-password.php" class="text-sm font-bold text-lime-600 hover:text-deep-green hover:underline">
+            Forgot Password?
+        </a>
+    </div>
+    
+    <button type="submit" class="w-full bg-deep-green text-white font-bold py-3 rounded-xl shadow-[4px_4px_0px_#000] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
+        <span>🚀</span> Access Account
+    </button>
+    
+    <div class="text-center mt-8 pt-6 border-t-2 border-dashed border-gray-200">
+        <p class="text-gray-500 text-sm mb-2">New to QuickMed?</p>
+        <a href="<?= SITE_URL ?>/signup.php" class="inline-block font-bold text-deep-green border-b-2 border-lime-accent hover:bg-lime-accent hover:text-white px-1 transition-all">
+            Create New Account →
+        </a>
+    </div>
+</form>
+
+<script>
+function togglePassword() {
+    const passwordInput = document.getElementById('passwordInput');
+    const eyeIcon = document.getElementById('eyeIcon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.textContent = '🙈'; // চোখ বন্ধ আইকন (Hidden mode off)
+    } else {
+        passwordInput.type = 'password';
+        eyeIcon.textContent = '👁️'; // চোখ খোলা আইকন (Hidden mode on)
+    }
+}
+</script>
         </div>
         
     </div>

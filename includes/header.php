@@ -205,19 +205,19 @@ if (isLoggedIn() && isset($_SESSION['user_id'])) {
                                 $role = $currentUser['role_name'];
                                 if($role === 'admin') {
                                     $dashboardLink = SITE_URL . "/views/admin/dashboard.php";
-                                    $dashLabel = "ADMIN";
+                                    $dashLabel = "DASHBOARD";
                                 } 
                                 elseif($role === 'shop_manager') {
                                     $dashboardLink = SITE_URL . "/views/shop_manager/dashboard.php";
-                                    $dashLabel = "MANAGER";
+                                    $dashLabel = "DASHBOARD";
                                 }
                                 elseif($role === 'doctor') {
-                                    $dashboardLink = SITE_URL . "/views/doctor/prescriptions.php";
-                                    $dashLabel = "DOCTOR";
+                                    $dashboardLink = SITE_URL . "/views/doctor/dashboard.php";
+                                    $dashLabel = "DASHBOARD";
                                 }
                                 elseif($role === 'salesman') {
-                                    $dashboardLink = SITE_URL . "/views/salesman/pos.php";
-                                    $dashLabel = "POS";
+                                    $dashboardLink = SITE_URL . "/views/salesman/dashboard.php";
+                                    $dashLabel = "DASHBOARD";
                                 }
                             }
                         ?>
@@ -226,15 +226,15 @@ if (isLoggedIn() && isset($_SESSION['user_id'])) {
                             <span>⚡</span> <?= $dashLabel ?>
                         </a>
                         
-                        <a href="<?= SITE_URL ?>/profile.php" class="hover:text-lime-accent transition-all flex items-center gap-1 font-mono">
-                            <span>👤</span> PROFILE
+                        <a href="<?= SITE_URL ?>/profile.php" class="bg-lime-accent text-deep-green px-5 py-2 rounded-lg font-bold border-2 border-lime-accent shadow-[3px_3px_0px_#000] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all uppercase flex items-center gap-2">
+                            <span>👨🏻‍💼</span> PROFILE
                         </a>
                         
                         <a href="<?= SITE_URL ?>/logout.php" class="text-red-300 hover:text-white px-2 py-1 rounded transition hover:bg-red-500/20">✖</a>
                     
                     <?php else: ?>
                         
-                        <a href="<?= SITE_URL ?>/login.php" class="font-mono text-lime-accent border-b-2 border-transparent hover:border-lime-accent hover:text-white transition-all pb-0.5">
+                        <a href="<?= SITE_URL ?>/login.php" class="bg-lime-accent text-deep-green px-5 py-2 rounded-lg font-bold border-2 border-lime-accent shadow-[3px_3px_0px_#000] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all uppercase flex items-center gap-2">
                             🔐 LOGIN
                         </a>
                         
