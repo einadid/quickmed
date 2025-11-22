@@ -1,6 +1,7 @@
 <?php
 /**
  * QuickMed - Ultra Dynamic Header (FIXED & ENHANCED)
+ * With Global AJAX Search
  */
 
 // 1. SITE_URL Definition
@@ -96,11 +97,43 @@ if (isLoggedIn() && isset($_SESSION['user_id'])) {
         #preloader { position: fixed; inset: 0; z-index: 99999; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; transition: opacity 0.3s ease-out; }
         .medicine-spin { font-size: 4rem; animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+/* MARQUEE FIX - NO GRADIENT */
+        .marquee-container { 
+            overflow: hidden; 
+            white-space: nowrap; 
+            background: #044532ff; /* Deep Green Background */
+            color: #ffffff;      /* White Text */
+            font-size: 0.9rem; 
+            font-weight: 600;
+            padding: 10px 0; 
+            border-bottom: 2px solid #84cc16;
+            
+            /* নিচের লাইনগুলো গ্র্যাডিয়েন্ট বা ফেইড ইফেক্ট বন্ধ করবে */
+            position: relative;
+            width: 100%;
+            mask-image: none !important;
+            -webkit-mask-image: none !important;
+        }
 
-        /* MARQUEE */
-        .marquee-container { overflow: hidden; white-space: nowrap; background: #022c22; color: #ecfccb; font-size: 0.85rem; padding: 8px 0; border-bottom: 1px solid #84cc16; }
-        .marquee-content { display: inline-block; padding-left: 100%; animation: marquee 40s linear infinite; }
-        @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+        /* যদি কোনো hidden element বা shadow থাকে, তা রিমুভ করার জন্য */
+        .marquee-container::before,
+        .marquee-container::after {
+            content: none !important;
+            display: none !important;
+            background: none !important;
+        }
+
+        .marquee-content { 
+            display: inline-block; 
+            padding-left: 100%; 
+            animation: marquee 30s linear infinite; 
+        }
+
+        @keyframes marquee { 
+            0% { transform: translate(0, 0); } 
+            100% { transform: translate(-100%, 0); } 
+        }
+
 
         /* NAVBAR ANIMATION (MEDICINES) */
         .nav-bg-anim { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; opacity: 0.1; }
@@ -125,6 +158,12 @@ if (isLoggedIn() && isset($_SESSION['user_id'])) {
             body { padding-bottom: 80px; }
         }
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        
+        /* Custom Scrollbar for Search Results */
+        .custom-scroll::-webkit-scrollbar { width: 8px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #84cc16; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #065f46; }
     </style>
 </head>
 <body class="bg-gray-50 font-sans flex flex-col min-h-screen selection:bg-lime-accent selection:text-deep-green">
@@ -166,20 +205,24 @@ if (isLoggedIn() && isset($_SESSION['user_id'])) {
                     <span class="md:hidden text-xl font-mono font-bold text-white">QuickMed</span>
                 </a>
                 
-                <button onclick="openMobileSearch()" class="md:hidden text-lime-accent p-2 border border-lime-accent/50 rounded-lg hover:bg-lime-accent/10 transition z-10">🔍</button>
+                <button onclick="openGlobalSearch()" class="md:hidden text-lime-accent p-2 border border-lime-accent/50 rounded-lg hover:bg-lime-accent/10 transition z-10">🔍</button>
                 
                 <div class="hidden md:flex items-center gap-6 text-sm font-bold text-white z-10">
+                    
                     
                     <div class="bg-black/40 px-3 py-1.5 rounded-lg border border-lime-accent/30 font-mono text-lime-accent flex items-center gap-2 shadow-inner">
                         <span class="animate-pulse">●</span> <span id="navClock">00:00:00</span>
                     </div>
-
+                    
                     <div class="flex gap-6 tracking-wide font-mono text-gray-200 items-center">
                         <a href="<?= SITE_URL ?>/index.php" class="hover:text-lime-accent hover:-translate-y-0.5 transition-all">HOME</a>
                         <a href="<?= SITE_URL ?>/shop.php" class="hover:text-lime-accent hover:-translate-y-0.5 transition-all">SHOP</a>
                         <a href="<?= SITE_URL ?>/about.php" class="hover:text-lime-accent hover:-translate-y-0.5 transition-all">ABOUT</a>
                         <a href="<?= SITE_URL ?>/contact.php" class="hover:text-lime-accent hover:-translate-y-0.5 transition-all">CONTACT</a>
                     </div>
+                    <button onclick="openGlobalSearch()" class="text-lime-accent hover:text-white hover:scale-110 transition-transform text-xl" title="Search (Ctrl+K)">
+                        🔍
+                    </button>
                     
                     <div class="h-6 w-px bg-white/20 mx-2"></div>
 
@@ -342,13 +385,39 @@ if (isLoggedIn() && isset($_SESSION['user_id'])) {
         <?php endif; ?>
     </div>
 
-    <div id="mobileSearchModal" class="hidden fixed inset-0 bg-black/95 z-[99999] p-4 flex flex-col backdrop-blur-md">
-        <div class="flex justify-between items-center mb-6 border-b border-lime-accent/30 pb-4">
-            <h3 class="text-lime-accent text-xl font-mono font-bold tracking-widest">SEARCH DATABASE</h3>
-            <button onclick="closeMobileSearch()" class="text-white text-4xl hover:text-red-500 transition">&times;</button>
+    <div id="globalSearchModal" class="hidden fixed inset-0 bg-black/80 z-[99999] flex items-start justify-center pt-20 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden transform transition-all scale-100 mx-4 relative border-4 border-deep-green">
+            
+            <button onclick="closeGlobalSearch()" class="absolute right-4 top-4 text-gray-400 hover:text-red-500 text-2xl font-bold transition-transform hover:rotate-90">&times;</button>
+            
+            <div class="p-6">
+                <h2 class="text-xl font-bold text-deep-green mb-4 flex items-center gap-2">
+                    <span>🔍</span> Search Medicines
+                </h2>
+                
+                <div class="relative">
+                    <input type="text" id="globalSearchInput" 
+                        class="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 rounded-xl focus:border-deep-green focus:ring-4 focus:ring-green-100 outline-none transition-all font-bold text-gray-700" 
+                        placeholder="Type medicine name (e.g. Napa, Ace)..."
+                        autocomplete="off">
+                    <span class="absolute left-4 top-4 text-2xl text-gray-400"></span>
+                    
+                    <div id="searchLoader" class="hidden absolute right-4 top-4">
+                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-deep-green"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="globalSearchResults" class="max-h-[60vh] overflow-y-auto bg-gray-50 custom-scroll border-t border-gray-200">
+                <div class="p-8 text-center text-gray-400">
+                    <p>Start typing to search...</p>
+                </div>
+            </div>
+            
+            <div class="bg-gray-100 p-3 text-center text-xs text-gray-500 border-t border-gray-200">
+                Press <span class="font-mono bg-white border px-1 rounded">ESC</span> to close
+            </div>
         </div>
-        <input type="text" id="mobileSearchInput" class="w-full bg-gray-900 border-2 border-lime-accent text-lime-accent p-4 rounded-xl text-xl focus:outline-none focus:shadow-[0_0_20px_rgba(132,204,22,0.3)] font-mono placeholder-gray-600" placeholder="MEDICINE NAME..." autocomplete="off">
-        <div id="mobileSearchResults" class="mt-4 flex-1 overflow-y-auto font-mono text-white space-y-2"></div>
     </div>
 
     <script>
@@ -365,13 +434,106 @@ if (isLoggedIn() && isset($_SESSION['user_id'])) {
             document.body.style.overflow = menu.classList.contains('hidden') ? '' : 'hidden';
         }
 
-        function openMobileSearch() {
-            document.getElementById('mobileSearchModal').classList.remove('hidden');
-            document.getElementById('mobileSearchInput').focus();
+        // --- GLOBAL SEARCH LOGIC ---
+        function openGlobalSearch() {
+            const modal = document.getElementById('globalSearchModal');
+            const input = document.getElementById('globalSearchInput');
+            modal.classList.remove('hidden');
+            setTimeout(() => input.focus(), 100); // Focus input automatically
+            document.body.style.overflow = 'hidden'; // Disable scroll
         }
-        function closeMobileSearch() {
-            document.getElementById('mobileSearchModal').classList.add('hidden');
+
+        function closeGlobalSearch() {
+            document.getElementById('globalSearchModal').classList.add('hidden');
+            document.getElementById('globalSearchInput').value = ''; // Clear input
+            document.getElementById('globalSearchResults').innerHTML = '<div class="p-8 text-center text-gray-400"><p>Start typing to search...</p></div>'; // Reset results
+            document.body.style.overflow = ''; // Enable scroll
         }
+
+        // Close on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeGlobalSearch();
+            // Optional: Open search with Ctrl+K
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                openGlobalSearch();
+            }
+        });
+
+        // Close on Outside Click
+        document.getElementById('globalSearchModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('globalSearchModal')) {
+                closeGlobalSearch();
+            }
+        });
+
+        // Live Search Logic
+        let searchTimeout;
+        document.getElementById('globalSearchInput').addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            const resultsContainer = document.getElementById('globalSearchResults');
+            const loader = document.getElementById('searchLoader');
+
+            if (query.length < 2) {
+                resultsContainer.innerHTML = '<div class="p-8 text-center text-gray-400"><p>Type at least 2 characters...</p></div>';
+                return;
+            }
+
+            loader.classList.remove('hidden'); // Show loader
+
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const siteUrl = '<?= SITE_URL ?>';
+                    const response = await fetch(`${siteUrl}/ajax/search_medicine.php?q=${encodeURIComponent(query)}`);
+                    const results = await response.json();
+                    
+                    loader.classList.add('hidden'); // Hide loader
+
+                    if (results.length === 0) {
+                        resultsContainer.innerHTML = `
+                            <div class="p-8 text-center text-gray-500">
+                                <div class="text-6xl mb-4">😔</div>
+                                <p class="text-xl font-bold">No medicines found</p>
+                                <p class="text-sm mt-2">Try searching with generic name</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    let html = '';
+                    results.forEach(item => {
+                        const imagePath = item.image ? `${siteUrl}/uploads/medicines/${item.image}` : `${siteUrl}/assets/images/placeholder.png`;
+                        const stockBadge = item.stock > 0 
+                            ? '<span class="text-xs bg-lime-100 text-deep-green px-2 py-1 rounded font-bold border border-lime-300">In Stock</span>' 
+                            : '<span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded font-bold border border-red-200">Out of Stock</span>';
+                        
+                        html += `
+                            <a href="${siteUrl}/product.php?id=${item.id}" class="flex items-center gap-4 p-4 border-b hover:bg-white transition-colors group cursor-pointer">
+                                <img src="${imagePath}" class="w-16 h-16 object-contain bg-white border rounded p-1 group-hover:scale-105 transition-transform">
+                                
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-deep-green text-lg group-hover:text-lime-600 transition">${item.name}</h4>
+                                    <p class="text-sm text-gray-600">${item.power} | ${item.form}</p>
+                                    <p class="text-xs text-gray-400 mt-1">${item.generic_name}</p>
+                                </div>
+                                
+                                <div class="text-right">
+                                    <p class="text-xl font-bold text-deep-green">৳${item.price}</p>
+                                    ${stockBadge}
+                                </div>
+                            </a>
+                        `;
+                    });
+                    resultsContainer.innerHTML = html;
+
+                } catch (error) {
+                    console.error(error);
+                    loader.classList.add('hidden');
+                    resultsContainer.innerHTML = '<div class="p-8 text-center text-red-500">Search failed. Please try again.</div>';
+                }
+            }, 300); // 300ms Delay
+        });
     </script>
 
     <?php if (isset($_SESSION['success']) || isset($_SESSION['error'])): ?>
