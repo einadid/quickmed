@@ -12,20 +12,21 @@ $blogs = $conn->query("SELECT hp.*, u.full_name, u.profile_image
 
 <section class="py-20 bg-gray-50 relative overflow-hidden">
     <div class="container mx-auto px-4 relative z-10">
-        <div class="text-center mb-12" data-aos="fade-up">
-            <h2 class="text-4xl font-bold text-deep-green mb-2 font-mono uppercase">📚 Health Insights</h2>
-            <p class="text-gray-600">Expert advice from our certified doctors</p>
-        </div>
+        <?php qm_section_head('📚 Health Insights', 'Expert advice from our certified doctors', 'Health Blog'); ?>
 
         <div class="grid md:grid-cols-3 gap-8">
             <?php while ($blog = $blogs->fetch_assoc()): ?>
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:-translate-y-2 transition-all duration-300 border border-gray-200" data-aos="fade-up">
                     
                     <!-- Image -->
-                    <div class="h-56 overflow-hidden relative group">
-                        <img src="<?= SITE_URL ?>/uploads/news/<?= $blog['image'] ?>" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
-                        <div class="absolute top-4 left-4 bg-deep-green text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
-                            <?= $blog['category'] ?>
+                    <div class="h-56 overflow-hidden relative group bg-gray-100">
+                        <?php if (!empty($blog['image'])): ?>
+                            <img src="<?= SITE_URL ?>/uploads/news/<?= htmlspecialchars($blog['image']) ?>" class="w-full h-full object-cover transition duration-700 group-hover:scale-110" loading="lazy">
+                        <?php else: ?>
+                            <div class="w-full h-full flex items-center justify-center text-6xl">📚</div>
+                        <?php endif; ?>
+                        <div class="absolute top-4 left-4">
+                            <span class="badge badge-green"><?= htmlspecialchars($blog['category'] ?? 'General') ?></span>
                         </div>
                     </div>
 

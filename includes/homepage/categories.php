@@ -16,14 +16,7 @@ $categories = [
 ?>
 
 <section class="container mx-auto px-4 py-16">
-    <div class="text-center mb-12" data-aos="fade-up">
-        <h2 class="text-4xl font-bold text-green mb-4 uppercase">
-            <?= __('shop_by_concerns') ?>
-        </h2>
-        <div class="bg-lime-accent inline-block px-6 py-2 border-4 border-green">
-            <p class="text-green font-bold">Find medicines for your specific health needs</p>
-        </div>
-    </div>
+    <?php qm_section_head(__('shop_by_concerns'), 'Find medicines for your specific health needs', 'Categories'); ?>
     
     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
         <?php foreach ($categories as $index => $category): ?>

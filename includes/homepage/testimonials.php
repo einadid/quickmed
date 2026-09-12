@@ -80,7 +80,7 @@ if (!empty($reviewsData)):
         100% { transform: translateX(0); }
     }
 
-    .marquee-container {
+    .rv-marquee {
         display: flex;
         overflow: hidden;
         width: 100%;
@@ -88,21 +88,21 @@ if (!empty($reviewsData)):
         -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
     }
 
-    .marquee-track {
+    .rv-track {
         display: flex;
         width: max-content;
     }
 
     /* Animation Classes */
-    .animate-scroll-left {
+    .rv-left {
         animation: scrollLeft 40s linear infinite;
     }
-    .animate-scroll-right {
+    .rv-right {
         animation: scrollRight 40s linear infinite;
     }
 
     /* Pause on Hover */
-    .marquee-container:hover .marquee-track {
+    .rv-marquee:hover .rv-track {
         animation-play-state: paused;
     }
 </style>
@@ -120,8 +120,8 @@ if (!empty($reviewsData)):
         </div>
     </div>
 
-    <div class="marquee-container mb-8">
-        <div class="marquee-track animate-scroll-left">
+    <div class="rv-marquee mb-8">
+        <div class="rv-track rv-left">
             <?php 
             // লুপ ২ বার চালানো হচ্ছে যাতে ইনফিনিট স্ক্রল স্মুথ হয় (Seamless Loop)
             foreach ($reviewsData as $review) { echo renderReviewCard($review); }
@@ -130,8 +130,8 @@ if (!empty($reviewsData)):
         </div>
     </div>
 
-    <div class="marquee-container">
-        <div class="marquee-track animate-scroll-right">
+    <div class="rv-marquee">
+        <div class="rv-track rv-right">
             <?php 
             // ডাটা রিভার্স করে দেওয়া হলো যাতে দুটি রো ভিন্ন অর্ডারে দেখায়
             $reversedData = array_reverse($reviewsData);

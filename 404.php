@@ -17,7 +17,10 @@ require_once 'config.php'; // Ensure this path is correct
         body {
             font-family: 'Space Mono', monospace;
             background-color: #064e3b; /* Deep Green Base */
-            overflow: hidden;
+            overflow-x: hidden;
+        }
+        @media (min-width: 768px) {
+            body { overflow: hidden; }
         }
 
         /* --- Background Animation --- */

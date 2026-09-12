@@ -32,7 +32,7 @@ try {
 
 <style>
     /* Scoped Styles for this section */
-    .stat-card {
+    .eco-card {
         background: rgba(255, 255, 255, 0.03);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
@@ -43,7 +43,7 @@ try {
     }
 
     /* Hover Effect: Glow & Lift */
-    .stat-card:hover {
+    .eco-card:hover {
         transform: translateY(-5px);
         background: rgba(255, 255, 255, 0.07);
         border-color: rgba(132, 204, 22, 0.3); /* Lime-500 equivalent */
@@ -95,7 +95,7 @@ try {
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
             
-            <div class="stat-card rounded-2xl p-6 group">
+            <div class="eco-card rounded-2xl p-6 group">
                 <div class="flex items-center justify-between mb-4">
                     <div class="p-3 rounded-lg bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -107,7 +107,7 @@ try {
                 <div class="text-sm text-slate-400 font-medium">Available Medicines</div>
             </div>
 
-            <div class="stat-card rounded-2xl p-6 group">
+            <div class="eco-card rounded-2xl p-6 group">
                 <div class="flex items-center justify-between mb-4">
                     <div class="p-3 rounded-lg bg-purple-500/10 text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition-colors">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -119,7 +119,7 @@ try {
                 <div class="text-sm text-slate-400 font-medium">Active Pharmacies</div>
             </div>
 
-            <div class="stat-card rounded-2xl p-6 group">
+            <div class="eco-card rounded-2xl p-6 group">
                 <div class="flex items-center justify-between mb-4">
                     <div class="p-3 rounded-lg bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -131,7 +131,7 @@ try {
                 <div class="text-sm text-slate-400 font-medium">Orders Completed</div>
             </div>
 
-            <div class="stat-card rounded-2xl p-6 group">
+            <div class="eco-card rounded-2xl p-6 group">
                 <div class="flex items-center justify-between mb-4">
                     <div class="p-3 rounded-lg bg-orange-500/10 text-orange-400 group-hover:bg-orange-500 group-hover:text-white transition-colors">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -143,7 +143,7 @@ try {
                 <div class="text-sm text-slate-400 font-medium">Happy Customers</div>
             </div>
 
-            <div class="stat-card rounded-2xl p-6 group border-lime-500/30 bg-lime-500/5">
+            <div class="eco-card rounded-2xl p-6 group border-lime-500/30 bg-lime-500/5">
                 <div class="flex items-center justify-between mb-4">
                     <div class="p-3 rounded-lg bg-lime-400 text-slate-900 shadow-[0_0_15px_rgba(163,230,53,0.5)]">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

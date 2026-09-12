@@ -53,135 +53,58 @@ $recentStmt->execute();
 $recentOrders = $recentStmt->get_result();
 
 include __DIR__ . '/../../includes/header.php';
+
+$dashTitle = 'My Dashboard';
+$dashSubtitle = 'Welcome to your health hub · Member since ' . date('Y', strtotime($user['created_at']));
+$dashIcon = '👋';
+include __DIR__ . '/../../includes/dashnav.php';
 ?>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<section class="container mx-auto px-4 py-10 min-h-screen">
+    <div class="max-w-6xl mx-auto">
 
-<section class="bg-gray-50 min-h-screen pb-20">
-    
-    <!-- HERO HEADER -->
-    <div class="bg-deep-green text-white pt-24 pb-32 relative overflow-hidden rounded-b-[3rem] shadow-xl">
-        <!-- Decorative Blobs -->
-        <div class="absolute top-0 right-0 w-64 h-64 bg-lime-accent opacity-10 rounded-full blur-3xl transform translate-x-10 -translate-y-10"></div>
-        <div class="absolute bottom-0 left-0 w-48 h-48 bg-white opacity-5 rounded-full blur-3xl"></div>
-
-        <div class="container mx-auto px-6 relative z-10 flex flex-col md:flex-row justify-between items-center">
-            <div data-aos="fade-right">
-                <div class="inline-block bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1 rounded-full text-xs font-mono mb-3">
-                    Member Since <?= date('Y', strtotime($user['created_at'])) ?>
+        <!-- Welcome + loyalty strip -->
+        <div class="grid lg:grid-cols-3 gap-5 mb-8">
+            <div class="card lg:col-span-2 flex items-center gap-5" data-aos="fade-right">
+                <?= qm_avatar($user, 'w-20 h-20') ?>
+                <div>
+                    <h2 class="text-2xl font-bold text-[#065f46]"><span id="greeting">Hello</span>, <?= htmlspecialchars(explode(' ', $user['full_name'])[0]) ?>!</h2>
+                    <p class="text-gray-500 text-sm">Member ID: <b class="font-mono"><?= htmlspecialchars($user['member_id'] ?? 'N/A') ?></b></p>
                 </div>
-                <h1 class="text-3xl md:text-5xl font-bold mb-2">
-                    <span id="greeting">Hello</span>, <?= htmlspecialchars(explode(' ', $user['full_name'])[0]) ?>!
-                </h1>
-                <p class="text-gray-200 text-lg opacity-90">Welcome to your health hub.</p>
             </div>
-            
-            <!-- Digital Loyalty Card -->
-            <div class="mt-8 md:mt-0 w-full md:w-auto" data-aos="fade-left">
-                <div class="bg-gradient-to-br from-emerald-500 to-teal-900 p-6 rounded-2xl shadow-2xl border border-white/10 relative overflow-hidden w-full md:w-96 h-52 flex flex-col justify-between group hover:scale-[1.02] transition-transform duration-500">
-                    
-                    <!-- Card Pattern -->
-                    <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle, #ffffff 1px, transparent 1px); background-size: 20px 20px;"></div>
-                    
-                    <div class="flex justify-between items-start relative z-10">
-                        <div>
-                            <p class="text-lime-accent text-xs font-bold uppercase tracking-widest">QuickMed Gold</p>
-                            <div class="mt-2 flex items-center gap-2">
-                                <span class="text-4xl font-bold text-white"><?= number_format($user['points']) ?></span>
-                                <span class="text-sm bg-white/20 px-2 py-0.5 rounded text-white">PTS</span>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-xs text-gray-300">Cash Value</p>
-                            <p class="text-xl font-bold text-lime-accent">৳<?= floor($user['points'] / 100) * 10 ?></p>
-                        </div>
-                    </div>
-
-                    <div class="relative z-10">
-                        <div class="flex justify-between items-end mb-2">
-                            <p class="font-mono text-gray-300 tracking-widest text-sm"><?= $user['member_id'] ?? '#### #### ####' ?></p>
-                            <div class="w-8 h-8 bg-yellow-400/80 rounded-full opacity-80"></div>
-                        </div>
-                        <div class="w-full bg-black/20 h-1.5 rounded-full overflow-hidden">
-                            <div class="bg-lime-accent h-full" style="width: <?= ($user['points'] % 1000) / 10 ?>%"></div>
-                        </div>
-                        <p class="text-[10px] text-gray-400 mt-1 text-right">Next Reward in <?= 1000 - ($user['points'] % 1000) ?> pts</p>
-                    </div>
+            <div class="card card-green flex items-center justify-between" data-aos="fade-left">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-[#84cc16]">Loyalty Points</p>
+                    <p class="text-3xl font-bold font-display">⭐ <?= number_format($user['points'] ?? 0) ?></p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-gray-300">Cash Value</p>
+                    <p class="text-xl font-bold text-[#84cc16]">৳<?= floor(($user['points'] ?? 0) / 100) * 10 ?></p>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- MAIN CONTENT -->
-    <div class="container mx-auto px-6 -mt-20 relative z-20">
-        
         <!-- 1. QUICK ACTIONS -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-            <a href="<?= SITE_URL ?>/shop.php" class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all group text-center border border-gray-100">
-                <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">🛍️</div>
-                <h3 class="font-bold text-deep-green">Shop Medicine</h3>
-                <p class="text-xs text-gray-500">Browse Products</p>
-            </a>
-
-            <a href="<?= SITE_URL ?>/prescription-upload.php" class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all group text-center border border-gray-100">
-                <div class="text-4xl mb-3 group-hover:rotate-12 transition-transform">📋</div>
-                <h3 class="font-bold text-deep-green">Upload Rx</h3>
-                <p class="text-xs text-gray-500">Order by Photo</p>
-            </a>
-
-            <a href="<?= SITE_URL ?>/my-orders.php" class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all group text-center border border-gray-100">
-                <div class="text-4xl mb-3 group-hover:translate-x-2 transition-transform">📦</div>
-                <h3 class="font-bold text-deep-green">Track Order</h3>
-                <p class="text-xs text-gray-500">Check Status</p>
-            </a>
-
-            <a href="<?= SITE_URL ?>/cart.php" class="bg-lime-accent p-6 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all group text-center relative overflow-hidden">
-                <div class="absolute -right-4 -top-4 text-6xl opacity-20 text-white">🛒</div>
-                <div class="text-4xl mb-3 relative z-10">🛒</div>
-                <h3 class="font-bold text-deep-green relative z-10">View Cart</h3>
-                <p class="text-xs text-deep-green opacity-80 relative z-10">Checkout Now</p>
-            </a>
+        <div class="qa-grid mb-10" data-aos="fade-up">
+            <a href="<?= SITE_URL ?>/shop.php" class="qa-card"><span class="qa-icon">🛍️</span><span class="qa-label">Shop Medicine</span></a>
+            <a href="<?= SITE_URL ?>/prescription-upload.php" class="qa-card"><span class="qa-icon">📋</span><span class="qa-label">Upload Rx</span></a>
+            <a href="<?= SITE_URL ?>/my-orders.php" class="qa-card"><span class="qa-icon">📦</span><span class="qa-label">Track Order</span></a>
+            <a href="<?= SITE_URL ?>/cart.php" class="qa-card"><span class="qa-icon">🛒</span><span class="qa-label">View Cart</span></a>
         </div>
 
         <!-- 2. STATS & CHART ROW -->
-        <div class="grid lg:grid-cols-3 gap-8 mb-10">
-            
-            <!-- Stats -->
-            <div class="space-y-6">
-                <div class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-deep-green flex items-center justify-between" data-aos="fade-up">
-                    <div>
-                        <p class="text-gray-500 text-xs font-bold uppercase">Total Spent</p>
-                        <h3 class="text-3xl font-bold text-deep-green">৳<?= number_format($stats['total_spent'] ?? 0) ?></h3>
-                    </div>
-                    <div class="bg-green-50 p-3 rounded-full text-2xl">💰</div>
-                </div>
-
-                <div class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-blue-500 flex items-center justify-between" data-aos="fade-up" data-aos-delay="100">
-                    <div>
-                        <p class="text-gray-500 text-xs font-bold uppercase">Total Orders</p>
-                        <h3 class="text-3xl font-bold text-blue-600"><?= $stats['total_orders'] ?></h3>
-                    </div>
-                    <div class="bg-blue-50 p-3 rounded-full text-2xl">📦</div>
-                </div>
-
-                <div class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-purple-500 flex items-center justify-between" data-aos="fade-up" data-aos-delay="200">
-                    <div>
-                        <p class="text-gray-500 text-xs font-bold uppercase">Prescriptions</p>
-                        <h3 class="text-3xl font-bold text-purple-600"><?= $stats['prescriptions_uploaded'] ?></h3>
-                    </div>
-                    <div class="bg-purple-50 p-3 rounded-full text-2xl">📄</div>
-                </div>
+        <div class="grid lg:grid-cols-3 gap-6 mb-10">
+            <div class="space-y-5">
+                <?php qm_stat('💰', qm_money($stats['total_spent'] ?? 0), 'Total Spent', ''); ?>
+                <?php qm_stat('📦', (int)$stats['total_orders'], 'Total Orders', 'blue'); ?>
+                <?php qm_stat('📄', (int)$stats['prescriptions_uploaded'], 'Prescriptions', 'amber'); ?>
             </div>
 
             <!-- Spending Chart -->
-            <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-lg border border-gray-100" data-aos="zoom-in">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-bold text-deep-green">📊 Spending Overview</h3>
-                    <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded">Last 6 Months</span>
-                </div>
+            <div class="card lg:col-span-2" data-aos="zoom-in">
+                <div class="card-header">📊 Spending Overview <span class="badge badge-neutral">Last 6 Months</span></div>
                 <div class="relative h-64 w-full">
-                    <?php if(empty($spending)): ?>
+                    <?php if (empty($spending)): ?>
                         <div class="h-full flex items-center justify-center text-gray-400">
                             No spending history yet.
                         </div>
@@ -193,63 +116,43 @@ include __DIR__ . '/../../includes/header.php';
         </div>
 
         <!-- 3. RECENT ORDERS -->
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100" data-aos="fade-up">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                <h3 class="text-lg font-bold text-deep-green">📋 Recent Orders</h3>
-                <a href="my-orders.php" class="text-sm text-lime-600 font-bold hover:underline">View All</a>
+        <div class="dash-shell" data-aos="fade-up">
+            <div class="dash-shell-head">
+                <h2>📋 Recent Orders</h2>
+                <a href="<?= SITE_URL ?>/my-orders.php" class="btn btn-lime btn-sm">View All →</a>
             </div>
 
             <?php if ($recentOrders->num_rows === 0): ?>
-                <div class="text-center py-12">
-                    <div class="text-6xl mb-4 opacity-20">🛒</div>
-                    <p class="text-gray-500 font-medium">You haven't placed any orders yet.</p>
-                    <a href="<?= SITE_URL ?>/shop.php" class="mt-4 inline-block btn btn-sm btn-primary">Start Shopping</a>
+                <div class="p-8 text-center">
+                    <div class="text-5xl mb-4 opacity-30">🛒</div>
+                    <p class="text-gray-500 font-medium mb-4">You haven't placed any orders yet.</p>
+                    <a href="<?= SITE_URL ?>/shop.php" class="btn btn-primary btn-sm">Start Shopping</a>
                 </div>
             <?php else: ?>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead class="bg-white text-xs uppercase text-gray-500 font-bold border-b border-gray-100">
+                <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none">
+                    <table class="table">
+                        <thead>
                             <tr>
-                                <th class="px-6 py-4">Order #</th>
-                                <th class="px-6 py-4">Date</th>
-                                <th class="px-6 py-4">Amount</th>
-                                <th class="px-6 py-4">Status</th>
-                                <th class="px-6 py-4 text-right">Action</th>
+                                <th>Order #</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th class="text-right">Action</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-50">
+                        <tbody>
                             <?php while ($order = $recentOrders->fetch_assoc()): ?>
-                                <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-6 py-4 font-mono text-sm font-bold text-deep-green">
+                                <tr>
+                                    <td class="font-display font-bold text-[#065f46]">
                                         #<?= htmlspecialchars($order['order_number']) ?>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-600">
+                                    <td class="text-sm text-gray-500">
                                         <?= date('M d, Y', strtotime($order['created_at'])) ?>
                                     </td>
-                                    <td class="px-6 py-4 font-bold text-gray-800">
-                                        ৳<?= number_format($order['total_amount'], 2) ?>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <?php
-                                        // Use parcel status if available, else 'Pending'
-                                        $status = $order['parcel_status'] ?: 'pending';
-                                        $colors = [
-                                            'pending' => 'bg-yellow-100 text-yellow-700',
-                                            'processing' => 'bg-blue-100 text-blue-700',
-                                            'delivered' => 'bg-green-100 text-green-700',
-                                            'cancelled' => 'bg-red-100 text-red-700',
-                                            'returned' => 'bg-gray-100 text-gray-700'
-                                        ];
-                                        $badgeClass = $colors[$status] ?? 'bg-gray-100 text-gray-600';
-                                        ?>
-                                        <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase <?= $badgeClass ?>">
-                                            <?= ucfirst($status) ?>
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <a href="<?= SITE_URL ?>/my-orders.php" class="text-sm text-deep-green font-bold hover:underline">
-                                            Details &rarr;
-                                        </a>
+                                    <td class="font-bold"><?= qm_money($order['total_amount']) ?></td>
+                                    <td><?= qm_badge($order['parcel_status'] ?: 'pending') ?></td>
+                                    <td class="text-right">
+                                        <a href="<?= SITE_URL ?>/my-orders.php" class="btn btn-outline btn-sm">Details →</a>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>

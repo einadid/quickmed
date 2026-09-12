@@ -66,7 +66,8 @@ if (isLoggedIn() && isset($_SESSION['user_id'])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <link rel="icon" type="image/png" href="<?= SITE_URL ?>/assets/images/favicon.png">
+    <link rel="icon" type="image/png" href="<?= SITE_URL ?>/assets/images/logo.png">
+    <link rel="apple-touch-icon" href="<?= SITE_URL ?>/assets/images/logo.png">
     <link rel="stylesheet" href="<?= SITE_URL ?>/assets/css/style.css?v=<?= time() ?>">
 
     <script>
@@ -219,6 +220,10 @@ if (isLoggedIn() && isset($_SESSION['user_id'])) {
                         <a href="<?= SITE_URL ?>/shop.php" class="hover:text-lime-accent hover:-translate-y-0.5 transition-all">SHOP</a>
                         <a href="<?= SITE_URL ?>/about.php" class="hover:text-lime-accent hover:-translate-y-0.5 transition-all">ABOUT</a>
                         <a href="<?= SITE_URL ?>/contact.php" class="hover:text-lime-accent hover:-translate-y-0.5 transition-all">CONTACT</a>
+                        <span class="flex items-center bg-black/40 border border-lime-accent/30 rounded-lg overflow-hidden text-xs">
+                            <a href="?lang=en" class="px-2 py-1 font-mono <?= ($_SESSION['lang'] ?? 'en') === 'en' ? 'bg-lime-accent text-deep-green' : 'text-gray-300 hover:text-lime-accent' ?>">EN</a>
+                            <a href="?lang=bn" class="px-2 py-1 font-mono <?= ($_SESSION['lang'] ?? 'en') === 'bn' ? 'bg-lime-accent text-deep-green' : 'text-gray-300 hover:text-lime-accent' ?>">বাং</a>
+                        </span>
                     </div>
                     <button onclick="openGlobalSearch()" class="text-lime-accent hover:text-white hover:scale-110 transition-transform text-xl" title="Search (Ctrl+K)">
                         🔍
@@ -382,6 +387,20 @@ if (isLoggedIn() && isset($_SESSION['user_id'])) {
                 <a href="<?= SITE_URL ?>/contact.php" class="py-2 border-b border-white/10 hover:text-lime-accent hover:translate-x-2 transition-all">📞 CONTACT</a>
                 <a href="<?= SITE_URL ?>/logout.php" class="bg-red-500/80 py-3 rounded-xl hover:bg-red-600 transition mt-4 shadow-[4px_4px_0px_#000] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]">🚪 LOGOUT</a>
             </div>
+        <?php else: ?>
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-lime-accent rounded-2xl flex items-center justify-center text-3xl font-bold text-deep-green mx-auto mb-4 border-4 border-white">QM</div>
+                <h3 class="text-2xl font-bold text-white font-mono">QuickMed</h3>
+                <p class="text-lime-accent text-xs uppercase tracking-widest mt-1">Digital Pharmacy</p>
+            </div>
+            <div class="grid grid-cols-1 gap-4 w-64 text-center text-lg font-bold text-white font-mono">
+                <a href="<?= SITE_URL ?>/index.php" class="py-2 border-b border-white/10 hover:text-lime-accent transition-all">🏠 HOME</a>
+                <a href="<?= SITE_URL ?>/shop.php" class="py-2 border-b border-white/10 hover:text-lime-accent transition-all">🛍️ SHOP</a>
+                <a href="<?= SITE_URL ?>/about.php" class="py-2 border-b border-white/10 hover:text-lime-accent transition-all">ℹ️ ABOUT US</a>
+                <a href="<?= SITE_URL ?>/contact.php" class="py-2 border-b border-white/10 hover:text-lime-accent transition-all">📞 CONTACT</a>
+                <a href="<?= SITE_URL ?>/login.php" class="bg-lime-accent text-deep-green py-3 rounded-xl hover:bg-white transition mt-4">🔐 LOGIN</a>
+                <a href="<?= SITE_URL ?>/signup.php" class="bg-white/10 border-2 border-white/30 py-3 rounded-xl hover:bg-white hover:text-deep-green transition">✍️ SIGN UP</a>
+            </div>
         <?php endif; ?>
     </div>
 
@@ -543,14 +562,15 @@ if (isLoggedIn() && isset($_SESSION['user_id'])) {
             background: '#065f46', color: '#fff', iconColor: '#84cc16'
         });
         <?php if (isset($_SESSION['success'])): ?>
-            Toast.fire({ icon: 'success', title: '<?= $_SESSION['success'] ?>' });
+            Toast.fire({ icon: 'success', title: <?= json_encode(strip_tags($_SESSION['success'])) ?> });
             <?php unset($_SESSION['success']); ?>
         <?php endif; ?>
         <?php if (isset($_SESSION['error'])): ?>
-            Toast.fire({ icon: 'error', title: '<?= $_SESSION['error'] ?>', background: '#ef4444' });
+            Toast.fire({ icon: 'error', title: <?= json_encode(strip_tags($_SESSION['error'])) ?>, background: '#ef4444' });
             <?php unset($_SESSION['error']); ?>
         <?php endif; ?>
     </script>
     <?php endif; ?>
-</body>
-</html>
+
+    <!-- Page content starts (closed in includes/footer.php) -->
+    <main id="qm-main" class="flex-1 w-full">

@@ -23,8 +23,11 @@ if (!$post) {
 // Increment Views
 $conn->query("UPDATE health_posts SET views = views + 1 WHERE id = $postId");
 
-// Fetch Related Posts
-$related = $conn->query("SELECT * FROM health_posts WHERE category = '{$post['category']}' AND id != $postId LIMIT 3");
+// Fetch Related Posts (published only)
+$relStmt = $conn->prepare("SELECT id, title, image, category, created_at FROM health_posts WHERE category = ? AND id != ? AND is_published = 1 LIMIT 3");
+$relStmt->bind_param("si", $post['category'], $postId);
+$relStmt->execute();
+$related = $relStmt->get_result();
 
 // Prepare Share Data
 $currentUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
@@ -40,8 +43,11 @@ include 'includes/header.php';
     <img src="<?= SITE_URL ?>/uploads/news/<?= $post['image'] ?>" class="w-full h-full object-cover" alt="<?= htmlspecialchars($post['title']) ?>">
     
     <div class="absolute inset-0 z-20 flex flex-col justify-center items-center text-center text-white px-4" data-aos="fade-up">
-        <span class="bg-lime-accent text-deep-green px-4 py-1 rounded-full font-bold text-sm mb-4 shadow-lg uppercase tracking-widest">
-            <?= $post['category'] ?>
+        <div class="absolute top-6 left-6">
+            <a href="<?= SITE_URL ?>/blog.php" class="btn btn-white btn-sm">← All Articles</a>
+        </div>
+        <span class="badge badge-lime mb-4 shadow-lg" style="font-size:0.85rem;padding:0.5rem 1.2rem">
+            <?= htmlspecialchars($post['category'] ?? 'General') ?>
         </span>
         <h1 class="text-4xl md:text-6xl font-bold font-mono leading-tight max-w-4xl drop-shadow-lg">
             <?= htmlspecialchars($post['title']) ?>
@@ -69,7 +75,7 @@ include 'includes/header.php';
     <?= nl2br(htmlspecialchars_decode($post['content'])) ?>
 </div>
 
-        <div class="mt-12 bg-off-white p-8 rounded-xl border-l-8 border-lime-accent flex items-center gap-6 shadow-sm">
+        <div class="card mt-12 flex flex-col sm:flex-row items-center gap-6 card-accent">
             <img src="<?= $post['profile_image'] ? SITE_URL.'/uploads/profiles/'.$post['profile_image'] : 'https://ui-avatars.com/api/?name='.urlencode($post['full_name']) ?>" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md">
             <div>
                 <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Written By</p>

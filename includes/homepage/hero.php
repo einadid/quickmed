@@ -199,7 +199,7 @@
         </div>
         <div class="p-6">
             <?php if (isLoggedIn()): ?>
-                <form id="prescriptionForm" action="<?= SITE_URL ?>/actions/upload_prescription.php" method="POST" enctype="multipart/form-data">
+                <form id="prescriptionForm" action="<?= SITE_URL ?>/ajax/upload_prescription.php" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
                     <div class="mb-6">
                         <label class="block font-bold mb-3 text-deep-green text-lg">📸 Prescription Image *</label>
@@ -356,8 +356,36 @@ document.addEventListener('DOMContentLoaded', function() {
     // Modal close on outside click
     const modal = document.getElementById('prescriptionModal');
     if(modal) {
-        modal.addEventListener('click', function(e) { 
-            if (e.target === this) closePrescriptionModal(); 
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) closePrescriptionModal();
+        });
+    }
+
+    // --- AJAX prescription submit (fixed endpoint) ---
+    const rxForm = document.getElementById('prescriptionForm');
+    if (rxForm) {
+        rxForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = rxForm.querySelector('button[type="submit"]');
+            const oldText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = 'Uploading...';
+            try {
+                const res = await fetch(rxForm.action, { method: 'POST', body: new FormData(rxForm) });
+                const data = await res.json();
+                if (data.success) {
+                    closePrescriptionModal();
+                    rxForm.reset();
+                    clearImage();
+                    Swal.fire({ icon: 'success', title: 'Uploaded!', text: data.message, confirmButtonColor: '#065f46' });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Failed', text: data.message || 'Upload failed', confirmButtonColor: '#065f46' });
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Network error. Please try again.', confirmButtonColor: '#065f46' });
+            }
+            btn.disabled = false;
+            btn.innerHTML = oldText;
         });
     }
 });

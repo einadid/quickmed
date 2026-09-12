@@ -71,210 +71,102 @@ $parcelsStmt->execute();
 $parcels = $parcelsStmt->get_result();
 
 include __DIR__ . '/../../includes/header.php';
+
+$dashTitle = 'Sales Desk';
+$dashSubtitle = '🏪 ' . $shop['name'] . ' · ' . $shop['city'] . ' · ' . date('l, d F Y');
+$dashIcon = '🧾';
+include __DIR__ . '/../../includes/dashnav.php';
 ?>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
-    /* Custom Scrollbar */
-    .custom-scroll::-webkit-scrollbar { width: 6px; }
-    .custom-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
-    
-    /* Modal Overlay */
-    .modal-overlay {
-        position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.6);
-        display: flex; justify-content: center; align-items: center; z-index: 9999;
-        backdrop-filter: blur(4px);
-    }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(4px); }
     .modal-overlay.hidden { display: none; }
 </style>
 
-<section class="bg-gray-50 min-h-screen pb-20">
-    
-    <div class="bg-gradient-to-br from-deep-green to-green-900 text-white pt-24 pb-32 relative overflow-hidden rounded-b-[3rem] shadow-xl">
-        <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-            <div class="absolute top-10 right-20 text-9xl transform rotate-12">🛒</div>
-            <div class="absolute bottom-10 left-20 text-9xl transform -rotate-12">🧾</div>
-        </div>
+<section class="container mx-auto px-4 py-10 min-h-screen">
+    <div class="max-w-7xl mx-auto">
 
-        <div class="container mx-auto px-6 relative z-10 flex flex-col md:flex-row justify-between items-center">
-            <div data-aos="fade-right">
-                <div class="flex items-center gap-3 mb-3">
-                    <span class="bg-lime-accent text-deep-green text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-md">Salesman Panel</span>
-                    <span class="flex h-3 w-3 relative">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-lime-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-3 w-3 bg-lime-500"></span>
-                    </span>
-                    <span class="text-lime-accent text-sm font-mono">Online</span>
-                </div>
-                <h1 class="text-4xl md:text-5xl font-bold mb-2 tracking-tight">
-                    Welcome Back, <?= htmlspecialchars(explode(' ', $user['full_name'])[0]) ?>! 👋
-                </h1>
-                <p class="text-gray-200 text-lg flex items-center gap-2 opacity-90">
-                    🏪 <?= htmlspecialchars($shop['name']) ?> <span class="text-lime-accent">•</span> <?= htmlspecialchars($shop['city']) ?>
-                </p>
-            </div>
-            
-            <div class="text-right mt-8 md:mt-0 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 shadow-lg" data-aos="fade-left">
-                <div class="text-5xl font-mono font-bold text-lime-accent drop-shadow-md" id="liveClock">00:00:00</div>
-                <div class="text-gray-200 text-lg font-medium"><?= date('l, d F Y') ?></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="container mx-auto px-6 -mt-24 relative z-20">
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <a href="pos.php" class="bg-lime-accent p-6 rounded-2xl shadow-lg border-4 border-white transform hover:-translate-y-2 hover:scale-[1.02] transition-all duration-300 group flex flex-col justify-between h-full relative overflow-hidden">
-                <div class="absolute -right-4 -bottom-4 text-8xl opacity-20 text-deep-green group-hover:scale-110 transition-transform">🧾</div>
-                <div>
-                    <h3 class="text-2xl font-bold text-deep-green mb-1">Open POS</h3>
-                    <p class="text-deep-green opacity-80 text-sm font-medium">Start New Sale</p>
-                </div>
-                <div class="mt-4 bg-white/30 w-12 h-12 rounded-full flex items-center justify-center text-2xl group-hover:rotate-90 transition-transform">➜</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+            <a href="pos.php" class="card card-lime card-hover flex items-center gap-4" data-aos="fade-up">
+                <span class="text-5xl">🧾</span>
+                <span>
+                    <span class="block text-xl font-bold text-[#065f46]">Open POS →</span>
+                    <span class="block text-sm text-gray-500">Start a new sale</span>
+                </span>
             </a>
 
-            <div class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-deep-green" data-aos="fade-up" data-aos-delay="100">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider">Orders Today</p>
-                        <h3 class="text-4xl font-bold text-gray-800 mt-1"><?= $stats['today_orders'] ?? 0 ?></h3>
-                    </div>
-                    <div class="bg-green-50 p-3 rounded-full text-2xl">📦</div>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-blue-500" data-aos="fade-up" data-aos-delay="200">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider">Sales Today</p>
-                        <h3 class="text-4xl font-bold text-deep-green mt-1">৳<?= number_format($stats['today_sales'] ?? 0) ?></h3>
-                    </div>
-                    <div class="bg-blue-50 p-3 rounded-full text-2xl">💰</div>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-purple-500" data-aos="fade-up" data-aos-delay="300">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider">Delivered</p>
-                        <h3 class="text-4xl font-bold text-purple-600 mt-1"><?= $stats['delivered_today'] ?? 0 ?></h3>
-                        <p class="text-xs text-gray-400 mt-1">Returns: <span class="text-red-500 font-bold"><?= $stats['returned_today'] ?? 0 ?></span></p>
-                    </div>
-                    <div class="bg-purple-50 p-3 rounded-full text-2xl">✅</div>
-                </div>
-            </div>
+            <?php qm_stat('📦', (int)($stats['today_orders'] ?? 0), "Orders Today", ''); ?>
+            <?php qm_stat('💰', qm_money($stats['today_sales'] ?? 0), 'Sales Today', 'blue'); ?>
+            <?php qm_stat('✅', (int)($stats['delivered_today'] ?? 0), 'Delivered · ↩ ' . (int)($stats['returned_today'] ?? 0) . ' returned', 'lime'); ?>
         </div>
 
-        <div class="grid lg:grid-cols-3 gap-8 mb-10">
-            <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-lg border border-gray-100" data-aos="zoom-in">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold text-deep-green flex items-center gap-2">
-                        📊 Weekly Sales Trend
-                    </h3>
-                </div>
+        <div class="grid lg:grid-cols-3 gap-6 mb-10">
+            <div class="card lg:col-span-2" data-aos="zoom-in">
+                <div class="card-header">📊 Weekly Sales Trend</div>
                 <div class="relative h-72 w-full">
                     <canvas id="salesChart"></canvas>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 flex flex-col" data-aos="fade-left">
-                <h3 class="text-xl font-bold text-deep-green mb-6">⚡ Quick Shortcuts</h3>
-                
-                <div class="grid gap-4 flex-1">
+            <div class="card flex flex-col" data-aos="fade-left">
+                <div class="card-header">⚡ Quick Shortcuts</div>
+                <div class="grid gap-3 flex-1">
                     <a href="prescriptions.php" class="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-green-50 border border-transparent hover:border-green-200 transition group">
-                        <div class="bg-white p-3 rounded-full shadow-sm text-2xl group-hover:scale-110 transition-transform">📋</div>
-                        <div>
-                            <h4 class="font-bold text-gray-800">Prescriptions</h4>
-                            <p class="text-xs text-gray-500">Process Pending Requests</p>
-                        </div>
+                        <span class="text-3xl group-hover:scale-110 transition-transform">📋</span>
+                        <span><span class="block font-bold text-gray-800">Prescriptions</span><span class="block text-xs text-gray-500">Process Pending Requests</span></span>
                     </a>
-
                     <a href="online-orders.php" class="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-blue-50 border border-transparent hover:border-blue-200 transition group">
-                        <div class="bg-white p-3 rounded-full shadow-sm text-2xl group-hover:scale-110 transition-transform">🌐</div>
-                        <div>
-                            <h4 class="font-bold text-gray-800">Online Orders</h4>
-                            <p class="text-xs text-gray-500">Check Web Orders</p>
-                        </div>
+                        <span class="text-3xl group-hover:scale-110 transition-transform">🌐</span>
+                        <span><span class="block font-bold text-gray-800">Online Orders</span><span class="block text-xs text-gray-500">Check Web Orders</span></span>
                     </a>
-
                     <a href="reports.php" class="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-purple-50 border border-transparent hover:border-purple-200 transition group">
-                        <div class="bg-white p-3 rounded-full shadow-sm text-2xl group-hover:scale-110 transition-transform">📑</div>
-                        <div>
-                            <h4 class="font-bold text-gray-800">Sales Reports</h4>
-                            <p class="text-xs text-gray-500">View History</p>
-                        </div>
+                        <span class="text-3xl group-hover:scale-110 transition-transform">📑</span>
+                        <span><span class="block font-bold text-gray-800">Sales Reports</span><span class="block text-xs text-gray-500">View History</span></span>
                     </a>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100" data-aos="fade-up">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                <h3 class="text-lg font-bold text-deep-green flex items-center gap-2">
-                    📦 Recent Transactions
-                </h3>
-            </div>
-            
+        <div class="dash-shell" data-aos="fade-up">
+            <div class="dash-shell-head"><h2>📦 Recent Transactions</h2></div>
+
             <?php if ($parcels->num_rows === 0): ?>
-                <div class="text-center py-16">
-                    <div class="text-6xl mb-4 opacity-20">📭</div>
-                    <p class="text-gray-500 font-medium">No sales records found today.</p>
+                <div class="p-8 text-center">
+                    <div class="text-5xl mb-4 opacity-30">📭</div>
+                    <p class="text-gray-500 font-medium">No sales records found.</p>
                 </div>
             <?php else: ?>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-gray-100 text-xs uppercase text-gray-500 font-bold tracking-wider">
+                <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none">
+                    <table class="table">
+                        <thead>
                             <tr>
-                                <th class="px-6 py-4">Parcel #</th>
-                                <th class="px-6 py-4">Customer</th>
-                                <th class="px-6 py-4 text-center">Items</th>
-                                <th class="px-6 py-4">Amount</th>
-                                <th class="px-6 py-4 text-center">Status</th>
-                                <th class="px-6 py-4 text-right">Action</th>
+                                <th>Parcel #</th>
+                                <th>Customer</th>
+                                <th class="text-center">Items</th>
+                                <th>Amount</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-right">Action</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100">
+                        <tbody>
                             <?php while ($parcel = $parcels->fetch_assoc()): ?>
-                                <tr class="hover:bg-gray-50 transition duration-200 group">
-                                    <td class="px-6 py-4 font-mono text-sm font-bold text-deep-green">
+                                <tr class="group">
+                                    <td class="font-display text-sm font-bold text-[#065f46]">
                                         <?= htmlspecialchars($parcel['parcel_number']) ?>
-                                        <br><span class="text-xs text-gray-400 font-normal"><?= date('h:i A', strtotime($parcel['created_at'])) ?></span>
+                                        <span class="text-xs text-gray-400 font-normal block"><?= date('h:i A', strtotime($parcel['created_at'])) ?></span>
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td>
                                         <p class="font-bold text-gray-800 text-sm"><?= htmlspecialchars($parcel['customer_name']) ?></p>
                                         <p class="text-xs text-gray-500"><?= htmlspecialchars($parcel['customer_phone']) ?></p>
                                     </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold"><?= $parcel['items_count'] ?></span>
-                                    </td>
-                                    <td class="px-6 py-4 font-bold text-gray-800">৳<?= number_format($parcel['subtotal'], 2) ?></td>
-                                    <td class="px-6 py-4 text-center">
-                                        <?php
-                                        $statusColors = [
-                                            'delivered' => 'bg-green-100 text-green-700',
-                                            'returned' => 'bg-red-100 text-red-700',
-                                            'processing' => 'bg-blue-100 text-blue-700',
-                                            'packed' => 'bg-yellow-100 text-yellow-700',
-                                            'cancelled' => 'bg-gray-100 text-gray-600'
-                                        ];
-                                        $statusClass = $statusColors[$parcel['status']] ?? 'bg-gray-100 text-gray-600';
-                                        ?>
-                                        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase <?= $statusClass ?>">
-                                            <?= ucfirst($parcel['status']) ?>
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <a href="parcel-details.php?id=<?= $parcel['id'] ?>" class="p-2 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition" title="View Details">
-                                                👁️
-                                            </a>
-                                            <?php if ($parcel['status'] === 'delivered'): ?>
-                                                <button onclick="openReturnModal(<?= $parcel['id'] ?>)" class="p-2 bg-red-50 text-red-600 rounded hover:bg-red-100 transition" title="Return Items">
-                                                    ↩
-                                                </button>
-                                            <?php endif; ?>
-                                        </div>
+                                    <td class="text-center"><span class="badge badge-neutral"><?= (int)$parcel['items_count'] ?></span></td>
+                                    <td class="font-bold"><?= qm_money($parcel['subtotal']) ?></td>
+                                    <td class="text-center"><?= qm_badge($parcel['status']) ?></td>
+                                    <td class="text-right whitespace-nowrap">
+                                        <a href="parcel-details.php?id=<?= (int)$parcel['id'] ?>" class="btn btn-outline btn-sm" title="View Details">👁️</a>
+                                        <?php if ($parcel['status'] === 'delivered'): ?>
+                                            <button onclick="openReturnModal(<?= (int)$parcel['id'] ?>)" class="btn btn-danger btn-sm" title="Return Items">↩</button>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>
@@ -346,7 +238,7 @@ include __DIR__ . '/../../includes/header.php';
 // 1. LIVE CLOCK
 function updateClock() {
     const now = new Date();
-    document.getElementById('liveClock').textContent = now.toLocaleTimeString('en-US', { hour12: false });
+    var _clk = document.getElementById('liveClock'); if (_clk) _clk.textContent = now.toLocaleTimeString('en-US', { hour12: false });
 }
 setInterval(updateClock, 1000);
 updateClock();

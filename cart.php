@@ -55,37 +55,22 @@ while ($item = $cartItems->fetch_assoc()) {
 include 'includes/header.php';
 ?>
 
-<section class="w-full max-w-[100vw] overflow-x-hidden px-4 py-8 md:py-16 min-h-screen">
-    <div class="container mx-auto max-w-6xl">
-        
-        <div class="text-center mb-8 md:mb-12" data-aos="fade-down">
-            <h1 class="text-3xl md:text-5xl font-bold text-deep-green mb-4 font-mono uppercase">
-                🛒 <?= __('your_cart') ?>
-            </h1>
-            <div class="bg-lime-accent inline-block px-4 py-2 md:px-6 md:py-3 border-4 border-deep-green">
-                <p class="text-deep-green font-bold text-base md:text-xl">
-                    <span id="total-items-count"><?= $totalItems ?></span> Items in Your Cart
-                </p>
-            </div>
-        </div>
+<?php qm_hero(__('your_cart'), '', 'QuickMed Shop', '🛒'); ?>
+
+<section class="container mx-auto px-4 py-10 min-h-screen">
+    <div class="max-w-6xl mx-auto">
+        <p class="text-center text-gray-500 font-bold mb-8"><span id="total-items-count"><?= $totalItems ?></span> item(s) in your cart</p>
 
         <?php if (empty($cartByShop)): ?>
-            <div class="bg-white text-center py-12 md:py-20 rounded-lg shadow-sm mx-auto" data-aos="zoom-in">
-                <div class="text-7xl md:text-9xl mb-6">🛒</div>
-                <h2 class="text-2xl md:text-3xl font-bold text-gray-600 mb-6"><?= __('cart_empty') ?></h2>
-                <a href="<?= SITE_URL ?>/shop.php" class="inline-block bg-deep-green text-white px-8 py-3 rounded-lg font-bold hover:bg-lime-accent hover:text-deep-green transition">
-                    🛍️ <?= __('continue_shopping') ?>
-                </a>
-            </div>
+            <?php qm_empty(__('cart_empty'), '', '🛍️ ' . __('continue_shopping'), SITE_URL . '/shop.php'); ?>
         <?php else: ?>
             
             <div class="flex flex-col lg:grid lg:grid-cols-3 gap-8 relative">
                 
                 <div class="lg:col-span-2 space-y-6 order-1">
                     <?php foreach ($cartByShop as $shopId => $shopData): ?>
-                        <div class="bg-white border-2 md:border-4 border-deep-green rounded-lg overflow-hidden shadow-sm" data-aos="fade-up">
-                            
-                            <div class="bg-deep-green text-white p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <div class="dash-shell" data-aos="fade-up">
+                            <div class="dash-shell-head">
                                 <div>
                                     <h3 class="text-lg md:text-2xl font-bold">🏪 <?= htmlspecialchars($shopData['shop_name']) ?></h3>
                                     <p class="text-lime-accent text-sm">📍 <?= htmlspecialchars($shopData['city']) ?></p>
@@ -98,7 +83,7 @@ include 'includes/header.php';
                                 </div>
                             </div>
 
-                            <div class="p-3 md:p-4 space-y-4" id="shop-items-<?= $shopId ?>">
+                            <div class="dash-shell-body space-y-4" id="shop-items-<?= $shopId ?>">
                                 <?php foreach ($shopData['items'] as $item): ?>
                                     <div class="flex flex-col sm:flex-row gap-4 p-3 border border-gray-200 rounded-lg hover:border-lime-accent transition-all cart-item shop-item-<?= $shopId ?>" 
                                          id="item-row-<?= $item['cart_id'] ?>"
@@ -186,10 +171,8 @@ include 'includes/header.php';
                 </div>
 
                 <div class="lg:col-span-1 order-2">
-                    <div class="bg-green-50 border-4 border-deep-green p-6 rounded-lg sticky top-24 shadow-lg w-full" data-aos="fade-left">
-                        <h3 class="text-xl font-bold text-deep-green mb-4 uppercase border-b-2 border-deep-green pb-2">
-                            📋 Order Summary
-                        </h3>
+                    <div class="card card-accent sticky top-24 w-full" data-aos="fade-left">
+                        <div class="card-header">📋 Order Summary</div>
                         
                         <div class="space-y-3 mb-6">
                             <div class="flex justify-between text-base text-gray-700">
@@ -208,11 +191,11 @@ include 'includes/header.php';
                             </div>
                         </div>
                         
-                        <a href="<?= SITE_URL ?>/checkout.php" class="block w-full bg-deep-green text-white text-center font-bold py-3 rounded hover:bg-lime-accent hover:text-deep-green transition-all uppercase shadow-md mb-3">
+                        <a href="<?= SITE_URL ?>/checkout.php" class="btn btn-primary btn-block mb-3">
                             ✅ Proceed to Checkout
                         </a>
-                        
-                        <a href="<?= SITE_URL ?>/shop.php" class="block w-full bg-white text-deep-green text-center font-bold py-3 rounded border-2 border-deep-green hover:bg-gray-50 transition-all uppercase">
+
+                        <a href="<?= SITE_URL ?>/shop.php" class="btn btn-outline btn-block">
                             ← Continue Shopping
                         </a>
                         

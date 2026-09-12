@@ -27,11 +27,7 @@ include 'includes/header.php';
     </div>
 
     <div class="container mx-auto px-4 relative z-10">
-        <div class="text-center mb-16" data-aos="fade-up">
-            <span class="text-lime-600 font-bold tracking-widest uppercase text-sm bg-lime-100 px-3 py-1 rounded-full">Easy Process</span>
-            <h2 class="text-4xl md:text-5xl font-bold text-deep-green mt-4 mb-4 font-mono">Order via Prescription?</h2>
-            <div class="w-24 h-1.5 bg-lime-accent mx-auto rounded-full"></div>
-        </div>
+        <?php qm_section_head('Order via Prescription?', 'Three simple steps from prescription to doorstep.', 'Easy Process'); ?>
 
         <div class="grid md:grid-cols-3 gap-8 text-center max-w-6xl mx-auto">
             <div class="bg-white p-8 rounded-2xl shadow-lg border-b-4 border-lime-accent relative transform hover:-translate-y-2 transition duration-300" data-aos="fade-right">
@@ -56,9 +52,9 @@ include 'includes/header.php';
             </div>
         </div>
 
-        <div class="text-center mt-16" data-aos="zoom-in">
-            <a href="prescription-upload.php" class="btn btn-primary px-10 py-4 text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all neon-border flex items-center justify-center gap-3 inline-flex">
-                <span class="text-2xl">📤</span> Upload Prescription Now
+        <div class="text-center mt-14" data-aos="zoom-in">
+            <a href="prescription-upload.php" class="btn btn-primary btn-lg">
+                <span class="text-xl">📤</span> Upload Prescription Now
             </a>
         </div>
     </div>
@@ -89,7 +85,7 @@ include 'includes/header.php';
                 <li class="flex items-center gap-3">✅ <span class="font-bold text-white">Nationwide Coverage</span> including rural areas</li>
             </ul>
 
-            <a href="about.php" class="btn bg-transparent border-2 border-lime-accent text-lime-accent hover:bg-lime-accent hover:text-deep-green px-8 py-3 font-bold text-lg rounded-lg transition-all duration-300">
+            <a href="about.php" class="btn btn-lime btn-lg">
                 Learn More About Us →
             </a>
         </div>

@@ -19,39 +19,7 @@ $doctors = $conn->query("SELECT full_name, profile_image FROM users WHERE role_i
 include 'includes/header.php';
 ?>
 
-<style>
-    /* Background Animation */
-    .floating-bg {
-        position: absolute; width: 100%; height: 100%; overflow: hidden; z-index: 0; pointer-events: none;
-    }
-    .emoji {
-        position: absolute; font-size: 3rem; opacity: 0.1; animation: float 15s infinite linear;
-    }
-    @keyframes float {
-        0% { transform: translateY(100vh) rotate(0deg); }
-        100% { transform: translateY(-10vh) rotate(360deg); }
-    }
-</style>
-
-<!-- Hero Section -->
-<section class="relative py-32 bg-deep-green text-white overflow-hidden">
-    <!-- Animated Background -->
-    <div class="floating-bg">
-        <div class="emoji" style="left: 10%; animation-duration: 12s;">💊</div>
-        <div class="emoji" style="left: 30%; animation-duration: 18s; font-size: 4rem;">💉</div>
-        <div class="emoji" style="left: 50%; animation-duration: 15s;">🩸</div>
-        <div class="emoji" style="left: 70%; animation-duration: 20s; font-size: 5rem;">🧬</div>
-        <div class="emoji" style="left: 90%; animation-duration: 14s;">🩺</div>
-    </div>
-
-    <div class="container mx-auto px-4 text-center relative z-10" data-aos="zoom-in">
-        <span class="bg-lime-accent text-deep-green px-6 py-2 rounded-full font-bold text-sm uppercase tracking-widest mb-6 inline-block shadow-[4px_4px_0px_white] transform -rotate-2">Since 2025</span>
-        <h1 class="text-5xl md:text-7xl font-bold font-mono mb-6 leading-tight">Healthcare <br> Redefined</h1>
-        <p class="text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto leading-relaxed font-light">
-            QuickMed is Bangladesh's most trusted digital healthcare platform, bridging the gap between patients and genuine medicine with technology and care.
-        </p>
-    </div>
-</section>
+<?php qm_hero('Healthcare Redefined', "Bangladesh's most trusted digital healthcare platform — genuine medicine with technology and care.", 'Since 2025 · About Us', '🏥'); ?>
 
 <!-- Our Story & Mission -->
 <section class="py-24 bg-white relative">

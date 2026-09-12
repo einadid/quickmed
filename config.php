@@ -17,9 +17,21 @@ date_default_timezone_set('Asia/Dhaka');
 // 1. ENVIRONMENT DETECTION & DB CONFIGURATION
 // =============================================
 
-// Check if running on Localhost (XAMPP)
-$whitelist = ['127.0.0.1', '::1', 'localhost'];
-$isLocal = in_array($_SERVER['SERVER_NAME'], $whitelist);
+// Check if running on Localhost (XAMPP) or Live Server.
+// NOTE: InfinityFree / free.nf / epizy hostnames are always treated as LIVE.
+$serverName = $_SERVER['SERVER_NAME'] ?? 'localhost';
+$httpHost = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$localNames = ['127.0.0.1', '::1', 'localhost'];
+$liveHints = ['infinityfree', 'free.nf', 'epizy.com', 'rf.gd', 'ct.ws', 'unaux.com'];
+
+$isLocal = in_array($serverName, $localNames, true)
+    || strpos($httpHost, 'localhost') !== false;
+foreach ($liveHints as $hint) {
+    if (stripos($httpHost, $hint) !== false || stripos($serverName, $hint) !== false) {
+        $isLocal = false;
+        break;
+    }
+}
 
 if ($isLocal) {
     // --- LOCALHOST SETTINGS (XAMPP) ---
@@ -31,7 +43,7 @@ if ($isLocal) {
     define('DB_PASS', '');
     define('DB_NAME', 'quickmed');
     
-    define('SITE_URL', 'https://localhost/quickmed');
+    define('SITE_URL', 'http://localhost/quickmed');
     define('UPLOAD_ROOT', __DIR__ . '/uploads/'); // Simple path for XAMPP
 } else {
     // --- LIVE SERVER SETTINGS (INFINITYFREE) ---
@@ -87,14 +99,13 @@ define('UPLOAD_DIR', UPLOAD_ROOT);
 define('PRESCRIPTION_DIR', UPLOAD_DIR . 'prescriptions/');
 define('MEDICINE_DIR', UPLOAD_DIR . 'medicines/');
 define('NEWS_DIR', UPLOAD_DIR . 'news/');
+define('PROFILE_DIR', UPLOAD_DIR . 'profiles/');
 
-// Create upload directories if they don't exist (Only works if permissions allow)
-if ($isLocal) {
-    $dirs = [UPLOAD_DIR, PRESCRIPTION_DIR, MEDICINE_DIR, NEWS_DIR];
-    foreach ($dirs as $dir) {
-        if (!is_dir($dir)) {
-            @mkdir($dir, 0755, true);
-        }
+// Create upload directories if they don't exist (works when permissions allow)
+$dirs = [UPLOAD_DIR, PRESCRIPTION_DIR, MEDICINE_DIR, NEWS_DIR, PROFILE_DIR];
+foreach ($dirs as $dir) {
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0755, true);
     }
 }
 
@@ -333,10 +344,14 @@ function generateVerificationCode($length = 8) {
 }
 
 // =============================================
-// 8. AUTO-LOAD LANGUAGE FILE
+// 8. AUTO-LOAD LANGUAGE + UI HELPERS
 // =============================================
 $lang = $_SESSION['lang'] ?? 'en';
 if (file_exists(__DIR__ . '/includes/lang.php')) {
     require_once __DIR__ . '/includes/lang.php';
+}
+// Shared UI helpers (heroes, badges, empty states) — v2.0 design system
+if (file_exists(__DIR__ . '/includes/ui.php')) {
+    require_once __DIR__ . '/includes/ui.php';
 }
 ?>

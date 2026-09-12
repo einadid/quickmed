@@ -1,3 +1,4 @@
+</main><!-- /#qm-main (opened in includes/header.php) -->
 <?php
 /**
  * Ultra Modern Footer - Live & Dynamic
