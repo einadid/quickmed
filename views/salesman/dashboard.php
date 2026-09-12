@@ -83,7 +83,7 @@ include __DIR__ . '/../../includes/dashnav.php';
     .modal-overlay.hidden { display: none; }
 </style>
 
-<section class="container mx-auto px-4 py-10 min-h-screen">
+<section class="container mx-auto px-3 sm:px-4 py-6 sm:py-8 min-h-screen">
     <div class="max-w-7xl mx-auto">
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">

@@ -57,7 +57,7 @@ include 'includes/header.php';
 
 <?php qm_hero(__('your_cart'), '', 'QuickMed Shop', '🛒'); ?>
 
-<section class="container mx-auto px-4 py-10 min-h-screen">
+<section class="container mx-auto px-3 sm:px-4 py-6 sm:py-8 min-h-screen">
     <div class="max-w-6xl mx-auto">
         <p class="text-center text-gray-500 font-bold mb-8"><span id="total-items-count"><?= $totalItems ?></span> item(s) in your cart</p>
 
@@ -65,9 +65,9 @@ include 'includes/header.php';
             <?php qm_empty(__('cart_empty'), '', '🛍️ ' . __('continue_shopping'), SITE_URL . '/shop.php'); ?>
         <?php else: ?>
             
-            <div class="flex flex-col lg:grid lg:grid-cols-3 gap-8 relative">
+            <div class="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-5 relative">
                 
-                <div class="lg:col-span-2 space-y-6 order-1">
+                <div class="lg:col-span-2 space-y-4 order-1">
                     <?php foreach ($cartByShop as $shopId => $shopData): ?>
                         <div class="dash-shell" data-aos="fade-up">
                             <div class="dash-shell-head">
@@ -171,7 +171,7 @@ include 'includes/header.php';
                 </div>
 
                 <div class="lg:col-span-1 order-2">
-                    <div class="card card-accent sticky top-24 w-full" data-aos="fade-left">
+                    <div class="card card-accent sticky top-[4.5rem] w-full p-3 sm:p-4" data-aos="fade-left">
                         <div class="card-header">📋 Order Summary</div>
                         
                         <div class="space-y-3 mb-6">

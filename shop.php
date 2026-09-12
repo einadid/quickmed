@@ -98,27 +98,24 @@ include 'includes/header.php';
 
 <?php qm_hero('Shop Medicines', $totalProducts . ' genuine products available from verified branches.', 'QuickMed Shop', '🛍️'); ?>
 
-<section class="container mx-auto px-4 py-10 min-h-screen">
-
-    <div class="flex flex-col lg:grid lg:grid-cols-4 gap-6 md:gap-8">
-        
+<section class="container mx-auto px-3 sm:px-4 py-6 sm:py-8 min-h-screen">
+    <div class="flex flex-col lg:grid lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
         <aside class="lg:col-span-1 order-1">
-            <div class="card sticky top-20">
+            <div class="card sticky top-[4.5rem] p-3 sm:p-4">
                 <details class="group" open>
                     <summary class="list-none flex justify-between items-center cursor-pointer lg:cursor-default">
-                        <h3 class="text-lg font-bold text-[#065f46] font-display">🔍 FILTERS</h3>
-                        <span class="lg:hidden text-[#065f46] transform group-open:rotate-180 transition-transform">▼</span>
+                        <h3 class="text-[0.9rem] sm:text-[1rem] font-bold text-[#065f46] font-display">🔍 FILTERS</h3>
+                        <span class="lg:hidden text-[#065f46] transform group-open:rotate-180 transition-transform text-sm">▼</span>
                     </summary>
-
-                    <div class="mt-4">
+                    <div class="mt-3">
                         <form method="GET">
-                            <div class="mb-4">
-                                <label class="label">Search</label>
-                                <input type="text" name="search" class="input" placeholder="Medicine name..." value="<?= htmlspecialchars($searchQuery) ?>">
+                            <div class="mb-3">
+                                <label class="label text-[0.78rem]">Search</label>
+                                <input type="text" name="search" class="input text-[0.82rem] py-2" placeholder="Medicine name..." value="<?= htmlspecialchars($searchQuery) ?>">
                             </div>
-                            <div class="mb-4">
-                                <label class="label">Category</label>
-                                <select name="category" class="input" onchange="this.form.submit()">
+                            <div class="mb-3">
+                                <label class="label text-[0.78rem]">Category</label>
+                                <select name="category" class="input text-[0.82rem] py-2" onchange="this.form.submit()">
                                     <option value="">All Categories</option>
                                     <?php 
                                     // Reset pointer just in case
@@ -129,9 +126,9 @@ include 'includes/header.php';
                                     <?php endwhile; ?>
                                 </select>
                             </div>
-                            <div class="mb-4">
-                                <label class="label">Shop</label>
-                                <select name="shop" class="input" onchange="this.form.submit()">
+                            <div class="mb-3">
+                                <label class="label text-[0.78rem]">Shop</label>
+                                <select name="shop" class="input text-[0.82rem] py-2" onchange="this.form.submit()">
                                     <option value="">All Shops</option>
                                     <?php 
                                     $shops->data_seek(0);
@@ -141,18 +138,18 @@ include 'includes/header.php';
                                     <?php endwhile; ?>
                                 </select>
                             </div>
-                            <div class="mb-4">
-                                <label class="label">Sort By</label>
-                                <select name="sort" class="input" onchange="this.form.submit()">
+                            <div class="mb-3">
+                                <label class="label text-[0.78rem]">Sort By</label>
+                                <select name="sort" class="input text-[0.82rem] py-2" onchange="this.form.submit()">
                                     <option value="name_asc" <?= $sort === 'name_asc' ? 'selected' : '' ?>>Name (A-Z)</option>
                                     <option value="name_desc" <?= $sort === 'name_desc' ? 'selected' : '' ?>>Name (Z-A)</option>
                                     <option value="price_asc" <?= $sort === 'price_asc' ? 'selected' : '' ?>>Price (Low to High)</option>
                                     <option value="price_desc" <?= $sort === 'price_desc' ? 'selected' : '' ?>>Price (High to Low)</option>
                                 </select>
                             </div>
-                            <button type="submit" class="btn btn-primary btn-block">Apply Filters</button>
+                            <button type="submit" class="btn btn-primary btn-block btn-sm py-2.5 text-[0.78rem]">Apply Filters</button>
                             <?php if (!empty($category) || !empty($searchQuery) || $shopId > 0): ?>
-                                <a href="shop.php" class="btn btn-ghost btn-block mt-2">✕ Clear All</a>
+                                <a href="shop.php" class="btn btn-ghost btn-block mt-2 btn-sm text-[0.75rem]">✕ Clear All</a>
                             <?php endif; ?>
                         </form>
                     </div>
@@ -164,7 +161,7 @@ include 'includes/header.php';
             <?php if ($products->num_rows === 0): ?>
                 <?php qm_empty('No Products Found', 'Try a different search or clear the filters.', '✕ Clear Filters', SITE_URL . '/shop.php'); ?>
             <?php else: ?>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3 md:gap-4">
                     <?php while ($prod = $products->fetch_assoc()): ?>
                         <div class="product-card">
                             <a href="<?= SITE_URL ?>/product.php?id=<?= $prod['id'] ?>" class="p-img block">

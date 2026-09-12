@@ -94,77 +94,64 @@ if (isLoggedIn() && isset($_SESSION['user_id'])) {
     </script>
     
     <style>
-        /* PRELOADER */
-        #preloader { position: fixed; inset: 0; z-index: 99999; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; transition: opacity 0.3s ease-out; }
-        .medicine-spin { font-size: 4rem; animation: spin 1s linear infinite; }
+        /* PRELOADER - compact */
+        #preloader { position: fixed; inset: 0; z-index: 99999; background: rgba(255,255,255,0.96); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; transition: opacity 0.25s ease-out; }
+        .medicine-spin { font-size: 2.8rem; animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-/* MARQUEE FIX - NO GRADIENT */
+
+        /* MARQUEE - responsive smaller */
         .marquee-container { 
-            overflow: hidden; 
-            white-space: nowrap; 
-            background: #044532ff; /* Deep Green Background */
-            color: #ffffff;      /* White Text */
-            font-size: 0.9rem; 
-            font-weight: 600;
-            padding: 10px 0; 
-            border-bottom: 2px solid #84cc16;
-            
-            /* নিচের লাইনগুলো গ্র্যাডিয়েন্ট বা ফেইড ইফেক্ট বন্ধ করবে */
-            position: relative;
-            width: 100%;
-            mask-image: none !important;
-            -webkit-mask-image: none !important;
+            overflow: hidden; white-space: nowrap; 
+            background: #044532ff; color: #ffffff; 
+            font-size: 0.78rem; font-weight: 600;
+            padding: 6px 0; border-bottom: 1.5px solid #84cc16;
+            position: relative; width: 100%;
+            mask-image: none !important; -webkit-mask-image: none !important;
         }
+        .marquee-container::before, .marquee-container::after { content: none !important; display: none !important; background: none !important; }
+        .marquee-content { display: inline-block; padding-left: 100%; animation: marquee 32s linear infinite; }
+        @keyframes marquee { 0% { transform: translate(0,0); } 100% { transform: translate(-100%,0); } }
+        @media (max-width: 640px) { .marquee-container { font-size: 0.68rem; padding: 5px 0; } }
 
-        /* যদি কোনো hidden element বা shadow থাকে, তা রিমুভ করার জন্য */
-        .marquee-container::before,
-        .marquee-container::after {
-            content: none !important;
-            display: none !important;
-            background: none !important;
-        }
-
-        .marquee-content { 
-            display: inline-block; 
-            padding-left: 100%; 
-            animation: marquee 30s linear infinite; 
-        }
-
-        @keyframes marquee { 
-            0% { transform: translate(0, 0); } 
-            100% { transform: translate(-100%, 0); } 
-        }
-
-
-        /* NAVBAR ANIMATION (MEDICINES) */
-        .nav-bg-anim { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; opacity: 0.1; }
-        .float-item { position: absolute; font-size: 1.5rem; animation: floatAround 15s infinite linear; }
+        /* NAVBAR ANIMATION - subtle */
+        .nav-bg-anim { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; opacity: 0.08; }
+        .float-item { position: absolute; font-size: 1.2rem; animation: floatAround 18s infinite linear; }
         .float-item:nth-child(1) { top: 10%; left: 10%; animation-duration: 20s; }
         .float-item:nth-child(2) { top: 60%; left: 80%; animation-duration: 25s; animation-delay: -5s; }
         .float-item:nth-child(3) { top: 30%; left: 40%; animation-duration: 18s; animation-delay: -2s; }
         .float-item:nth-child(4) { top: 80%; left: 20%; animation-duration: 22s; animation-delay: -10s; }
-        
         @keyframes floatAround {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            25% { transform: translate(20px, 20px) rotate(90deg); }
-            50% { transform: translate(0, 40px) rotate(180deg); }
-            75% { transform: translate(-20px, 20px) rotate(270deg); }
-            100% { transform: translate(0, 0) rotate(360deg); }
+            0% { transform: translate(0,0) rotate(0deg); }
+            25% { transform: translate(12px,12px) rotate(90deg); }
+            50% { transform: translate(0,20px) rotate(180deg); }
+            75% { transform: translate(-12px,12px) rotate(270deg); }
+            100% { transform: translate(0,0) rotate(360deg); }
         }
 
-        .neon-border-bottom { border-bottom: 3px solid #84cc16; box-shadow: 0 4px 15px -5px rgba(132, 204, 22, 0.5); }
+        .neon-border-bottom { border-bottom: 2.5px solid #84cc16; box-shadow: 0 3px 12px -4px rgba(132,204,22,0.45); }
         .mobile-bottom-nav { display: none !important; }
         @media (max-width: 768px) {
             .mobile-bottom-nav { display: flex !important; }
-            body { padding-bottom: 80px; }
+            body { padding-bottom: 72px; }
         }
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
         
-        /* Custom Scrollbar for Search Results */
-        .custom-scroll::-webkit-scrollbar { width: 8px; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #84cc16; border-radius: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb:hover { background: #065f46; }
+
+        /* Nav responsive tweaks */
+        @media (max-width: 640px) {
+            nav .container { padding-left: 10px !important; padding-right: 10px !important; }
+        }
+        /* Global search modal responsive */
+        @media (max-width: 640px) {
+            #globalSearchModal { padding-top: 10px !important; align-items: flex-start !important; }
+            #globalSearchModal .bg-white { border-width: 2.5px !important; border-radius: 0.9rem !important; }
+            #globalSearchModal .p-6 { padding: 1rem !important; }
+            #globalSearchInput { font-size: 0.95rem !important; padding: 0.75rem 0.75rem 0.75rem 2.5rem !important; }
+        }
     </style>
 </head>
 <body class="bg-gray-50 font-sans flex flex-col min-h-screen selection:bg-lime-accent selection:text-deep-green">
@@ -194,42 +181,36 @@ if (isLoggedIn() && isset($_SESSION['user_id'])) {
             <span class="float-item">🧪</span>
         </div>
 
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center py-2">
+        <div class="container mx-auto px-3 sm:px-4">
+            <div class="flex justify-between items-center py-1.5 sm:py-2">
                 
-                <a href="<?= SITE_URL ?>/index.php" class="inline-flex items-center gap-3 group z-10">
-                    <div class="w-12 h-12 bg-[#84cc16] text-[#065f46] rounded-xl flex items-center justify-center text-2xl font-bold shadow-[2px_2px_0px_white] group-hover:rotate-6 transition-transform duration-300">QM</div>
+                <a href="<?= SITE_URL ?>/index.php" class="inline-flex items-center gap-2 sm:gap-3 group z-10">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 bg-[#84cc16] text-[#065f46] rounded-[0.6rem] sm:rounded-xl flex items-center justify-center text-[1.1rem] sm:text-xl font-bold shadow-[1.5px_1.5px_0px_white] group-hover:rotate-6 transition-transform duration-300">QM</div>
                     <div class="hidden md:block">
-                        <h2 class="text-2xl font-mono font-bold tracking-tighter text-white leading-none group-hover:text-lime-accent transition-colors">QuickMed</h2>
-                        <p class="text-[10px] text-[#84cc16] tracking-widest uppercase font-bold">Digital Pharmacy</p>
+                        <h2 class="text-[1.35rem] font-mono font-bold tracking-tighter text-white leading-none group-hover:text-lime-accent transition-colors">QuickMed</h2>
+                        <p class="text-[9px] text-[#84cc16] tracking-widest uppercase font-bold">Digital Pharmacy</p>
                     </div>
-                    <span class="md:hidden text-xl font-mono font-bold text-white">QuickMed</span>
+                    <span class="md:hidden text-[1.05rem] font-mono font-bold text-white tracking-tight">QuickMed</span>
                 </a>
                 
-                <button onclick="openGlobalSearch()" class="md:hidden text-lime-accent p-2 border border-lime-accent/50 rounded-lg hover:bg-lime-accent/10 transition z-10">🔍</button>
+                <button onclick="openGlobalSearch()" class="md:hidden text-lime-accent p-1.5 border border-lime-accent/50 rounded-lg hover:bg-lime-accent/10 transition z-10 text-sm">🔍</button>
                 
-                <div class="hidden md:flex items-center gap-6 text-sm font-bold text-white z-10">
-                    
-                    
-                    <div class="bg-black/40 px-3 py-1.5 rounded-lg border border-lime-accent/30 font-mono text-lime-accent flex items-center gap-2 shadow-inner">
+                <div class="hidden md:flex items-center gap-4 lg:gap-5 text-[0.8rem] font-bold text-white z-10">
+                    <div class="bg-black/30 px-2.5 py-1 rounded-lg border border-lime-accent/20 font-mono text-lime-accent flex items-center gap-1.5 shadow-inner text-[11px]">
                         <span class="animate-pulse">●</span> <span id="navClock">00:00:00</span>
                     </div>
-                    
-                    <div class="flex gap-6 tracking-wide font-mono text-gray-200 items-center">
+                    <div class="flex gap-4 lg:gap-5 tracking-wide font-mono text-gray-200 items-center text-[0.78rem]">
                         <a href="<?= SITE_URL ?>/index.php" class="hover:text-lime-accent hover:-translate-y-0.5 transition-all">HOME</a>
                         <a href="<?= SITE_URL ?>/shop.php" class="hover:text-lime-accent hover:-translate-y-0.5 transition-all">SHOP</a>
                         <a href="<?= SITE_URL ?>/about.php" class="hover:text-lime-accent hover:-translate-y-0.5 transition-all">ABOUT</a>
                         <a href="<?= SITE_URL ?>/contact.php" class="hover:text-lime-accent hover:-translate-y-0.5 transition-all">CONTACT</a>
-                        <span class="flex items-center bg-black/40 border border-lime-accent/30 rounded-lg overflow-hidden text-xs">
+                        <span class="flex items-center bg-black/30 border border-lime-accent/20 rounded-lg overflow-hidden text-[11px]">
                             <a href="?lang=en" class="px-2 py-1 font-mono <?= ($_SESSION['lang'] ?? 'en') === 'en' ? 'bg-lime-accent text-deep-green' : 'text-gray-300 hover:text-lime-accent' ?>">EN</a>
                             <a href="?lang=bn" class="px-2 py-1 font-mono <?= ($_SESSION['lang'] ?? 'en') === 'bn' ? 'bg-lime-accent text-deep-green' : 'text-gray-300 hover:text-lime-accent' ?>">বাং</a>
                         </span>
                     </div>
-                    <button onclick="openGlobalSearch()" class="text-lime-accent hover:text-white hover:scale-110 transition-transform text-xl" title="Search (Ctrl+K)">
-                        🔍
-                    </button>
-                    
-                    <div class="h-6 w-px bg-white/20 mx-2"></div>
+                    <button onclick="openGlobalSearch()" class="text-lime-accent hover:text-white hover:scale-110 transition-transform text-lg" title="Search (Ctrl+K)">🔍</button>
+                    <div class="h-5 w-px bg-white/20"></div>
 
                     <?php if (isLoggedIn() && $currentUser): ?>
                         
@@ -270,25 +251,16 @@ if (isLoggedIn() && isset($_SESSION['user_id'])) {
                             }
                         ?>
 
-                        <a href="<?= $dashboardLink ?>" class="bg-lime-accent text-deep-green px-5 py-2 rounded-lg font-bold border-2 border-lime-accent shadow-[3px_3px_0px_#000] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all uppercase flex items-center gap-2">
+                        <a href="<?= $dashboardLink ?>" class="bg-lime-accent text-deep-green px-3.5 py-1.5 rounded-lg font-bold border-[1.5px] border-lime-accent shadow-[2px_2px_0px_#000] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all uppercase flex items-center gap-1.5 text-[0.75rem]">
                             <span>⚡</span> <?= $dashLabel ?>
                         </a>
-                        
-                        <a href="<?= SITE_URL ?>/profile.php" class="bg-lime-accent text-deep-green px-5 py-2 rounded-lg font-bold border-2 border-lime-accent shadow-[3px_3px_0px_#000] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all uppercase flex items-center gap-2">
-                            <span>👨🏻‍💼</span> PROFILE
+                        <a href="<?= SITE_URL ?>/profile.php" class="bg-white text-deep-green px-3.5 py-1.5 rounded-lg font-bold border-[1.5px] border-white shadow-[2px_2px_0px_#84cc16] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all uppercase flex items-center gap-1.5 text-[0.75rem]">
+                            <span>👤</span> PROFILE
                         </a>
-                        
-                        <a href="<?= SITE_URL ?>/logout.php" class="text-red-300 hover:text-white px-2 py-1 rounded transition hover:bg-red-500/20">✖</a>
-                    
+                        <a href="<?= SITE_URL ?>/logout.php" class="text-red-300 hover:text-white px-2 py-1 rounded transition hover:bg-red-500/20 text-sm">✖</a>
                     <?php else: ?>
-                        
-                        <a href="<?= SITE_URL ?>/login.php" class="bg-lime-accent text-deep-green px-5 py-2 rounded-lg font-bold border-2 border-lime-accent shadow-[3px_3px_0px_#000] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all uppercase flex items-center gap-2">
-                            🔐 LOGIN
-                        </a>
-                        
-                        <a href="<?= SITE_URL ?>/signup.php" class="bg-white text-deep-green px-5 py-2 rounded-lg font-bold border-2 border-white shadow-[4px_4px_0px_#84cc16] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all flex items-center gap-2">
-                            <span>✍️</span> SIGN UP
-                        </a>
+                        <a href="<?= SITE_URL ?>/login.php" class="bg-lime-accent text-deep-green px-3.5 py-1.5 rounded-lg font-bold border-[1.5px] border-lime-accent shadow-[2px_2px_0px_#000] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all uppercase flex items-center gap-1.5 text-[0.75rem]">🔐 LOGIN</a>
+                        <a href="<?= SITE_URL ?>/signup.php" class="bg-white text-deep-green px-3.5 py-1.5 rounded-lg font-bold border-[1.5px] border-white shadow-[2px_2px_0px_#84cc16] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all flex items-center gap-1.5 text-[0.75rem]"><span>✍️</span> SIGN UP</a>
 
                     <?php endif; ?>
                 </div>

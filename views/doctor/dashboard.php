@@ -30,7 +30,7 @@ $dashIcon = '🩺';
 include __DIR__ . '/../../includes/dashnav.php';
 ?>
 
-<section class="container mx-auto px-4 py-10 min-h-screen">
+<section class="container mx-auto px-3 sm:px-4 py-6 sm:py-8 min-h-screen">
     <div class="max-w-6xl mx-auto">
             
         <div class="grid sm:grid-cols-3 gap-5 mb-10" data-aos="fade-up">

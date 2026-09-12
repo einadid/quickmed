@@ -109,7 +109,7 @@ include 'includes/header.php';
 
 <?php qm_hero('My Profile', 'Manage your personal information and security.', $roleDisplay, '👤'); ?>
 
-<section class="container mx-auto px-4 py-10 min-h-screen">
+<section class="container mx-auto px-3 sm:px-4 py-6 sm:py-8 min-h-screen">
     <div class="max-w-4xl mx-auto">
 
         <div class="grid md:grid-cols-3 gap-8">

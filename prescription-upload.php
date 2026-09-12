@@ -48,7 +48,7 @@ include 'includes/header.php';
 
 <?php qm_hero('Upload Prescription', 'Send your prescription — our doctors will review and confirm your order.', 'Prescription Service', '📋'); ?>
 
-<section class="container mx-auto px-4 py-10 min-h-screen">
+<section class="container mx-auto px-3 sm:px-4 py-6 sm:py-8 min-h-screen">
     <div class="grid lg:grid-cols-3 gap-8">
 
         <div class="lg:col-span-1">

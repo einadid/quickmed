@@ -129,10 +129,10 @@ include 'includes/header.php';
 
 <?php qm_hero('Welcome Back', 'Login to access your dashboard and orders.', 'Member Login', '🔐'); ?>
 
-<section class="container mx-auto px-4 py-12 flex items-start justify-center">
+<section class="container mx-auto px-3 sm:px-4 py-6 sm:py-8 flex items-start justify-center">
     <div class="w-full max-w-md">
 
-        <div class="card card-pad-lg" data-aos="zoom-in">
+        <div class="card p-4 sm:p-5 rounded-xl" data-aos="zoom-in">
             
           <form method="POST" action="">
     <?php if(function_exists('generateCSRFToken')): ?>

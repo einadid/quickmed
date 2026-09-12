@@ -60,11 +60,11 @@ $dashIcon = '👋';
 include __DIR__ . '/../../includes/dashnav.php';
 ?>
 
-<section class="container mx-auto px-4 py-10 min-h-screen">
+<section class="container mx-auto px-3 sm:px-4 py-6 sm:py-8 min-h-screen">
     <div class="max-w-6xl mx-auto">
 
         <!-- Welcome + loyalty strip -->
-        <div class="grid lg:grid-cols-3 gap-5 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-8">
             <div class="card lg:col-span-2 flex items-center gap-5" data-aos="fade-right">
                 <?= qm_avatar($user, 'w-20 h-20') ?>
                 <div>
@@ -85,7 +85,7 @@ include __DIR__ . '/../../includes/dashnav.php';
         </div>
 
         <!-- 1. QUICK ACTIONS -->
-        <div class="qa-grid mb-10" data-aos="fade-up">
+        <div class="qa-grid mb-6" data-aos="fade-up">
             <a href="<?= SITE_URL ?>/shop.php" class="qa-card"><span class="qa-icon">🛍️</span><span class="qa-label">Shop Medicine</span></a>
             <a href="<?= SITE_URL ?>/prescription-upload.php" class="qa-card"><span class="qa-icon">📋</span><span class="qa-label">Upload Rx</span></a>
             <a href="<?= SITE_URL ?>/my-orders.php" class="qa-card"><span class="qa-icon">📦</span><span class="qa-label">Track Order</span></a>

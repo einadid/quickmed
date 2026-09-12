@@ -32,7 +32,7 @@ include 'includes/header.php';
 
 <?php qm_hero('My Orders', 'Track your order history and parcel status.', 'Customer Panel', '📦'); ?>
 
-<section class="container mx-auto px-4 py-10 min-h-screen">
+<section class="container mx-auto px-3 sm:px-4 py-6 sm:py-8 min-h-screen">
     <div class="max-w-6xl mx-auto">
         <?php if ($orders->num_rows === 0): ?>
             <?php qm_empty('No Orders Yet', 'Start shopping to see your orders here.', '🛍️ Start Shopping', SITE_URL . '/shop.php'); ?>

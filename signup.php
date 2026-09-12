@@ -152,7 +152,7 @@ include 'includes/header.php';
 <section class="min-h-screen py-12">
     <div class="container mx-auto px-4">
         <div class="max-w-2xl mx-auto">
-            <div class="card card-pad-lg" data-aos="zoom-in">
+            <div class="card p-4 sm:p-5 rounded-xl" data-aos="zoom-in">
                 <form method="POST" action="">
                     <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
                     

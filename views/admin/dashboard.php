@@ -41,7 +41,7 @@ $dashIcon = '👑';
 include __DIR__ . '/../../includes/dashnav.php';
 ?>
 
-<section class="container mx-auto px-4 py-10 min-h-screen">
+<section class="container mx-auto px-3 sm:px-4 py-6 sm:py-8 min-h-screen">
     <div class="max-w-7xl mx-auto">
 
         <div class="grid md:grid-cols-2 gap-5 mb-6" data-aos="fade-up">
@@ -57,7 +57,7 @@ include __DIR__ . '/../../includes/dashnav.php';
         </div>
 
         <h2 class="text-xl font-bold text-[#065f46] mb-5 font-display">🚀 QUICK ACTIONS</h2>
-        <div class="qa-grid mb-10" data-aos="fade-up">
+        <div class="qa-grid mb-6" data-aos="fade-up">
             <a href="medicines.php" class="qa-card"><span class="qa-icon">💊</span><span class="qa-label">Medicines</span></a>
             <a href="shops.php" class="qa-card"><span class="qa-icon">🏪</span><span class="qa-label">Shops</span></a>
             <a href="users.php" class="qa-card"><span class="qa-icon">👥</span><span class="qa-label">Users</span></a>

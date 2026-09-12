@@ -269,7 +269,7 @@ include 'includes/header.php';
 
 <?php qm_hero(__('checkout'), 'Complete your order in a few simple steps.', 'Secure Checkout', '💳'); ?>
 
-<section class="container mx-auto px-4 py-10 min-h-screen">
+<section class="container mx-auto px-3 sm:px-4 py-6 sm:py-8 min-h-screen">
     <div class="max-w-6xl mx-auto">
 
         <form method="POST" action="" class="grid lg:grid-cols-3 gap-6 lg:gap-8">
