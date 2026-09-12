@@ -1,0 +1,32 @@
+# =====================================================================
+# QuickMed — Apache Configuration (XAMPP LOCALHOST variant)
+# =====================================================================
+# LOCAL USE ONLY. If your URL is http://localhost/quickmed :
+#   copy this file's content into  C:\xampp\htdocs\quickmed\.htaccess
+# (i.e. replace the live .htaccess while developing locally).
+# NEVER upload this variant to InfinityFree.
+# =====================================================================
+
+RewriteEngine On
+RewriteBase /quickmed/
+
+# 1. Custom error pages (localhost paths include /quickmed/)
+ErrorDocument 404 /quickmed/404.php
+ErrorDocument 403 /quickmed/404.php
+ErrorDocument 500 /quickmed/404.php
+
+# 2. Optional: allow URLs without .php
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.*)$ $1.php [L]
+
+# 3. Prevent directory listing
+Options -Indexes
+
+# 4. Protect sensitive files
+<FilesMatch "^(config\.php|\.env|\.htaccess|composer\.json|composer\.lock)$">
+    Require all denied
+</FilesMatch>
+
+AddDefaultCharset UTF-8

@@ -1,48 +1,56 @@
-# QuickMed - Localhost Configuration
+# =====================================================================
+# QuickMed — Apache Configuration (LIVE SERVER: InfinityFree / htdocs root)
+# =====================================================================
+# This file goes to:  htdocs/.htaccess   (same folder as index.php)
+#
+# Using XAMPP localhost instead? Copy the rules from
+# `.htaccess.localhost` over this file (see DEPLOY_INFINITYFREE.md).
+# =====================================================================
 
 RewriteEngine On
+RewriteBase /
 
-# IMPORTANT: Change this if your folder name is different
-# If URL is localhost/quickmed, then use /quickmed/
-RewriteBase /quickmed/
+# 1. Custom error pages
+ErrorDocument 404 /404.php
+ErrorDocument 403 /404.php
+ErrorDocument 500 /404.php
 
-# 1. Custom Error Pages (Must include folder name)
-ErrorDocument 404 /quickmed/404.php
-ErrorDocument 403 /quickmed/404.php
-ErrorDocument 500 /quickmed/404.php
-
-# 2. Remove .php extension
+# 2. Optional: allow URLs without .php ( /shop  →  /shop.php )
+#    Only rewrites when a matching .php file exists; real files are untouched.
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME}\.php -f
-RewriteRule ^(.*)$ $1.php [L]
-
-# 3. Prevent Directory Listing
-Options -Indexes
-
-# 4. Protect Sensitive Files
-<FilesMatch "^(config\.php|\.env|\.htaccess)$">
-    Order allow,deny
-    Deny from all
-</FilesMatch>
-
-RewriteEngine On
-RewriteBase /quickmed/
-
-# 1. Custom Error Pages
-ErrorDocument 404 /quickmed/404.php
-ErrorDocument 403 /quickmed/404.php
-ErrorDocument 500 /quickmed/404.php
-
-# 2. To remove .php extension (Optional)
-# যদি কেউ browser এ .php ছাড়া লেখে, তবে সার্ভার সেটাকে .php ফাইল হিসেবে চিনবে
-RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME}.php -f
 RewriteRule ^(.*)$ $1.php [L]
 
-# 3. Allow direct access to existing files
-# যদি ফাইলটি বাস্তবে থাকে (যেমন index.php), তবে রিরাইট রুল এপ্লাই হবে না
-RewriteCond %{REQUEST_FILENAME} -f
-RewriteRule ^ - [L]
-
-# 4. Prevent Directory Listing
+# 3. Prevent directory listing
 Options -Indexes
+
+# 4. Protect sensitive files & folders
+<FilesMatch "^(config\.php|\.env|\.htaccess|composer\.json|composer\.lock)$">
+    Require all denied
+</FilesMatch>
+
+# Block direct access to the SQL schema (import it once, then it's safe to leave)
+<FilesMatch "^quickmed\.sql$">
+    Require all denied
+</FilesMatch>
+
+# 5. Security headers (ignored silently if headers module is unavailable)
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# 6. Cache static assets for 7 days (faster repeat visits)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/png "access plus 7 days"
+    ExpiresByType image/jpeg "access plus 7 days"
+    ExpiresByType image/webp "access plus 7 days"
+    ExpiresByType text/css "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+</IfModule>
+
+# 7. Force UTF-8
+AddDefaultCharset UTF-8

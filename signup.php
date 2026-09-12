@@ -147,29 +147,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 include 'includes/header.php';
 ?>
 
-<section class="min-h-screen py-16 relative overflow-hidden">
-    <div class="absolute inset-0 animated-bg opacity-5"></div>
-    
-    <div class="container mx-auto px-4 relative z-10">
+<?php qm_hero('Create Your Account', 'Join the QuickMed family and get ' . SIGNUP_BONUS_POINTS . ' bonus points instantly.', 'New Member', '✍️'); ?>
+
+<section class="min-h-screen py-12">
+    <div class="container mx-auto px-4">
         <div class="max-w-2xl mx-auto">
-            <div class="card bg-white border-4 border-deep-green shadow-2xl" data-aos="zoom-in">
-                <div class="card-header text-center bg-deep-green neon-border">
-                    <h1 class="text-3xl font-mono">✍️ CREATE YOUR ACCOUNT</h1>
-                    <p class="text-lime-accent mt-2">Join QuickMed Family Today!</p>
-                </div>
-                
-                <form method="POST" action="" class="p-8">
+            <div class="card card-pad-lg" data-aos="zoom-in">
+                <form method="POST" action="">
                     <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
                     
                     <div class="grid md:grid-cols-2 gap-6">
                         <div class="md:col-span-2">
-                            <label class="block font-bold mb-2 text-deep-green text-lg">
+                            <label class="label">
                                 👤 <?= __('full_name') ?> *
                             </label>
                             <input 
                                 type="text" 
                                 name="full_name" 
-                                class="input border-4 border-deep-green focus:border-lime-accent transition-all duration-300" 
+                                class="input" 
                                 required 
                                 placeholder="Enter your full name"
                                 value="<?= $_POST['full_name'] ?? '' ?>"
@@ -177,13 +172,13 @@ include 'includes/header.php';
                         </div>
                         
                         <div>
-                            <label class="block font-bold mb-2 text-deep-green text-lg">
+                            <label class="label">
                                 📧 <?= __('email') ?> *
                             </label>
                             <input 
                                 type="email" 
                                 name="email" 
-                                class="input border-4 border-deep-green focus:border-lime-accent transition-all duration-300" 
+                                class="input" 
                                 required 
                                 placeholder="your@email.com"
                                 value="<?= $_POST['email'] ?? '' ?>"
@@ -191,13 +186,13 @@ include 'includes/header.php';
                         </div>
                         
                         <div>
-                            <label class="block font-bold mb-2 text-deep-green text-lg">
+                            <label class="label">
                                 📱 <?= __('phone') ?> *
                             </label>
                             <input 
                                 type="tel" 
                                 name="phone" 
-                                class="input border-4 border-deep-green focus:border-lime-accent transition-all duration-300" 
+                                class="input" 
                                 required 
                                 placeholder="01XXXXXXXXX"
                                 value="<?= $_POST['phone'] ?? '' ?>"
@@ -205,13 +200,13 @@ include 'includes/header.php';
                         </div>
                         
                         <div>
-                            <label class="block font-bold mb-2 text-deep-green text-lg">
+                            <label class="label">
                                 🔒 <?= __('password') ?> *
                             </label>
                             <input 
                                 type="password" 
                                 name="password" 
-                                class="input border-4 border-deep-green focus:border-lime-accent transition-all duration-300" 
+                                class="input" 
                                 required 
                                 placeholder="Min <?= MIN_PASSWORD_LENGTH ?> characters"
                                 minlength="<?= MIN_PASSWORD_LENGTH ?>"
@@ -226,13 +221,13 @@ include 'includes/header.php';
                         </div>
                         
                         <div>
-                            <label class="block font-bold mb-2 text-deep-green text-lg">
+                            <label class="label">
                                 🔐 <?= __('confirm_password') ?> *
                             </label>
                             <input 
                                 type="password" 
                                 name="confirm_password" 
-                                class="input border-4 border-deep-green focus:border-lime-accent transition-all duration-300" 
+                                class="input" 
                                 required 
                                 placeholder="Re-enter password"
                                 id="confirmPassword"
@@ -241,13 +236,13 @@ include 'includes/header.php';
                         </div>
                         
                         <div class="md:col-span-2">
-                            <label class="block font-bold mb-2 text-deep-green text-lg">
+                            <label class="label">
                                 🎫 <?= __('verification_code') ?> (Optional - for staff only)
                             </label>
                             <input 
                                 type="text" 
                                 name="verification_code" 
-                                class="input border-4 border-deep-green focus:border-lime-accent transition-all duration-300" 
+                                class="input" 
                                 placeholder="Enter code if you're staff member"
                                 value="<?= $_POST['verification_code'] ?? '' ?>"
                             >
@@ -257,61 +252,37 @@ include 'includes/header.php';
                         </div>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary w-full mt-8 text-xl py-4 transform transition-all duration-300 hover:scale-105 neon-border">
+                    <button type="submit" class="btn btn-primary btn-lg btn-block mt-8">
                         ✨ CREATE ACCOUNT & GET <?= SIGNUP_BONUS_POINTS ?> POINTS ✨
                     </button>
-                    
-                    <div class="text-center mt-6 pt-6 border-t-4 border-deep-green">
-                        <p class="text-lg mb-2"><?= __('have_account') ?></p>
-                        <a href="<?= SITE_URL ?>/login.php" class="text-deep-green hover:text-lime-accent font-bold text-2xl transition-colors duration-300">
+
+                    <div class="text-center mt-6 pt-6 border-t border-gray-200">
+                        <p class="mb-2"><?= __('have_account') ?></p>
+                        <a href="<?= SITE_URL ?>/login.php" class="text-[#065f46] hover:underline font-bold text-xl">
                             <?= __('login') ?> →
                         </a>
                     </div>
                 </form>
             </div>
-            
+
             <div class="grid md:grid-cols-2 gap-6 mt-8">
-                <div class="card bg-lime-accent border-4 border-deep-green" data-aos="fade-right">
-                    <h3 class="text-2xl font-bold text-deep-green mb-4 uppercase">🎁 Signup Benefits</h3>
-                    <ul class="space-y-3">
-                        <li class="flex items-center gap-3">
-                            <span class="text-2xl">✅</span>
-                            <span class="font-bold">Get <?= SIGNUP_BONUS_POINTS ?> welcome bonus points</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <span class="text-2xl">✅</span>
-                            <span class="font-bold">Earn points on every order</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <span class="text-2xl">✅</span>
-                            <span class="font-bold">Track orders in real-time</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <span class="text-2xl">✅</span>
-                            <span class="font-bold">Upload prescriptions easily</span>
-                        </li>
+                <div class="card card-lime" data-aos="fade-right">
+                    <h3 class="font-bold text-[#065f46] mb-4 font-display">🎁 SIGNUP BENEFITS</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li class="flex items-center gap-3"><span class="text-xl">✅</span><span class="font-bold">Get <?= SIGNUP_BONUS_POINTS ?> welcome bonus points</span></li>
+                        <li class="flex items-center gap-3"><span class="text-xl">✅</span><span class="font-bold">Earn points on every order</span></li>
+                        <li class="flex items-center gap-3"><span class="text-xl">✅</span><span class="font-bold">Track orders in real-time</span></li>
+                        <li class="flex items-center gap-3"><span class="text-xl">✅</span><span class="font-bold">Upload prescriptions easily</span></li>
                     </ul>
                 </div>
-                
-                <div class="card bg-white border-4 border-deep-green" data-aos="fade-left">
-                    <h3 class="text-2xl font-bold text-deep-green mb-4 uppercase">🔒 Your Data is Safe</h3>
-                    <ul class="space-y-3">
-                        <li class="flex items-center gap-3">
-                            <span class="text-2xl">🛡️</span>
-                            <span>Encrypted password storage</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <span class="text-2xl">🔐</span>
-                            <span>Secure payment methods</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <span class="text-2xl">📱</span>
-                            <span>SMS & Email notifications</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <span class="text-2xl">✨</span>
-                            <span>100% Privacy guaranteed</span>
-                        </li>
+
+                <div class="card" data-aos="fade-left">
+                    <h3 class="font-bold text-[#065f46] mb-4 font-display">🔒 YOUR DATA IS SAFE</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li class="flex items-center gap-3"><span class="text-xl">🛡️</span><span>Encrypted password storage</span></li>
+                        <li class="flex items-center gap-3"><span class="text-xl">🔐</span><span>Secure payment methods</span></li>
+                        <li class="flex items-center gap-3"><span class="text-xl">📱</span><span>SMS & Email notifications</span></li>
+                        <li class="flex items-center gap-3"><span class="text-xl">✨</span><span>100% Privacy guaranteed</span></li>
                     </ul>
                 </div>
             </div>

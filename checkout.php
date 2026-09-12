@@ -267,145 +267,102 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 include 'includes/header.php';
 ?>
 
-<section class="container mx-auto px-2 md:px-4 py-8 md:py-16 min-h-screen w-full overflow-x-hidden">
+<?php qm_hero(__('checkout'), 'Complete your order in a few simple steps.', 'Secure Checkout', '💳'); ?>
+
+<section class="container mx-auto px-4 py-10 min-h-screen">
     <div class="max-w-6xl mx-auto">
-        <div class="text-center mb-8 md:mb-12" data-aos="fade-down">
-            <h1 class="text-3xl md:text-5xl font-bold text-deep-green mb-4 font-mono uppercase">
-                💳 <?= __('checkout') ?>
-            </h1>
-            <div class="bg-lime-accent inline-block px-4 py-2 md:px-6 md:py-3 border-2 md:border-4 border-deep-green">
-                <p class="text-deep-green font-bold text-lg md:text-xl">Complete Your Order</p>
-            </div>
-        </div>
 
         <form method="POST" action="" class="grid lg:grid-cols-3 gap-6 lg:gap-8">
             <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
             
             <div class="lg:col-span-2 space-y-6">
-                <div class="card bg-white border-2 md:border-4 border-deep-green rounded-lg overflow-hidden" data-aos="fade-right">
-                    <div class="p-4 md:p-6">
-                        <h3 class="text-xl md:text-2xl font-bold text-deep-green mb-4 md:mb-6 uppercase border-b-2 md:border-b-4 border-deep-green pb-3">
-                            📋 <?= __('delivery_info') ?>
-                        </h3>
-                        
-                        <div class="grid md:grid-cols-2 gap-4 md:gap-6">
-                            <div>
-                                <label class="block font-bold mb-2 text-deep-green text-base md:text-lg">👤 <?= __('full_name') ?> *</label>
-                                <input 
-                                    type="text" 
-                                    name="customer_name" 
-                                    class="input w-full p-3 border-2 md:border-4 border-deep-green focus:border-lime-accent transition-all rounded" 
-                                    required
-                                    value="<?= htmlspecialchars($user['full_name']) ?>"
-                                >
-                            </div>
-                            
-                            <div>
-                                <label class="block font-bold mb-2 text-deep-green text-base md:text-lg">📱 <?= __('phone') ?> *</label>
-                                <input 
-                                    type="tel" 
-                                    name="customer_phone" 
-                                    class="input w-full p-3 border-2 md:border-4 border-deep-green focus:border-lime-accent transition-all rounded" 
-                                    required
-                                    value="<?= htmlspecialchars($user['phone']) ?>"
-                                >
-                            </div>
-                            
-                            <div class="md:col-span-2">
-                                <label class="block font-bold mb-2 text-deep-green text-base md:text-lg">📍 <?= __('address') ?> *</label>
-                                <textarea 
-                                    name="customer_address" 
-                                    rows="3" 
-                                    class="input w-full p-3 border-2 md:border-4 border-deep-green focus:border-lime-accent transition-all rounded"
-                                    required
-                                    placeholder="House/Flat, Road, Area, City"
-                                ><?= htmlspecialchars($user['address'] ?? '') ?></textarea>
-                            </div>
+                <div class="card" data-aos="fade-right">
+                    <div class="card-header">📋 <?= __('delivery_info') ?></div>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="label">👤 <?= __('full_name') ?> *</label>
+                            <input type="text" name="customer_name" class="input" required value="<?= htmlspecialchars($user['full_name']) ?>">
+                        </div>
+                        <div>
+                            <label class="label">📱 <?= __('phone') ?> *</label>
+                            <input type="tel" name="customer_phone" class="input" required value="<?= htmlspecialchars($user['phone']) ?>">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="label">📍 <?= __('address') ?> *</label>
+                            <textarea name="customer_address" rows="3" class="input" required placeholder="House/Flat, Road, Area, City"><?= htmlspecialchars($user['address'] ?? '') ?></textarea>
                         </div>
                     </div>
                 </div>
 
-                <div class="card bg-white border-2 md:border-4 border-deep-green rounded-lg overflow-hidden" data-aos="fade-right" data-aos-delay="100">
-                    <div class="p-4 md:p-6">
-                        <h3 class="text-xl md:text-2xl font-bold text-deep-green mb-4 md:mb-6 uppercase border-b-2 md:border-b-4 border-deep-green pb-3">
-                            🚚 <?= __('delivery_type') ?>
-                        </h3>
-                        
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <label class="cursor-pointer group">
-                                <input type="radio" name="delivery_type" value="home" checked class="hidden peer">
-                                <div class="border-2 md:border-4 border-deep-green p-4 md:p-6 peer-checked:bg-lime-accent peer-checked:border-lime-accent transition-all transform group-hover:scale-[1.02] rounded h-full">
-                                    <div class="text-4xl md:text-5xl mb-3">🏠</div>
-                                    <h4 class="text-lg md:text-xl font-bold mb-2"><?= __('home_delivery') ?></h4>
-                                    <p class="text-gray-600 mb-2 text-sm">Delivered to your doorstep</p>
-                                    
-                                    <?php if ($subtotal >= 1000): ?>
-                                        <p class="text-xl md:text-2xl font-bold text-green-600">FREE</p>
-                                    <?php else: ?>
-                                        <p class="text-xl md:text-2xl font-bold text-deep-green">+ ৳<?= HOME_DELIVERY_CHARGE ?></p>
-                                    <?php endif; ?>
-                                </div>
-                            </label>
-                            
-                            <label class="cursor-pointer group">
-                                <input type="radio" name="delivery_type" value="pickup" class="hidden peer">
-                                <div class="border-2 md:border-4 border-deep-green p-4 md:p-6 peer-checked:bg-lime-accent peer-checked:border-lime-accent transition-all transform group-hover:scale-[1.02] rounded h-full">
-                                    <div class="text-4xl md:text-5xl mb-3">🏪</div>
-                                    <h4 class="text-lg md:text-xl font-bold mb-2"><?= __('store_pickup') ?></h4>
-                                    <p class="text-gray-600 mb-2 text-sm">Pick up from nearest shop</p>
-                                    <p class="text-xl md:text-2xl font-bold text-green-600">FREE</p>
-                                </div>
-                            </label>
-                        </div>
+                <div class="card" data-aos="fade-right" data-aos-delay="100">
+                    <div class="card-header">🚚 <?= __('delivery_type') ?></div>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="delivery_type" value="home" checked class="hidden peer">
+                            <div class="border-2 border-gray-200 rounded-xl p-5 peer-checked:bg-[#ecfccb] peer-checked:border-[#84cc16] peer-checked:shadow-lg transition-all h-full hover:border-[#84cc16]">
+                                <div class="text-4xl mb-3">🏠</div>
+                                <h4 class="text-lg font-bold text-[#065f46] mb-1"><?= __('home_delivery') ?></h4>
+                                <p class="text-gray-500 mb-2 text-sm">Delivered to your doorstep</p>
+                                <?php if ($subtotal >= 1000): ?>
+                                    <span class="badge badge-success">FREE</span>
+                                <?php else: ?>
+                                    <p class="text-xl font-bold text-[#065f46]">+ <?= qm_money(HOME_DELIVERY_CHARGE) ?></p>
+                                <?php endif; ?>
+                            </div>
+                        </label>
+
+                        <label class="cursor-pointer">
+                            <input type="radio" name="delivery_type" value="pickup" class="hidden peer">
+                            <div class="border-2 border-gray-200 rounded-xl p-5 peer-checked:bg-[#ecfccb] peer-checked:border-[#84cc16] peer-checked:shadow-lg transition-all h-full hover:border-[#84cc16]">
+                                <div class="text-4xl mb-3">🏪</div>
+                                <h4 class="text-lg font-bold text-[#065f46] mb-1"><?= __('store_pickup') ?></h4>
+                                <p class="text-gray-500 mb-2 text-sm">Pick up from nearest shop</p>
+                                <span class="badge badge-success">FREE</span>
+                            </div>
+                        </label>
                     </div>
                 </div>
 
                 <?php if ($user['points'] >= 100): ?>
-                <div class="card bg-lime-accent border-2 md:border-4 border-deep-green rounded-lg overflow-hidden p-4 md:p-6" data-aos="fade-right" data-aos-delay="200">
-                    <h3 class="text-xl md:text-2xl font-bold text-deep-green mb-4 uppercase">
-                        ⭐ Use Loyalty Points
-                    </h3>
-                    <p class="mb-4 text-base md:text-lg">You have <strong class="text-2xl md:text-3xl"><?= $user['points'] ?></strong> points available</p>
+                <div class="card card-lime" data-aos="fade-right" data-aos-delay="200">
+                    <div class="card-header">⭐ Use Loyalty Points</div>
+                    <p class="mb-4">You have <strong class="text-2xl text-[#065f46]"><?= number_format($user['points']) ?></strong> points available</p>
                     <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
-                        <input 
-                            type="number" 
-                            name="use_points" 
+                        <input
+                            type="number"
+                            name="use_points"
                             id="usePoints"
                             min="0"
                             max="<?= $user['points'] ?>"
                             step="100"
-                            class="input border-4 border-deep-green w-full md:flex-1 text-lg p-3 rounded"
+                            class="input md:flex-1"
                             placeholder="Enter points (multiples of 100)"
                             onchange="calculateDiscount()"
                             onkeyup="calculateDiscount()"
                         >
-                        <span id="pointsDiscount" class="text-lg md:text-xl font-bold text-deep-green"></span>
+                        <span id="pointsDiscount" class="text-lg font-bold text-[#065f46]"></span>
                     </div>
-                    <p class="text-sm mt-2 text-gray-700 font-bold">💡 100 points = ৳10 discount</p>
+                    <p class="form-hint">💡 100 points = ৳10 discount</p>
                 </div>
                 <?php endif; ?>
 
                 <?php if ($requiresPrescription): ?>
-                <div class="card bg-yellow-100 border-2 md:border-4 border-yellow-500 rounded-lg p-4 md:p-6" data-aos="fade-right" data-aos-delay="300">
-                    <h3 class="text-lg md:text-xl font-bold text-yellow-800 mb-3">
-                        ⚠️ Prescription Required
-                    </h3>
-                    <p class="text-gray-700 mb-4 text-sm md:text-base">
-                        Some items in your cart require a valid prescription. Please ensure you have uploaded your prescription.
-                    </p>
-                    <a href="<?= SITE_URL ?>/index.php#upload" class="inline-block btn border-2 border-yellow-500 text-yellow-800 hover:bg-yellow-500 hover:text-white px-4 py-2 rounded font-bold transition-all">
-                        📋 Upload Prescription
-                    </a>
+                <div data-aos="fade-right" data-aos-delay="300">
+                    <div class="alert alert-warning">
+                        <span class="text-2xl">⚠️</span>
+                        <div class="flex-1">
+                            <b>Prescription Required.</b>
+                            <p class="text-sm">Some items in your cart need a valid prescription. Please upload it first.</p>
+                            <a href="<?= SITE_URL ?>/prescription-upload.php" class="btn btn-outline btn-sm mt-3">📋 Upload Prescription</a>
+                        </div>
+                    </div>
                 </div>
                 <?php endif; ?>
             </div>
 
             <div class="lg:col-span-1">
-                <div class="card bg-white border-2 md:border-4 border-deep-green rounded-lg sticky top-24 overflow-hidden" data-aos="fade-left">
-                    <div class="p-4 md:p-6">
-                        <h3 class="text-xl md:text-2xl font-bold text-deep-green mb-4 md:mb-6 uppercase border-b-2 md:border-b-4 border-deep-green pb-3">
-                            📦 Order Summary
-                        </h3>
+                <div class="card card-accent sticky top-24" data-aos="fade-left">
+                        <div class="card-header">📦 Order Summary</div>
                         
                         <div class="space-y-3 mb-6 max-h-64 overflow-y-auto custom-scrollbar">
                             <?php foreach ($cartData as $item): ?>
@@ -419,36 +376,36 @@ include 'includes/header.php';
                             <?php endforeach; ?>
                         </div>
                         
-                        <div class="space-y-3 mb-6 border-t-2 md:border-t-4 border-deep-green pt-4">
-                            <div class="flex justify-between text-base md:text-lg">
+                        <div class="space-y-3 mb-6 border-t border-gray-200 pt-4">
+                            <div class="flex justify-between">
                                 <span>Subtotal:</span>
-                                <span class="font-bold">৳<?= number_format($subtotal, 2) ?></span>
+                                <span class="font-bold"><?= qm_money($subtotal) ?></span>
                             </div>
-                            
-                            <div class="flex justify-between text-base md:text-lg">
+
+                            <div class="flex justify-between">
                                 <span>Delivery:</span>
-                                <span class="font-bold" id="deliveryCharge">৳<?= number_format(HOME_DELIVERY_CHARGE, 2) ?></span>
+                                <span class="font-bold" id="deliveryCharge"><?= qm_money(HOME_DELIVERY_CHARGE) ?></span>
                             </div>
-                            
-                            <div class="flex justify-between text-base md:text-lg text-green-600" id="pointsDiscountRow" style="display: none;">
+
+                            <div class="flex justify-between text-green-700" id="pointsDiscountRow" style="display: none;">
                                 <span>Points Discount:</span>
                                 <span class="font-bold" id="pointsDiscountAmount">- ৳0.00</span>
                             </div>
-                            
-                            <div class="flex justify-between text-xl md:text-2xl font-bold bg-deep-green text-white p-4 -mx-4 md:-mx-6 -mb-0 neon-border mt-4">
+
+                            <div class="flex justify-between text-xl font-bold bg-[#065f46] text-white p-4 rounded-xl mt-2">
                                 <span>Total:</span>
-                                <span id="grandTotal">৳<?= number_format($subtotal + HOME_DELIVERY_CHARGE, 2) ?></span>
+                                <span id="grandTotal"><?= qm_money($subtotal + HOME_DELIVERY_CHARGE) ?></span>
                             </div>
                         </div>
-                        
-                        <div class="bg-lime-accent border-2 md:border-4 border-deep-green p-3 md:p-4 mb-6 rounded">
-                            <p class="text-xs md:text-sm font-bold text-deep-green mb-1">🎁 Points You'll Earn</p>
-                            <p class="text-2xl md:text-3xl font-bold text-deep-green" id="pointsEarn">
+
+                        <div class="bg-[#ecfccb] border border-[#84cc16] p-4 mb-6 rounded-xl text-center">
+                            <p class="text-xs font-bold text-[#065f46] mb-1">🎁 POINTS YOU'LL EARN</p>
+                            <p class="text-2xl font-bold text-[#065f46]" id="pointsEarn">
                                 ⭐ <?= floor(($subtotal + HOME_DELIVERY_CHARGE) / 1000) * POINTS_PER_1000_BDT ?>
                             </p>
                         </div>
-                        
-                        <button type="submit" class="btn w-full bg-deep-green text-white text-lg md:text-xl py-3 md:py-4 font-bold rounded hover:bg-lime-accent hover:text-deep-green transition-all shadow-lg transform hover:scale-105">
+
+                        <button type="submit" class="btn btn-primary btn-lg btn-block">
                             ✅ PLACE ORDER
                         </button>
                         
@@ -460,7 +417,6 @@ include 'includes/header.php';
                                 By placing order, you agree to our Terms & Conditions
                             </p>
                         </div>
-                    </div>
                 </div>
             </div>
         </form>

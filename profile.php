@@ -107,18 +107,10 @@ $roleDisplay = isset($user['role_name']) ? ucfirst($user['role_name']) : 'Member
 include 'includes/header.php';
 ?>
 
-<section class="container mx-auto px-4 py-16 min-h-screen">
+<?php qm_hero('My Profile', 'Manage your personal information and security.', $roleDisplay, '👤'); ?>
+
+<section class="container mx-auto px-4 py-10 min-h-screen">
     <div class="max-w-4xl mx-auto">
-        <div class="text-center mb-12" data-aos="fade-down">
-            <h1 class="text-5xl font-bold text-deep-green mb-4 font-mono uppercase">
-                👤 My Profile
-            </h1>
-            <div class="bg-lime-accent inline-block px-6 py-3 border-4 border-deep-green">
-                <p class="text-deep-green font-bold text-xl">
-                    <?= htmlspecialchars($roleDisplay) ?>
-                </p>
-            </div>
-        </div>
 
         <div class="grid md:grid-cols-3 gap-8">
             <div class="md:col-span-1">

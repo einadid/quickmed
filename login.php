@@ -127,51 +127,42 @@ include 'includes/header.php';
     <div class="absolute bottom-20 right-10 text-9xl opacity-5 transform rotate-12">💊</div>
 </div>
 
-<section class="container mx-auto px-4 py-16 min-h-[calc(100vh-200px)] flex items-center justify-center">
+<?php qm_hero('Welcome Back', 'Login to access your dashboard and orders.', 'Member Login', '🔐'); ?>
+
+<section class="container mx-auto px-4 py-12 flex items-start justify-center">
     <div class="w-full max-w-md">
-        
-        <div class="bg-white p-8 rounded-2xl border-2 border-deep-green shadow-[8px_8px_0px_#065f46]" data-aos="zoom-in">
-            
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-mono font-bold text-deep-green mb-2">🔐 MEMBER LOGIN</h1>
-                <p class="text-gray-500 text-sm font-bold uppercase tracking-wider">Access your dashboard</p>
-            </div>
+
+        <div class="card card-pad-lg" data-aos="zoom-in">
             
           <form method="POST" action="">
     <?php if(function_exists('generateCSRFToken')): ?>
         <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
     <?php endif; ?>
     
-    <div class="mb-5 group">
-        <label class="block font-bold mb-2 text-deep-green group-hover:text-lime-600 transition"><?= __('email') ?> *</label>
-        <div class="relative">
-            <input 
-                type="email" 
-                name="email" 
-                class="peer w-full bg-gray-50 border-2 border-gray-200 rounded-xl py-3 pl-10 pr-4 text-gray-800 focus:outline-none focus:border-lime-accent focus:shadow-[4px_4px_0px_#84cc16] transition-all font-mono z-10 relative bg-transparent" 
-                required 
-                placeholder="your@email.com"
-                value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
-            >
-            <span class="absolute left-3 top-3.5 text-gray-400 transition-opacity duration-200 peer-focus:opacity-0 peer-[&:not(:placeholder-shown)]:opacity-0 z-0">📧</span>
-        </div>
+    <div class="mb-5">
+        <label class="label">📧 <?= __('email') ?> *</label>
+        <input
+            type="email"
+            name="email"
+            class="input"
+            required
+            placeholder="your@email.com"
+            value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
+        >
     </div>
-    
-    <div class="mb-6 group">
-        <label class="block font-bold mb-2 text-deep-green group-hover:text-lime-600 transition"><?= __('password') ?> *</label>
+
+    <div class="mb-5">
+        <label class="label">🔑 <?= __('password') ?> *</label>
         <div class="relative">
-            <input 
-                type="password" 
-                name="password" 
+            <input
+                type="password"
+                name="password"
                 id="passwordInput"
-                class="peer w-full bg-gray-50 border-2 border-gray-200 rounded-xl py-3 pl-10 pr-12 text-gray-800 focus:outline-none focus:border-lime-accent focus:shadow-[4px_4px_0px_#84cc16] transition-all font-mono z-10 relative bg-transparent" 
-                required 
+                class="input pr-12"
+                required
                 placeholder="••••••••"
             >
-            
-            <span class="absolute left-3 top-3.5 text-gray-400 transition-opacity duration-200 peer-focus:opacity-0 peer-[&:not(:placeholder-shown)]:opacity-0 z-0">🔑</span>
-            
-            <button type="button" onclick="togglePassword()" class="absolute right-3 top-3 text-gray-500 hover:text-deep-green z-20 focus:outline-none">
+            <button type="button" onclick="togglePassword()" class="absolute right-3 top-2.5 text-gray-500 hover:text-[#065f46] focus:outline-none" title="Show/Hide">
                 <span id="eyeIcon">👁️</span>
             </button>
         </div>
@@ -194,13 +185,13 @@ include 'includes/header.php';
         </a>
     </div>
     
-    <button type="submit" class="w-full bg-deep-green text-white font-bold py-3 rounded-xl shadow-[4px_4px_0px_#000] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
+    <button type="submit" class="btn btn-primary btn-block btn-lg">
         <span>🚀</span> Access Account
     </button>
-    
+
     <div class="text-center mt-8 pt-6 border-t-2 border-dashed border-gray-200">
         <p class="text-gray-500 text-sm mb-2">New to QuickMed?</p>
-        <a href="<?= SITE_URL ?>/signup.php" class="inline-block font-bold text-deep-green border-b-2 border-lime-accent hover:bg-lime-accent hover:text-white px-1 transition-all">
+        <a href="<?= SITE_URL ?>/signup.php" class="inline-block font-bold text-[#065f46] border-b-2 border-[#84cc16] hover:bg-[#84cc16] px-1 transition-all">
             Create New Account →
         </a>
     </div>

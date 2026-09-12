@@ -77,163 +77,71 @@ $lowStockStmt->execute();
 $lowStock = $lowStockStmt->get_result();
 
 include __DIR__ . '/../../includes/header.php';
+
+$dashTitle = 'Shop Manager';
+$dashSubtitle = '📍 ' . $shop['name'] . ' · ' . $shop['city'] . ' · ' . date('l, d F Y');
+$dashIcon = '🏥';
+include __DIR__ . '/../../includes/dashnav.php';
 ?>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<section class="container mx-auto px-4 py-10 min-h-screen">
+    <div class="max-w-7xl mx-auto">
 
-<section class="bg-gray-50 min-h-screen pb-20">
-    
-    <div class="bg-deep-green text-white pt-24 pb-32 relative overflow-hidden rounded-b-[3rem] shadow-xl">
-        <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-            <div class="absolute top-10 left-10 text-9xl transform -rotate-12">🏥</div>
-            <div class="absolute bottom-10 right-10 text-9xl transform rotate-12">💊</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+            <?php qm_stat('💰', qm_money($todayStats['sales'] ?? 0), "Today's Revenue", 'lime'); ?>
+            <?php qm_stat('📈', qm_money($stats['total_sales'] ?? 0), 'Total · ' . (int)$stats['total_orders'] . ' orders', ''); ?>
+            <?php qm_stat('📦', (int)$stats['active_products'], 'Active Products', 'blue'); ?>
+            <?php qm_stat('⚠️', (int)$stats['low_stock_items'], 'Low Stock Items', 'rose'); ?>
         </div>
 
-        <div class="container mx-auto px-6 relative z-10 flex flex-col md:flex-row justify-between items-center">
-            <div data-aos="fade-right">
-                <div class="flex items-center gap-3 mb-2">
-                    <span class="bg-lime-accent text-deep-green text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Shop Manager</span>
-                    <span class="flex h-3 w-3 relative">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-lime-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-3 w-3 bg-lime-500"></span>
-                    </span>
-                    <span class="text-lime-accent text-sm font-mono">System Live</span>
-                </div>
-                <h1 class="text-4xl md:text-5xl font-bold mb-2">
-                    Hello, <?= htmlspecialchars(explode(' ', $user['full_name'])[0]) ?>! 👋
-                </h1>
-                <p class="text-gray-200 text-lg flex items-center gap-2">
-                    📍 <?= htmlspecialchars($shop['name']) ?> <span class="text-lime-accent">•</span> <?= htmlspecialchars($shop['city']) ?>
-                </p>
-            </div>
-            
-            <div class="text-right mt-6 md:mt-0" data-aos="fade-left">
-                <div class="text-5xl font-mono font-bold text-lime-accent" id="liveClock">00:00:00</div>
-                <div class="text-gray-300 text-lg"><?= date('l, d F Y') ?></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="container mx-auto px-6 -mt-20 relative z-20">
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <div class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-lime-accent transform hover:-translate-y-2 transition-all duration-300" data-aos="fade-up" data-aos-delay="0">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider">Today's Revenue</p>
-                        <h3 class="text-3xl font-bold text-deep-green mt-1">৳<?= number_format($todayStats['sales'] ?? 0) ?></h3>
-                        <p class="text-xs text-gray-400 mt-1"><?= $todayStats['count'] ?? 0 ?> orders processed</p>
-                    </div>
-                    <div class="bg-lime-100 p-3 rounded-full text-2xl">💰</div>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-deep-green transform hover:-translate-y-2 transition-all duration-300" data-aos="fade-up" data-aos-delay="100">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider">Total Lifetime</p>
-                        <h3 class="text-3xl font-bold text-gray-800 mt-1">৳<?= number_format($stats['total_sales'] ?? 0) ?></h3>
-                        <p class="text-xs text-green-600 mt-1 font-bold">Total <?= $stats['total_orders'] ?> orders</p>
-                    </div>
-                    <div class="bg-green-100 p-3 rounded-full text-2xl">📈</div>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-blue-500 transform hover:-translate-y-2 transition-all duration-300" data-aos="fade-up" data-aos-delay="200">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider">Inventory</p>
-                        <h3 class="text-3xl font-bold text-gray-800 mt-1"><?= $stats['active_products'] ?></h3>
-                        <p class="text-xs text-blue-500 mt-1 font-bold">Active Products</p>
-                    </div>
-                    <div class="bg-blue-100 p-3 rounded-full text-2xl">📦</div>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-red-500 transform hover:-translate-y-2 transition-all duration-300 animate-pulse" data-aos="fade-up" data-aos-delay="300">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-red-400 text-xs font-bold uppercase tracking-wider">Attention Needed</p>
-                        <h3 class="text-3xl font-bold text-red-600 mt-1"><?= $stats['low_stock_items'] ?></h3>
-                        <p class="text-xs text-red-400 mt-1 font-bold">Items Low Stock</p>
-                    </div>
-                    <div class="bg-red-100 p-3 rounded-full text-2xl">⚠️</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid lg:grid-cols-3 gap-8 mb-10">
-            
-            <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-lg border border-gray-100" data-aos="zoom-in">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold text-deep-green flex items-center gap-2">
-                        📊 Sales Overview <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded">Last 7 Days</span>
-                    </h3>
-                </div>
+        <div class="grid lg:grid-cols-3 gap-6 mb-10">
+            <div class="card lg:col-span-2" data-aos="zoom-in">
+                <div class="card-header">📊 Sales Overview <span class="badge badge-neutral">Last 7 Days</span></div>
                 <div class="relative h-72 w-full">
                     <canvas id="revenueChart"></canvas>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 flex flex-col justify-between" data-aos="fade-left">
-                <h3 class="text-xl font-bold text-deep-green mb-4">⚡ Quick Actions</h3>
-                
-                <div class="grid grid-cols-2 gap-4 h-full">
-                    <a href="inventory.php" class="bg-gray-50 p-4 rounded-xl hover:bg-lime-50 hover:border-lime-accent border border-transparent transition text-center group flex flex-col justify-center items-center">
-                        <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">💊</div>
-                        <div class="text-sm font-bold text-gray-700">Inventory</div>
-                    </a>
-
-                    <a href="online-orders.php" class="bg-gray-50 p-4 rounded-xl hover:bg-blue-50 hover:border-blue-300 border border-transparent transition text-center group relative flex flex-col justify-center items-center">
-                        <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">🌐</div>
-                        <div class="text-sm font-bold text-gray-700">Online Orders</div>
+            <div class="card" data-aos="fade-left">
+                <div class="card-header">⚡ Quick Actions</div>
+                <div class="qa-grid qa-grid-2">
+                    <a href="inventory.php" class="qa-card"><span class="qa-icon">💊</span><span class="qa-label">Inventory</span></a>
+                    <a href="online-orders.php" class="qa-card" style="position:relative">
+                        <span class="qa-icon">🌐</span><span class="qa-label">Online Orders</span>
                         <?php if ($stats['delivered_orders'] < $stats['total_orders']): ?>
                             <span class="absolute top-2 right-2 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span>
                         <?php endif; ?>
                     </a>
-
-                    <a href="stock-alert.php" class="bg-gray-50 p-4 rounded-xl hover:bg-red-50 hover:border-red-300 border border-transparent transition text-center group flex flex-col justify-center items-center">
-                        <div class="text-3xl mb-2 group-hover:rotate-12 transition-transform">📉</div>
-                        <div class="text-sm font-bold text-gray-700">Low Stock</div>
-                    </a>
-
-                    <a href="reports.php" class="bg-gray-50 p-4 rounded-xl hover:bg-purple-50 hover:border-purple-300 border border-transparent transition text-center group flex flex-col justify-center items-center">
-                        <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">📑</div>
-                        <div class="text-sm font-bold text-gray-700">Reports</div>
-                    </a>
+                    <a href="stock-alert.php" class="qa-card"><span class="qa-icon">📉</span><span class="qa-label">Low Stock</span></a>
+                    <a href="reports.php" class="qa-card"><span class="qa-icon">📑</span><span class="qa-label">Reports</span></a>
                 </div>
             </div>
         </div>
 
-        <div class="grid lg:grid-cols-2 gap-8">
-            
-            <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100" data-aos="fade-up">
-                <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                    <h3 class="text-lg font-bold text-deep-green">📋 Recent Orders</h3>
-                    <a href="parcels.php" class="text-sm text-lime-600 font-bold hover:underline">View All</a>
+        <div class="grid lg:grid-cols-2 gap-6">
+
+            <div class="dash-shell" data-aos="fade-up">
+                <div class="dash-shell-head">
+                    <h2>📋 Recent Orders</h2>
+                    <a href="parcels.php" class="btn btn-lime btn-sm">View All →</a>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none">
+                    <table class="table">
+                        <thead>
                             <tr>
-                                <th class="px-6 py-3">Order ID</th>
-                                <th class="px-6 py-3">Customer</th>
-                                <th class="px-6 py-3">Amount</th>
-                                <th class="px-6 py-3">Status</th>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100">
+                        <tbody>
                             <?php while ($p = $parcels->fetch_assoc()): ?>
-                            <tr class="hover:bg-gray-50 transition">
-                                <td class="px-6 py-4 font-mono text-sm text-deep-green font-bold">#<?= $p['order_number'] ?></td>
-                                <td class="px-6 py-4 text-sm"><?= htmlspecialchars($p['customer_name']) ?></td>
-                                <td class="px-6 py-4 font-bold text-sm">৳<?= number_format($p['subtotal']) ?></td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase 
-                                        <?= $p['status'] == 'delivered' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' ?>">
-                                        <?= $p['status'] ?>
-                                    </span>
-                                </td>
+                            <tr>
+                                <td class="font-display text-sm text-[#065f46] font-bold">#<?= htmlspecialchars($p['order_number']) ?></td>
+                                <td class="text-sm"><?= htmlspecialchars($p['customer_name']) ?></td>
+                                <td class="font-bold text-sm"><?= qm_money($p['subtotal']) ?></td>
+                                <td><?= qm_badge($p['status']) ?></td>
                             </tr>
                             <?php endwhile; ?>
                             <?php if ($parcels->num_rows === 0): ?>
@@ -244,37 +152,37 @@ include __DIR__ . '/../../includes/header.php';
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-red-100" data-aos="fade-up" data-aos-delay="100">
-                <div class="p-6 border-b border-red-50 bg-red-50 flex justify-between items-center">
-                    <h3 class="text-lg font-bold text-red-600">⚠️ Restock Needed</h3>
-                    <a href="inventory.php" class="text-sm text-red-600 font-bold hover:underline">Manage</a>
+            <div class="dash-shell" data-aos="fade-up" data-aos-delay="100">
+                <div class="dash-shell-head">
+                    <h2>⚠️ Restock Needed</h2>
+                    <a href="inventory.php" class="btn btn-danger btn-sm">Manage</a>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead class="bg-white text-xs uppercase text-red-400 border-b border-red-100">
+                <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none">
+                    <table class="table">
+                        <thead>
                             <tr>
-                                <th class="px-6 py-3">Medicine</th>
-                                <th class="px-6 py-3">Current</th>
-                                <th class="px-6 py-3">Alert Level</th>
-                                <th class="px-6 py-3">Action</th>
+                                <th>Medicine</th>
+                                <th>Current</th>
+                                <th>Alert Level</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100">
+                        <tbody>
                             <?php while ($ls = $lowStock->fetch_assoc()): ?>
-                            <tr class="hover:bg-red-50 transition group">
-                                <td class="px-6 py-4">
+                            <tr>
+                                <td>
                                     <p class="font-bold text-sm text-gray-800"><?= htmlspecialchars($ls['name']) ?></p>
                                     <p class="text-xs text-gray-500"><?= htmlspecialchars($ls['power']) ?></p>
                                 </td>
-                                <td class="px-6 py-4 font-bold text-red-600 text-lg"><?= $ls['stock_quantity'] ?></td>
-                                <td class="px-6 py-4 text-sm text-gray-500"><?= $ls['reorder_level'] ?></td>
-                                <td class="px-6 py-4">
-                                    <a href="inventory.php?search=<?= urlencode($ls['name']) ?>" class="text-xs bg-deep-green text-white px-2 py-1 rounded hover:bg-lime-600">Add Stock</a>
+                                <td class="font-bold text-red-600 text-lg"><?= (int)$ls['stock_quantity'] ?></td>
+                                <td class="text-sm text-gray-500"><?= (int)$ls['reorder_level'] ?></td>
+                                <td>
+                                    <a href="inventory.php?search=<?= urlencode($ls['name']) ?>" class="btn btn-outline btn-sm">Add Stock</a>
                                 </td>
                             </tr>
                             <?php endwhile; ?>
                             <?php if ($lowStock->num_rows === 0): ?>
-                                <tr><td colspan="4" class="p-6 text-center text-green-500 font-bold">All stocks are healthy! ✅</td></tr>
+                                <tr><td colspan="4" class="p-6 text-center text-green-600 font-bold">All stocks are healthy! ✅</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -290,7 +198,7 @@ include __DIR__ . '/../../includes/header.php';
 function updateClock() {
     const now = new Date();
     const timeString = now.toLocaleTimeString('en-US', { hour12: false });
-    document.getElementById('liveClock').textContent = timeString;
+    var _clk = document.getElementById('liveClock'); if (_clk) _clk.textContent = timeString;
 }
 setInterval(updateClock, 1000);
 updateClock();

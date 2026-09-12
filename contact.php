@@ -44,75 +44,59 @@ include 'includes/header.php';
     .delay-2 { animation-delay: 2s; }
 </style>
 
-<section class="relative h-[45vh] bg-gradient-to-r from-deep-green to-emerald-900 flex items-center justify-center overflow-hidden">
-    <div class="absolute top-10 left-10 text-6xl opacity-10 text-white floating-icon">📍</div>
-    <div class="absolute bottom-10 right-10 text-6xl opacity-10 text-white floating-icon delay-1">📞</div>
-    <div class="absolute top-20 right-1/4 text-4xl opacity-10 text-white floating-icon delay-2">📧</div>
+<?php qm_hero('Contact Support', "We're here to help regarding your medicines & orders.", 'Agents Online Now', '📞'); ?>
 
-    <div class="text-center relative z-10 text-white px-4" data-aos="zoom-in">
-        <div class="inline-flex items-center gap-2 bg-lime-accent text-deep-green px-4 py-1 rounded-full font-bold text-xs uppercase tracking-widest mb-4 shadow-lg animate-pulse">
-            <span class="w-2 h-2 bg-deep-green rounded-full"></span> Agents Online Now
-        </div>
-        <h1 class="text-5xl md:text-6xl font-bold font-mono mb-4">Contact Support</h1>
-        <p class="text-gray-200 text-lg">We're here to help regarding your medicines & orders.</p>
-        
-        <div class="mt-6 text-lime-accent font-mono bg-white/10 inline-block px-6 py-2 rounded-lg backdrop-blur-sm border border-white/20">
-            <span id="ctgClock">Loading Time...</span> (CTG Time)
-        </div>
-    </div>
-</section>
-
-<section class="container mx-auto px-4 py-16 -mt-24 relative z-20">
+<section class="container mx-auto px-4 py-12 relative z-20">
+    <p class="text-center text-gray-500 font-mono mb-10">🕐 <span id="ctgClock">Loading...</span> (CTG Time)</p>
     
     <div class="grid md:grid-cols-3 gap-6 mb-12">
-        <div class="card bg-white border-l-8 border-lime-accent p-8 shadow-xl hover:-translate-y-2 transition-all group" data-aos="fade-up">
-            <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center text-3xl mb-4 group-hover:rotate-12 transition-transform">📍</div>
-            <h3 class="font-bold text-deep-green text-xl">Head Office</h3>
-            <p class="text-gray-600 mt-2 leading-relaxed">
-                GEC Circle, CDA Avenue,<br>
-                Chattogram, Bangladesh
-            </p>
-            <a href="#map" class="text-lime-600 font-bold text-sm mt-4 inline-block hover:underline">View on Map →</a>
+        <div class="stat-card lime" data-aos="fade-up">
+            <div class="stat-icon">📍</div>
+            <div>
+                <div class="stat-label">Head Office</div>
+                <div class="font-bold text-[#065f46]">GEC Circle, Chattogram</div>
+                <a href="#map" class="text-sm text-[#65a30d] font-bold hover:underline">View on Map →</a>
+            </div>
         </div>
 
-        <div class="card bg-white border-l-8 border-deep-green p-8 shadow-xl hover:-translate-y-2 transition-all group" data-aos="fade-up" data-aos-delay="100">
-            <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center text-3xl mb-4 group-hover:rotate-12 transition-transform">📞</div>
-            <h3 class="font-bold text-deep-green text-xl">Call Us</h3>
-            <a href="tel:09678100100" class="text-2xl font-mono font-bold text-gray-700 mt-2 block hover:text-deep-green transition">09678-100100</a>
-            <p class="text-xs text-gray-400 mt-1">Available 9:00 AM - 10:00 PM</p>
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+            <div class="stat-icon">📞</div>
+            <div>
+                <div class="stat-label">Call Us · 9AM–10PM</div>
+                <a href="tel:09678100100" class="font-bold text-[#065f46] text-lg font-display hover:underline">09678-100100</a>
+            </div>
         </div>
 
-        <div class="card bg-white border-l-8 border-blue-500 p-8 shadow-xl hover:-translate-y-2 transition-all group" data-aos="fade-up" data-aos-delay="200">
-            <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-3xl mb-4 group-hover:rotate-12 transition-transform">📧</div>
-            <h3 class="font-bold text-deep-green text-xl">Email Us</h3>
-            <a href="mailto:support@quickmed.com" class="text-gray-600 mt-2 block hover:text-blue-600 transition">support@quickmed.com</a>
-            <p class="text-xs text-gray-400 mt-1">Usually reply within 2 hours</p>
+        <div class="stat-card blue" data-aos="fade-up" data-aos-delay="200">
+            <div class="stat-icon">📧</div>
+            <div>
+                <div class="stat-label">Email Us</div>
+                <a href="mailto:support@quickmed.com" class="font-bold text-[#065f46] hover:underline break-all">support@quickmed.com</a>
+                <p class="text-xs text-gray-400">Reply within ~2 hours</p>
+            </div>
         </div>
     </div>
 
     <div class="grid lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2">
-            <div class="card bg-white border-4 border-deep-green p-8 shadow-2xl" data-aos="fade-right">
-                <div class="flex items-center justify-between mb-6 border-b-2 border-gray-100 pb-4">
-                    <h2 class="text-3xl font-bold text-deep-green">📩 Send Message</h2>
-                    <span class="text-4xl animate-bounce">✍️</span>
-                </div>
-                
-                <form method="POST" class="space-y-6">
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="form-control">
-                            <label class="label text-deep-green font-bold">Your Name</label>
-                            <input type="text" name="name" class="input w-full border-2 border-gray-200 focus:border-lime-accent transition bg-gray-50 focus:bg-white" required placeholder="e.g. Rahim Uddin">
+            <div class="card card-pad-lg" data-aos="fade-right">
+                <div class="card-header">📩 Send Message <span class="text-3xl">✍️</span></div>
+
+                <form method="POST" class="space-y-5">
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="label">Your Name</label>
+                            <input type="text" name="name" class="input" required placeholder="e.g. Rahim Uddin">
                         </div>
-                        <div class="form-control">
-                            <label class="label text-deep-green font-bold">Email Address</label>
-                            <input type="email" name="email" class="input w-full border-2 border-gray-200 focus:border-lime-accent transition bg-gray-50 focus:bg-white" required placeholder="rahim@example.com">
+                        <div>
+                            <label class="label">Email Address</label>
+                            <input type="email" name="email" class="input" required placeholder="rahim@example.com">
                         </div>
                     </div>
 
-                    <div class="form-control">
-                        <label class="label text-deep-green font-bold">Topic</label>
-                        <select name="subject" class="input w-full border-2 border-gray-200 focus:border-lime-accent bg-gray-50">
+                    <div>
+                        <label class="label">Topic</label>
+                        <select name="subject" class="input">
                             <option value="Order Issue">📦 Order Status / Issue</option>
                             <option value="Prescription">📋 Prescription Help</option>
                             <option value="Product">💊 Medicine Inquiry</option>
@@ -120,13 +104,13 @@ include 'includes/header.php';
                         </select>
                     </div>
 
-                    <div class="form-control">
-                        <label class="label text-deep-green font-bold">Message</label>
-                        <textarea name="message" rows="5" class="input w-full border-2 border-gray-200 focus:border-lime-accent transition bg-gray-50 focus:bg-white resize-none" required placeholder="Describe your issue..."></textarea>
+                    <div>
+                        <label class="label">Message</label>
+                        <textarea name="message" rows="5" class="input" required placeholder="Describe your issue..."></textarea>
                     </div>
 
-                    <button type="submit" name="send_message" class="btn btn-primary w-full py-4 text-lg font-bold shadow-lg transform hover:scale-105 transition-all flex items-center justify-center gap-2 group">
-                        <span>🚀</span> Send Message <span class="group-hover:translate-x-2 transition-transform">→</span>
+                    <button type="submit" name="send_message" class="btn btn-primary btn-lg btn-block">
+                        <span>🚀</span> Send Message →
                     </button>
                 </form>
             </div>
@@ -157,11 +141,11 @@ include 'includes/header.php';
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-blue-500 text-center">
+            <div class="card text-center card-accent">
                 <div class="text-4xl mb-2">💬</div>
                 <h3 class="text-lg font-bold text-gray-800">Live Chat</h3>
                 <p class="text-gray-500 text-sm mb-4">Chat with our pharmacist instantly.</p>
-                <a href="https://wa.me/8801XXXXXXXXX" target="_blank" class="btn bg-green-500 text-white w-full hover:bg-green-600">WhatsApp Chat</a>
+                <a href="tel:09678100100" class="btn btn-primary btn-block">📞 Call Hotline</a>
             </div>
         </div>
     </div>

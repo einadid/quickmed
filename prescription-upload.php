@@ -46,27 +46,29 @@ $history = $conn->query($query);
 include 'includes/header.php';
 ?>
 
-<section class="container mx-auto px-4 py-16 min-h-screen">
+<?php qm_hero('Upload Prescription', 'Send your prescription — our doctors will review and confirm your order.', 'Prescription Service', '📋'); ?>
+
+<section class="container mx-auto px-4 py-10 min-h-screen">
     <div class="grid lg:grid-cols-3 gap-8">
-        
+
         <div class="lg:col-span-1">
-            <div class="card bg-white border-4 border-deep-green p-6 sticky top-24">
-                <h2 class="text-2xl font-bold text-deep-green mb-6 uppercase border-b-4 border-deep-green pb-2">📤 New Upload</h2>
-                
+            <div class="card sticky top-24">
+                <div class="card-header">📤 New Upload</div>
+
                 <form method="POST" enctype="multipart/form-data" class="space-y-4">
-                    
-                    <div class="border-4 border-dashed border-gray-300 p-8 text-center rounded-lg cursor-pointer hover:border-lime-accent transition-all bg-gray-50 relative group" onclick="document.getElementById('file').click()">
-                        
+
+                    <div class="dropzone" onclick="document.getElementById('file').click()">
+
                         <input type="file" name="prescription_image" id="file" class="hidden" accept="image/*" onchange="preview(this)" required>
-                        
-                        <div id="placeholder" class="group-hover:scale-105 transition-transform duration-300">
+
+                        <div id="placeholder">
                             <span class="text-4xl block mb-2">📸</span>
-                            <p class="text-gray-500 font-bold">Click to Upload</p>
-                            <p class="text-xs text-gray-400 mt-1">JEPG, PNG, JPG supported</p>
+                            <p class="text-gray-600 font-bold">Click to Upload</p>
+                            <p class="text-xs text-gray-400 mt-1">JPEG, PNG, JPG supported (max 5MB)</p>
                         </div>
 
                         <div id="previewContainer" class="hidden mt-2">
-                            <p class="text-sm text-green-600 font-bold mb-2">Selected Image:</p>
+                            <p class="text-sm text-green-700 font-bold mb-2">Selected Image:</p>
                             <div class="relative inline-block">
                                 <img id="preview" class="max-h-40 mx-auto rounded-lg border-4 border-white shadow-lg object-cover">
                                 <button type="button" onclick="event.stopPropagation(); removeImage()" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 shadow-md" title="Remove Image">
@@ -75,90 +77,81 @@ include 'includes/header.php';
                             </div>
                         </div>
                     </div>
-                    <input type="text" name="name" value="<?= $user['full_name'] ?>" class="input border-2 border-deep-green w-full" placeholder="Patient Name" required>
-                    <input type="tel" name="phone" value="<?= $user['phone'] ?>" class="input border-2 border-deep-green w-full" placeholder="Phone Number" required>
-                    <textarea name="address" rows="2" class="input border-2 border-deep-green w-full" placeholder="Delivery Address" required><?= $user['address'] ?></textarea>
-                    <textarea name="notes" rows="2" class="input border-2 border-deep-green w-full" placeholder="Medicine Details / Notes (Optional)"></textarea>
+                    <div>
+                        <label class="label">Patient Name *</label>
+                        <input type="text" name="name" value="<?= htmlspecialchars($user['full_name']) ?>" class="input" placeholder="Patient Name" required>
+                    </div>
+                    <div>
+                        <label class="label">Phone *</label>
+                        <input type="tel" name="phone" value="<?= htmlspecialchars($user['phone']) ?>" class="input" placeholder="Phone Number" required>
+                    </div>
+                    <div>
+                        <label class="label">Delivery Address *</label>
+                        <textarea name="address" rows="2" class="input" placeholder="Delivery Address" required><?= htmlspecialchars($user['address'] ?? '') ?></textarea>
+                    </div>
+                    <div>
+                        <label class="label">Notes (Optional)</label>
+                        <textarea name="notes" rows="2" class="input" placeholder="Medicine Details / Notes"></textarea>
+                    </div>
 
-                    <button type="submit" name="submit_prescription" class="btn btn-primary w-full py-3 text-lg font-bold shadow-lg transform hover:scale-105 transition-transform">
-                        Submit Request
+                    <button type="submit" name="submit_prescription" class="btn btn-primary btn-block">
+                        📤 Submit Request
                     </button>
                 </form>
             </div>
         </div>
 
         <div class="lg:col-span-2">
-            <h2 class="text-3xl font-bold text-deep-green mb-6 uppercase border-b-4 border-lime-accent pb-2 inline-block">
-                📋 My Prescriptions
-            </h2>
+            <h2 class="text-2xl font-bold text-[#065f46] mb-6 font-display">📋 MY PRESCRIPTIONS</h2>
 
             <?php if ($history->num_rows === 0): ?>
-                <div class="text-center py-20 bg-white rounded-xl border-2 border-dashed border-gray-300">
-                    <div class="text-6xl mb-4 opacity-50">📭</div>
-                    <p class="text-xl text-gray-500">No prescriptions uploaded yet.</p>
-                </div>
+                <?php qm_empty('No prescriptions yet', 'Upload your first prescription using the form.'); ?>
             <?php else: ?>
-                <div class="space-y-6">
+                <div class="space-y-5">
                     <?php while ($row = $history->fetch_assoc()): ?>
-                        <div class="card bg-white border-l-8 p-6 flex flex-col md:flex-row gap-6 transition hover:shadow-lg
-                            <?= $row['status'] == 'pending' ? 'border-yellow-400' : 
-                               ($row['status'] == 'rejected' ? 'border-red-500' : 
-                               ($row['order_id'] ? 'border-deep-green' : 'border-blue-500')) ?>">
-                            
-                            <div class="w-full md:w-32 h-32 flex-shrink-0 cursor-pointer overflow-hidden rounded border-2 border-gray-200 group" onclick="window.open('<?= SITE_URL ?>/uploads/prescriptions/<?= $row['image_path'] ?>')">
-                                <img src="<?= SITE_URL ?>/uploads/prescriptions/<?= $row['image_path'] ?>" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <div class="card flex flex-col md:flex-row gap-5 card-hover">
+                            <div class="w-full md:w-32 h-32 flex-shrink-0 cursor-pointer overflow-hidden rounded-xl border border-gray-200 group" onclick="window.open('<?= SITE_URL ?>/uploads/prescriptions/<?= htmlspecialchars($row['image_path']) ?>')" title="Click to view full image">
+                                <img src="<?= SITE_URL ?>/uploads/prescriptions/<?= htmlspecialchars($row['image_path']) ?>" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" loading="lazy">
                             </div>
 
                             <div class="flex-1">
-                                <div class="flex justify-between items-start">
+                                <div class="flex flex-wrap justify-between items-start gap-3">
                                     <div>
-                                        <p class="text-xs text-gray-500 font-bold uppercase mb-1">
+                                        <p class="text-xs text-gray-400 font-bold uppercase mb-1">
                                             <?= date('d M Y, h:i A', strtotime($row['created_at'])) ?>
                                         </p>
-                                        <h3 class="text-lg font-bold text-gray-800">Rx Request #<?= $row['id'] ?></h3>
+                                        <h3 class="text-lg font-bold text-gray-800">Rx Request #<?= (int)$row['id'] ?></h3>
                                         <?php if ($row['notes']): ?>
-                                            <p class="text-sm text-gray-600 mt-1 bg-gray-50 p-2 rounded italic border border-gray-100">
+                                            <p class="text-sm text-gray-600 mt-1 bg-gray-50 p-2 rounded-lg italic border border-gray-200">
                                                 "<?= htmlspecialchars($row['notes']) ?>"
                                             </p>
                                         <?php endif; ?>
                                     </div>
-                                    
+
                                     <div class="text-right">
                                         <?php if ($row['order_id']): ?>
-                                            <span class="badge bg-deep-green text-white px-3 py-1 rounded-full shadow-md animate-pulse">
-                                                ✅ Order Placed
-                                            </span>
+                                            <span class="badge badge-green">✅ Order Placed</span>
                                         <?php elseif ($row['status'] == 'rejected'): ?>
-                                            <span class="badge bg-red-100 text-red-600 border border-red-200 px-3 py-1 rounded-full">
-                                                ❌ Rejected
-                                            </span>
-                                        <?php elseif ($row['status'] == 'reviewed'): ?>
-                                            <span class="badge bg-blue-100 text-blue-600 border border-blue-200 px-3 py-1 rounded-full">
-                                                👨‍⚕️ Doctor Approved
-                                            </span>
-                                            <p class="text-xs text-blue-500 mt-1 font-bold">Processing Quote...</p>
+                                            <?= qm_badge('rejected') ?>
+                                        <?php elseif ($row['status'] == 'approved' || $row['status'] == 'reviewed'): ?>
+                                            <?= qm_badge('approved') ?>
+                                            <p class="text-xs text-blue-600 mt-1 font-bold">Processing Quote...</p>
                                         <?php else: ?>
-                                            <span class="badge bg-yellow-100 text-yellow-700 border border-yellow-200 px-3 py-1 rounded-full">
-                                                ⏳ In Review
-                                            </span>
+                                            <?= qm_badge('pending') ?>
                                         <?php endif; ?>
                                     </div>
                                 </div>
 
-                                <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                                <div class="mt-4 pt-4 border-t border-gray-200 flex flex-wrap justify-between items-center gap-3">
                                     <?php if ($row['order_id']): ?>
-                                        <div class="flex items-center gap-2 text-deep-green font-bold bg-green-50 px-3 py-1 rounded border border-green-100">
-                                            <span>🛍️ Order #<?= $row['order_number'] ?></span>
+                                        <div class="flex items-center gap-2 text-[#065f46] font-bold bg-green-50 px-3 py-1.5 rounded-lg border border-green-200 text-sm">
+                                            <span>🛍️ #<?= htmlspecialchars($row['order_number']) ?></span>
                                             <span class="text-gray-300">|</span>
-                                            <span>৳<?= number_format($row['total_amount']) ?></span>
+                                            <span><?= qm_money($row['total_amount']) ?></span>
                                         </div>
-                                        <a href="my-orders.php" class="btn btn-outline btn-sm border-deep-green text-deep-green hover:bg-deep-green hover:text-white transition-colors">
-                                            Track Order →
-                                        </a>
+                                        <a href="my-orders.php" class="btn btn-outline btn-sm">Track Order →</a>
                                     <?php elseif ($row['status'] == 'rejected'): ?>
-                                        <p class="text-sm text-red-500 font-bold flex items-center gap-1">
-                                            ⚠️ Please re-upload a clearer image.
-                                        </p>
+                                        <p class="text-sm text-red-600 font-bold">⚠️ Please re-upload a clearer image.</p>
                                     <?php else: ?>
                                         <p class="text-xs text-gray-400 italic">You will be notified once processed.</p>
                                     <?php endif; ?>

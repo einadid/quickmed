@@ -83,7 +83,7 @@ if ($newsResult->num_rows > 0):
     </div>
     
     <div class="text-center mt-12">
-        <a href="<?= SITE_URL ?>/news-archive.php" class="btn btn-outline border-deep-green text-deep-green hover:bg-deep-green hover:text-white px-8 py-3 rounded font-bold transition">
+        <a href="<?= SITE_URL ?>/news.php" class="btn btn-outline border-deep-green text-deep-green hover:bg-deep-green hover:text-white px-8 py-3 rounded font-bold transition">
             View All News
         </a>
     </div>
